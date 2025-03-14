@@ -5,10 +5,10 @@ torch_dtype: bfloat16
 attn_implementation: flash_attention_2
 bf16: true
 tf32: true
-output_dir: runs/qwen-2.5-3b-r1-countdown
+output_dir: runs/qwen-2.5-3b-r1-gsm8k
 
 # Dataset arguments
-dataset_id_or_path: Jiayi-Pan/Countdown-Tasks-3to4
+dataset_id_or_path: openai/gsm8k
 
 # Lora Arguments
 # No LoRA is used here
@@ -40,3 +40,8 @@ report_to:
 save_strategy: "steps"
 save_steps: 25
 seed: 42
+experiment_name: "progressive-RL"
+
+# evaluation_strategy: "steps"
+# eval_steps: 1
+# do_eval: true
