@@ -1,4 +1,7 @@
 # Install Pytorch & other libraries, make sure to match your GPU driver version
+conda create -n LLM-RL python=3.11
+conda activate LLM-RL
+
 pip install -U tensorboard "setuptools<71.0.0"
  
 # Install flash-attn
@@ -11,7 +14,7 @@ pip install  --upgrade \
   "accelerate==1.3.0" \
   "hf-transfer==0.1.9" \
   "deepspeed==0.15.4" \
-  "trl==0.14.0"
+  "trl==0.15.2"
  
 
 pip uninstall pynvml
