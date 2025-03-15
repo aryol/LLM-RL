@@ -415,12 +415,11 @@ class EnvironmentPortionBaseUpdate(TrainerCallback):
         # state.log_history[-1].update(hyperparameters_to_log)
         # state.log_history[-1]['dataset_portions'] = portions
 
-        # portions = np.array(portions)
-        if wandb.run is not None and state.is_world_process_zero:
-            for i in portions:
-                wandb.log({'dataset_portions': i}, commit=False)
-        # wandb_logs = {'dataset_portions': portions.mean()}
-        wandb_logs = {}
+        portions = np.array(portions)
+        # if wandb.run is not None and state.is_world_process_zero:
+            # for i in portions:
+                # wandb.log({'dataset_portions': i}, commit=False)
+        wandb_logs = {'ratio/dataset_portions_mean': portions.mean(), 'ratio/dataset_portions_std': portions.std()}
         wandb_logs.update(hyperparameters_to_log)
 
         if wandb.run is not None and state.is_world_process_zero:
