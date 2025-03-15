@@ -4,7 +4,7 @@ import logging
 import os
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Callable, Optional, Sized, Union
+from typing import Any, Callable, Optional, Sized, Union, Dict
 import os
 import random
 import re 
@@ -13,24 +13,27 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers import AutoTokenizer
 from datasets import load_dataset, Dataset
 from trl import GRPOConfig, GRPOTrainer, get_peft_config, ModelConfig, TrlParser
+from transformers.trainer_utils import speed_metrics
 
 import code
 
 class CustomizedGRPOTrainer(GRPOTrainer):
-    def log(self, logs: dict[str, float], start_time: Optional[float] = None) -> None:
-        metrics = {key: sum(val) / len(val) for key, val in self._metrics.items()}  # average the metrics
+    def testttt(self):
+        pass
+    # def log(self, logs: dict[str, float], start_time: Optional[float] = None) -> None:
+    #     metrics = {key: sum(val) / len(val) for key, val in self._metrics.items()}  # average the metrics
         
 
-        # This method can be called both in training and evaluation. When called in evaluation, the keys in `logs`
-        # start with "eval_". We need to add the prefix "eval_" to the keys in `metrics` to match the format.
-        first_key = next(iter(logs.keys()))
-        if first_key.startswith("eval_"):
-            first_key = "_".join(first_key.split("_")[:-1])
-            metrics = {f"{first_key}_{key}": val for key, val in metrics.items()}
+    #     # This method can be called both in training and evaluation. When called in evaluation, the keys in `logs`
+    #     # start with "eval_". We need to add the prefix "eval_" to the keys in `metrics` to match the format.
+    #     first_key = next(iter(logs.keys()))
+    #     if first_key.startswith("eval_"):
+    #         first_key = "_".join(first_key.split("_")[:-1])
+    #         metrics = {f"{first_key}_{key}": val for key, val in metrics.items()}
 
-        logs = {**logs, **metrics}
-        super(GRPOTrainer, self).log(logs, start_time) # Assuming transformers versions is >= 4.47
-        self._metrics.clear()
+    #     logs = {**logs, **metrics}
+    #     super(GRPOTrainer, self).log(logs, start_time) # Assuming transformers versions is >= 4.47
+    #     self._metrics.clear()
    
 
 
@@ -113,7 +116,7 @@ def format_reward_func(completions, target, **kwargs):
       try:
         if random.random() < 0.1:  # 1% chance to write samples into a file
           os.makedirs("completion_samples", exist_ok=True)
-          log_file = os.path.join("completion_samples", "completion_samples.txt")
+          log_file = os.path.join("completion_samples", "completion_samples_format.txt")
           with open(log_file, "a") as f:
             f.write(f"\n\n==============\n")
             f.write(completion)
@@ -136,7 +139,7 @@ def format_reward_func(completions, target, **kwargs):
         rewards.append(0.0)
     return rewards
 
-def answer_reward_func(completions, target, **kwargs):
+def answer_reward_func(completions, prompts, target, **kwargs):
     """
     Evaluates completions based on the correctness of the final answer. 
 
@@ -148,24 +151,28 @@ def answer_reward_func(completions, target, **kwargs):
         list[float]: Reward scores
     """
     rewards = []
-    for completion, gt in zip(completions, target):
+    for completion, prompt, gt in zip(completions, prompts, target):
       try:
-        if random.random() < 0.1:  # 1% chance to write samples into a file
+        if random.random() < 1:  # 1% chance to write samples into a file
           os.makedirs("completion_samples", exist_ok=True)
-          log_file = os.path.join("completion_samples", "completion_samples.txt")
+          log_file = os.path.join("completion_samples", "completion_samples_answer.txt")
           with open(log_file, "a") as f:
             f.write(f"\n\n==============\n")
+            f.write(prompt)
+            f.write("\n$$\n")
             f.write(completion)
 
         if "####" in completion:
             answer = int(completion.split("####")[1].strip())
             if answer == int(gt):
                 rewards.append(1.0)
-                if random.random() < 0.10:  # 10% chance to write fully successful samples into a file
+                if random.random() < 1:  # 10% chance to write fully successful samples into a file
                     os.makedirs("completion_samples", exist_ok=True)
-                    log_file = os.path.join("completion_samples", "success_completion_samples.txt")
+                    log_file = os.path.join("completion_samples", "success_completion_samples_answer.txt")
                     with open(log_file, "a") as f:
                         f.write(f"\n\n==============\n")
+                        f.write(prompt)
+                        f.write("\n$$\n")
                         f.write(completion)
             else:
                rewards.append(0.0)
@@ -247,12 +254,12 @@ def grpo_function(
     # Choose curriculum strategy (Beta or Linear)
     if script_args.curriculum_strategy == "beta":
         curriculum_updater = EnvironmentPortionBetaUpdate( train_dataset,
-            init_alpha=2, init_beta=5, final_alpha=5, final_beta=2, warmup_timesteps=5000, total_timesteps=50000
+            init_alpha=2, init_beta=5, final_alpha=5, final_beta=2, warmup_timesteps=10, total_timesteps=200
         )
     else:
         curriculum_updater = EnvironmentPortionLinearUpdate( train_dataset,
             lower_bound_init=0.1, lower_bound_final=0.9, upper_bound_init=0.3, upper_bound_final=1.0,
-            warmup_timesteps=5000, total_timesteps=50000
+            warmup_timesteps=10, total_timesteps=200
         )
     
     # GRPO Trainer
@@ -309,40 +316,47 @@ def grpo_function(
         logger.info("*** Training complete! ***")
 
 
+import code
+
 class CurriculumDatasetWrapper:
     def __init__(self, dataset, generate_prompt, initial_portion=0.1):
         self.dataset = dataset  # Keep as HF Dataset
         self.generate_prompt = generate_prompt
         self.ground_truth_portion_dist = initial_portion  # Start with a small proportion
+        self.global_step = 0
+        self.portions = []
 
     def set_portion(self, portion):
         """Updates the portion of ground-truth CoT reasoning used in training."""
         self.ground_truth_portion_dist = portion
 
-    def sample_portion(self):
+    def sample_portion(self, seed=42, size=1):
         """Returns the current proportion of ground-truth CoT to use."""
         if callable(self.ground_truth_portion_dist):
-            return self.ground_truth_portion_dist()
+            return self.ground_truth_portion_dist(seed, size)
         elif isinstance(self.ground_truth_portion_dist, float):
-            return self.ground_truth_portion_dist
+            return [self.ground_truth_portion_dist]
         else:
             raise ValueError("ground_truth_portion_dist should be a float or a callable")
 
     def __getitem__(self, idx):
         """Retrieves a dataset sample with a dynamically adjusted reasoning portion."""
         sample = self.dataset[idx]  # Directly access HF dataset
-        portion = self.sample_portion()  # Get current difficulty proportion
-
+        portion = self.sample_portion(seed=self.return_seed(idx), size=1)[0] # Get current difficulty proportion
+        self.portions.append(portion)
         # Modify reasoning exposure based on `portion`
         reasoning_steps = sample.get('answer', "")  # Assume dataset has 'answer'
         word_list = reasoning_steps.split(' ')
         cut_answer = ' '.join(word_list[:int(len(word_list) * portion)])  # Partial CoT answer
 
         # Append the partial answer to the question
-        sample['question'] = sample['question'] + " " + cut_answer
+        sample['question'] = sample['question']
 
         # Apply the chat prompt formatting
-        return self.generate_prompt(sample)
+        return self.generate_prompt({**sample, 'partial_answer':cut_answer})
+
+    def return_seed(self, idx):
+        return self.global_step + 1024 * idx
 
     def __len__(self):
         return len(self.dataset)
@@ -374,14 +388,52 @@ class EnvironmentPortionBaseUpdate(TrainerCallback):
         self.dataset = dataset  # Reference to the curriculum dataset
 
     def update(self, state):
-        raise NotImplementedError
+        self.dataset.global_step = state.global_step
 
     def on_step_begin(self, args, state, control, **kwargs):
         """Called at the end of every step to update difficulty dynamically."""
         self.update(state)
 
-    # def on_train_begin(self, args, state, control, **kwargs):
-    #     pass
+    def on_train_begin(self, args, state, control, **kwargs):
+        self.update(state)
+
+    def on_log(self, args, state, control, logs=None, **kwargs):
+        """
+        This method is called at the end of every logging step. You can log the dataset's hyperparameters here.
+        """
+        # Assuming dataset has a 'hyperparameters' attribute (it could also be a method like `self.dataset.get_hyperparameters()`)
+        hyperparameters_to_log = self.get_hyperparameters()
+        portions = self.dataset.portions
+        self.dataset.portions = []
+
+        # Log the hyperparameters to the logs
+        if logs is None:
+            logs = {}
+
+        
+        # output = {**logs, **{"step": self.state.global_step}}
+        # state.log_history[-1].update(hyperparameters_to_log)
+        # state.log_history[-1]['dataset_portions'] = portions
+
+        # portions = np.array(portions)
+        if wandb.run is not None and state.is_world_process_zero:
+            for i in portions:
+                wandb.log({'dataset_portions': i}, commit=False)
+        # wandb_logs = {'dataset_portions': portions.mean()}
+        wandb_logs = {}
+        wandb_logs.update(hyperparameters_to_log)
+
+        if wandb.run is not None and state.is_world_process_zero:
+            wandb.log(wandb_logs, commit=False)
+
+        logs.update(wandb_logs)
+
+        
+        # Log the hyperparameters (you can log them to a logger or save them as a part of your training logs)
+        # print(f"Logging dataset hyperparameters: {hyperparameters_to_log}, {portions}")  # You can replace this with a logger if needed.
+        # print(f"logs:", logs)
+        # print("control", control)
+        # return logs
         
     # def on_prediction_step(self, args, state, control, eval_dataloader=None, **kwargs):
     #     pass
@@ -390,9 +442,6 @@ class EnvironmentPortionBaseUpdate(TrainerCallback):
     #     pass
 
     # def on_predict(self, args, state, control, **kwargs):
-    #     pass
-
-    # def on_log(self, args, state, control, logs=None, **kwargs):
     #     pass
 
     # def on_train_end(self, args, state, control, **kwargs):
@@ -409,10 +458,11 @@ class EnvironmentPortionBetaUpdate(EnvironmentPortionBaseUpdate):
         self.final_beta = final_beta
         self.warmup_timesteps = warmup_timesteps
         self.total_timesteps = total_timesteps
+        self.hparams = {'ratio/alpha': init_alpha, 'ratio/beta': init_beta}
 
     def update(self, state):
         """Updates dataset difficulty using a beta distribution based on training progress."""
-        print("update")
+        super().update(state)
         current_step = state.global_step  # Use HF Trainer’s step counter
 
         if current_step < self.warmup_timesteps:
@@ -422,13 +472,18 @@ class EnvironmentPortionBetaUpdate(EnvironmentPortionBaseUpdate):
             beta = self.init_beta + (self.final_beta - self.init_beta) * ((current_step - self.warmup_timesteps) / (self.total_timesteps - self.warmup_timesteps))
         else:
             alpha, beta = self.final_alpha, self.final_beta
+        
+        self.hparams =  {'ratio/alpha': alpha, 'ratio/beta': beta}
 
         # Sample new portion from updated beta distribution
-        portion_dist = np.random.default_rng().beta(alpha, beta)
-
+        # Sample new portion from updated uniform distribution
+        def sample_ratio_with_seed(seed=42, size=1):
+            return np.random.default_rng(seed).beta(alpha, beta, size=size)
         # Update dataset portion dynamically
-        self.dataset.set_portion(portion_dist)
-
+        self.dataset.set_portion(sample_ratio_with_seed)
+    
+    def get_hyperparameters(self,):
+        return self.hparams
 
 
 class EnvironmentPortionLinearUpdate(EnvironmentPortionBaseUpdate):
@@ -443,7 +498,7 @@ class EnvironmentPortionLinearUpdate(EnvironmentPortionBaseUpdate):
 
     def update(self, state):
         """Updates dataset difficulty using a linear progression based on training progress."""
-        print("update")
+        super().update(state)
         current_step = state.global_step  # Use HF Trainer’s step counter
 
         if current_step < self.warmup_timesteps:
@@ -455,11 +510,11 @@ class EnvironmentPortionLinearUpdate(EnvironmentPortionBaseUpdate):
             lower_bound, upper_bound = self.lower_bound_final, self.upper_bound_final
 
         # Sample new portion from updated uniform distribution
-        portion_dist = np.random.default_rng().uniform(low=lower_bound, high=upper_bound)
+        def sample_ratio_with_seed(seed=42, size=1):
+            return np.random.default_rng(seed).uniform(low=lower_bound, high=upper_bound, size=size)
 
         # Update dataset portion dynamically
-        self.dataset.set_portion(portion_dist)
-
+        self.dataset.set_portion(sample_ratio_with_seed)
 
 
 def main():
@@ -472,3 +527,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

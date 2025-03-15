@@ -42,6 +42,6 @@ save_steps: 25
 seed: 42
 experiment_name: "progressive-RL"
 
-# evaluation_strategy: "steps"
+# eval_strategy: "steps"
 # eval_steps: 1
 # do_eval: true
