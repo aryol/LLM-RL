@@ -1,6 +1,9 @@
 /completion_samples/
 /wandb/
 /srv_config/
+/outputs
+/runs
+
 
 
 # Byte-compiled / optimized / DLL files

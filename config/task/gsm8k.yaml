@@ -1,0 +1,4 @@
+# Dataset arguments
+dataset_id_or_path: openai/gsm8k
+
+reward_function: src.task.gsm8k.GSM8KReward
