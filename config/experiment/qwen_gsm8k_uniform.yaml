@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - override /task: gsm8k
+  - override /model: qwen_0.5b
+  - override /curriculum_strategy: uniform
