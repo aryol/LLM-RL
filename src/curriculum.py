@@ -121,6 +121,8 @@ class PortionUniformUpdate(PortionBaseUpdate):
         self.warmup_timesteps = warmup_timesteps
         self.total_timesteps = total_timesteps
 
+        self.hparams = {'ratio/lower_bound': lower_bound_init, 'ratio/upper_bound': upper_bound_init}  
+
     def update(self, state):
         """Updates dataset difficulty using a linear progression based on training progress."""
         super().update(state)
@@ -133,6 +135,8 @@ class PortionUniformUpdate(PortionBaseUpdate):
             upper_bound = self.upper_bound_init + (self.upper_bound_final - self.upper_bound_init) * ((current_step - self.warmup_timesteps) / (self.total_timesteps - self.warmup_timesteps))
         else:
             lower_bound, upper_bound = self.lower_bound_final, self.upper_bound_final
+        
+        self.hparams = {'ratio/lower_bound': lower_bound, 'ratio/upper_bound': upper_bound}
 
         # Sample new portion from updated uniform distribution
         def sample_ratio_with_seed(seed=42, size=1):
@@ -140,3 +144,6 @@ class PortionUniformUpdate(PortionBaseUpdate):
 
         # Update dataset portion dynamically
         self.dataset.set_portion(sample_ratio_with_seed)
+
+    def get_hyperparameters(self,):
+        return {'ratio/lower_bound': self.lower_bound_final, 'ratio/upper_bound': self.upper_bound_final}

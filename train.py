@@ -1,7 +1,8 @@
 import hydra   
 from omegaconf import DictConfig
 from typing import Optional
-
+from omegaconf import OmegaConf
+from trl import GRPOConfig
 
 import logging
 import os
@@ -149,7 +150,8 @@ def trainer(config):
 
     answer_reward_func = hydra.utils.get_method(config.task.reward_function,)
 
-    training_args = hydra.utils.instantiate(config.training_args)
+    training_args = OmegaConf.to_container(config.training_args)
+    training_args = GRPOConfig(**training_args)
     model_args = hydra.utils.instantiate(config.model.model_config)
     # GRPO Trainer
     trainer = GRPOTrainer(
@@ -173,6 +175,7 @@ def trainer(config):
         logger.info(f"Model parameters {model_args}")
         logger.info(f"Training/evaluation parameters {training_args}")
         wandb.init(project="progressive-RL", name="train_without_warning")
+
 
     # Check for last checkpoint
     last_checkpoint = get_checkpoint(training_args)
