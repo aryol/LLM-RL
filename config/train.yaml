@@ -9,7 +9,6 @@ defaults:
 
 # Training arguments
 training_args:
-  _target_: trl.GRPOConfig
   max_steps: 450
   per_device_train_batch_size: 8
   per_device_eval_batch_size: 16
@@ -25,15 +24,18 @@ training_args:
   max_prompt_length: 6144
   max_completion_length: 1024
   num_generations: 2
-  use_vllm: false
-  # vllm_device: "cuda:7"
+  use_vllm: true
+  vllm_device: "cuda:7"
   vllm_gpu_memory_utilization: 0.8
   output_dir: runs/qwen-2.5-05b-r1-gsm8k
   bf16: true
   tf32: true
-  
+  eval_strategy: "steps"
+  eval_steps: 30
+  do_eval: true
+  do_train: true
+
 # Logging arguments
-logger_configs:
   logging_strategy: steps
   logging_steps: 2
   report_to:
@@ -41,9 +43,6 @@ logger_configs:
   save_strategy: "steps"
   save_steps: 25
   seed: 42
-  experiment_name: "progressive-RL"
+  # experiment_name: "progressive-RL"
 
-eval_strategy: "steps"
-eval_steps: 30
-do_eval: true
-do_train: true
+

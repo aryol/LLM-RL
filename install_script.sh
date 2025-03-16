@@ -19,6 +19,7 @@ pip install  --upgrade \
 pip uninstall -y pynvml
 pip install -U nvidia-ml-py
 pip install wandb
+pip install rootutils
 
 # install vLLM 
 pip install -U vllm
