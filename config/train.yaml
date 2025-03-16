@@ -24,13 +24,12 @@ training_args:
   max_prompt_length: 6144
   max_completion_length: 1024
   num_generations: 2
-  use_vllm: false
-  # vllm_device: "cuda:7"
+  use_vllm: true
+  vllm_device: "cuda:7"
   vllm_gpu_memory_utilization: 0.8
   output_dir: runs/qwen-2.5-05b-r1-gsm8k
   bf16: true
   tf32: true
-
   logging_strategy: steps
   logging_steps: 2
   report_to:

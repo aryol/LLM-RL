@@ -1,5 +1,5 @@
 import hydra   
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 from typing import Optional
 from omegaconf import OmegaConf
 from trl import GRPOConfig
@@ -15,7 +15,7 @@ import wandb
 from transformers.trainer_utils import get_last_checkpoint
 from transformers import AutoTokenizer
 from datasets import load_dataset, Dataset
-from trl import GRPOTrainer, get_peft_config
+from trl import GRPOTrainer, get_peft_config, GRPOConfig
 from transformers.trainer_utils import speed_metrics
 
 import code

@@ -35,31 +35,15 @@ class PortionBaseUpdate(TrainerCallback):
         if logs is None:
             logs = {}
 
-        
-        # output = {**logs, **{"step": self.state.global_step}}
-        # state.log_history[-1].update(hyperparameters_to_log)
-        # state.log_history[-1]['dataset_portions'] = portions
+        if not control.should_evaluate:
+            portions = np.array(portions)
+            wandb_logs = {'ratio/dataset_portions_mean': portions.mean(), 'ratio/dataset_portions_std': portions.std()}
+            wandb_logs.update(hyperparameters_to_log)
 
-        # portions = np.array(portions)
-        if wandb.run is not None and state.is_world_process_zero:
-            for i in portions:
-                wandb.log({'dataset_portions': i}, commit=False)
-        # wandb_logs = {'dataset_portions': portions.mean()}
-        wandb_logs = {}
-        wandb_logs.update(hyperparameters_to_log)
+            if wandb.run is not None and state.is_world_process_zero:
+                wandb.log(wandb_logs, commit=False)
+            logs.update(wandb_logs)
 
-        if wandb.run is not None and state.is_world_process_zero:
-            wandb.log(wandb_logs, commit=False)
-
-        logs.update(wandb_logs)
-
-        
-        # Log the hyperparameters (you can log them to a logger or save them as a part of your training logs)
-        # print(f"Logging dataset hyperparameters: {hyperparameters_to_log}, {portions}")  # You can replace this with a logger if needed.
-        # print(f"logs:", logs)
-        # print("control", control)
-        # return logs
-        
     # def on_prediction_step(self, args, state, control, eval_dataloader=None, **kwargs):
     #     pass
 
