@@ -4,6 +4,8 @@
 /outputs
 /runs
 
+# wandb
+.wandb.yaml
 
 
 # Byte-compiled / optimized / DLL files
