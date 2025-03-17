@@ -44,15 +44,14 @@ class PortionBaseUpdate(TrainerCallback):
                 wandb.log(wandb_logs, commit=False)
             logs.update(wandb_logs)
 
+    # def on_init_end(self, args, state, control, **kwargs):
+    #     pass
     # def on_prediction_step(self, args, state, control, eval_dataloader=None, **kwargs):
     #     pass
-
     # def on_evaluate(self, args, state, control, **kwargs):
     #     pass
-
     # def on_predict(self, args, state, control, **kwargs):
     #     pass
-
     # def on_train_end(self, args, state, control, **kwargs):
     #     pass
    
@@ -130,4 +129,4 @@ class PortionUniformUpdate(PortionBaseUpdate):
         self.dataset.set_portion(sample_ratio_with_seed)
 
     def get_hyperparameters(self,):
-        return {'ratio/lower_bound': self.lower_bound_final, 'ratio/upper_bound': self.upper_bound_final}
+        return self.hparams

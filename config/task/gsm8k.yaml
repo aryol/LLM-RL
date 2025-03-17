@@ -1,4 +1,24 @@
 # Dataset arguments
-dataset_id_or_path: openai/gsm8k
+dataset:
+  _target_: datasets.load_dataset
+  path: openai/gsm8k
+  name: 'main'
 
-reward_function: src.task.gsm8k.GSM8KReward
+prompt_key: question
+target_key: answer
+
+default_prompt: "1. Always present the final answer on the last line of your response in the format: #### <answer> \
+  Ensure that the answer is a single number. \n \
+  2. End each sentence with a newline character ('\\n'). \n \
+  3. Perform any calculations within a <<...>> block before outputing the result of this calculation."
+
+extract_answer_from_dataset: src.task.gsm8k.ExtractAnswerFromDataset
+
+task_name: gsm8k
+
+reward_class: 
+  _target_: src.task.gsm8k.GSM8KReward
+  LOG_FILE: ${training_args.output_dir}/completions.json
+
+# reward_function: src.task.gsm8k.CorrectnessReward
+format_reward_function: src.task.gsm8k.FormatRewardFunction

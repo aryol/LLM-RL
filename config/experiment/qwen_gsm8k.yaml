@@ -1,0 +1,11 @@
+# @package _global_
+
+defaults:
+  - override /callbacks/curriculum_update_callback: beta
+  - override /task: gsm8k
+  - override /model: qwen_0.5b
+
+
+trainer:
+  eval_steps: 30
+  logging_steps: 2

@@ -1,0 +1,6 @@
+
+defaults:
+  - curriculum_update_callback: null
+
+# rollout_logger:
+#   _target_: src.callbacks.rollout_logger.RolloutLogger

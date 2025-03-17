@@ -2,10 +2,12 @@
 
 defaults:
   - _self_
-  - curriculum_strategy: null
+  - callbacks: default
   - task: ???
   - model: ???
-  - experiment: ???
+  - experiment: qwen_gsm8k
+
+log_dir: ${oc.env:PROJECT_ROOT}/logs
 
 # Training arguments
 training_args:
@@ -24,10 +26,11 @@ training_args:
   max_prompt_length: 6144
   max_completion_length: 1024
   num_generations: 2
-  use_vllm: true
-  vllm_device: "cuda:7"
-  vllm_gpu_memory_utilization: 0.8
-  output_dir: runs/qwen-2.5-05b-r1-gsm8k
+  # use_vllm: true
+  # vllm_device: "cuda:7"
+  # vllm_gpu_memory_utilization: 0.8
+  output_dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+  run_name: ${task.task_name}-${model.model_name}
   bf16: true
   tf32: true
   logging_strategy: steps
@@ -37,8 +40,21 @@ training_args:
   save_strategy: "steps"
   save_steps: 25
   seed: 42
+  torch_compile: false
 
   eval_strategy: "steps"
   eval_steps: 30
   do_eval: true
   do_train: true
+
+wandb_config:
+  name: ${model.model_name}
+  project: progressive_rl_on_${task.task_name}
+  dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+
+hydra:
+  run:
+    dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+  sweep:
+    dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+    subdir: ${hydra.job.num}

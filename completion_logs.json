@@ -1,0 +1,242 @@
+[
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nThe math teacher would be happy if the class average test score was at least 85. There are 10 students in the class, 5 of which scored a 92 on the test and 4 of which scored an 80. What would the last student have to score to at least make the teacher happy?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\n5 students scored a combined total of 92 * 5 = <<92*5=460>>460\n4 additional students scored a combined total of",
+        "completion": " 80 * 4 = <<80*4=320>>320\nTotal of 460 + 320 = <<460+320=780>>780\nThe math teacher would be happy if the class average test score is at least 85, so 780 / 10 = 78\nTherefore, the last student would have to score at least 85 to make the teacher happy.",
+        "target": "70",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nThe math teacher would be happy if the class average test score was at least 85. There are 10 students in the class, 5 of which scored a 92 on the test and 4 of which scored an 80. What would the last student have to score to at least make the teacher happy?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\n5 students scored a combined total of 92 * 5 = <<92*5=460>>460\n4 additional students scored a combined total of",
+        "completion": " 80 * 4 = <<80*4=320>>320.\nThus, the combined total of all students' scores is 460 + 320 = <<460+320=780>>780.\nTherefore, the score of the last student needs to be 780 - 85 = <<780-85=695>>695 to meet the teacher's average score of at least 85.\n#### 695",
+        "target": "70",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nPedro, Linden, and Jesus are playing a game. Jesus has 60 squares. Linden has 75 squares. Pedro has 200. How many more squares does Pedro have than both Jesus and Linden combined?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nPedro has 100 squares - 60 squares = <<100-60=40>>40 more",
+        "completion": " squares than Jesus.\nPedro has 100 squares - 75 squares = <<100-75=25>>25 more squares than Linden.\n\nPedro has 25 squares more than both Jesus and Linden combined.\nSo, the answer is:\nPedro has 25 more squares than both Jesus and Linden combined.",
+        "target": "65",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nPedro, Linden, and Jesus are playing a game. Jesus has 60 squares. Linden has 75 squares. Pedro has 200. How many more squares does Pedro have than both Jesus and Linden combined?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nPedro has 100 squares - 60 squares = <<100-60=40>>40 more",
+        "completion": " squares than Jesus and Linden combined.  \nTo find out how many more squares Pedro has than both Jesus and Linden combined, I'll calculate the difference between the squares that Pedro has and the squares that Jesus and Linden have combined.  \nThus, Pedro has 40 squares - 75 squares = <<40-75=-35>>-35 more squares than Jesus and Linden combined.  \nI'll assume that the answer is negative since it is not possible for a person to have negative squares.  \nTherefore, Pedro has 35 more squares than both Jesus and Linden combined.",
+        "target": "65",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nEmmett does 12 jumping jacks, 8 pushups, and 20 situps. What percentage of his exercises were pushups?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\n",
+        "completion": "1. Emmett does 12 jumping jacks.\n2. Emmett does 8 pushups.\n3. Emmett does 20 situps.\n4. Total number of exercises = 12 + 8 + 20 = 40\n5. To find percentage of pushups, we divide the number of pushups by the total number of exercises and multiply by 100.\n6. Percentage of pushups = (Number of pushups / Total number of exercises) x 100\n7. Percentage of pushups = (8 / 40) x 100\n8. Percentage of pushups = 0.20 x 100\n9. Percentage of pushups = 20%\n\nTherefore, 20% of Emmett's exercises were pushups, considering the given data.",
+        "target": "20",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nEmmett does 12 jumping jacks, 8 pushups, and 20 situps. What percentage of his exercises were pushups?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\n",
+        "completion": "1. First, add the number of jumping jacks, pushups, and situps: 12 + 8 + 20 = 40 exercises\n2. Then, to find the percentage, divide the number of exercises by the total number of exercises and multiply by 100: (8/40) * 100 = 20%",
+        "target": "20",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nA store sold a certain brand of jeans for $40. They only have few pairs of jeans left so they decided to give 10% discount on every two pairs of jeans bought by a customer at any one time. How much will a customer pay for 3 pairs of jeans?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nTwo pairs of jeans cost $40 x 2 = $<<40*2=80>>80.\nA discount of $80 x",
+        "completion": " 10 percent = $<<80*10/100=8>>8 is applied to $80.\nA customer will pay $80 - $8 = $<<80-8=72>>72 for 3 pairs of jeans.\nThe answer is <72>.",
+        "target": "112",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nA store sold a certain brand of jeans for $40. They only have few pairs of jeans left so they decided to give 10% discount on every two pairs of jeans bought by a customer at any one time. How much will a customer pay for 3 pairs of jeans?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nTwo pairs of jeans cost $40 x 2 = $<<40*2=80>>80.\nA discount of $80 x",
+        "completion": " 10/100 = $<<80*10/100=8>>8 will be deducted from this amount.\nSo the price of 2 pairs of jeans will be $80 - $8 = $<<80-8=72>>72.\nTherefore, a customer will pay $72 x 3 = $<<72*3=216>>216 for 3 pairs of jeans. <answer>216</answer>",
+        "target": "112",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nNico borrows 3 books from the library on Monday.  On Monday, he reads the first book with a total of 20 pages.  On Tuesday, he reads the second book with a total of 12 pages.  On Wednesday, he reads the third book.  If he has read a total of 51 pages from Monday to Wednesday, how many pages did he read on Wednesday?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nFrom Monday to Tuesday, Nico reads",
+        "completion": " 20 pages and 12 pages, which total 32 pages.\nThe total pages he read in the first two days is 32.\nIf he read a total of 51 pages from Monday to Wednesday, this means that on Wednesday he read 51 - 32 = 19 pages.\nSince he read a total of 3 books, each with 51 pages, he read 3 x 51 = 153 pages on Monday and Tuesday.\nTherefore, on Wednesday, Nico read 19 pages.\nTo find out how many pages he read on Wednesday, we subtract the pages already read on Tuesday and Monday from the total pages read from Monday to Wednesday.\nNumber of pages Nico read from Wednesday = Total pages - Pages from Monday to Tuesday - Pages from Tuesday to Wednesday\nNumber of pages Nico read from Wednesday = 19 - 32 - 12\nNumber of pages Nico read from Wednesday = 19 - 44\nNumber of pages Nico read from Wednesday = -25 (Negative since he read 19 pages)\nSince pages cannot be negative, it means Nico read a total of 25 pages on Wednesday.\nTherefore, Nico read 19 pages on Wednesday.",
+        "target": "19",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nNico borrows 3 books from the library on Monday.  On Monday, he reads the first book with a total of 20 pages.  On Tuesday, he reads the second book with a total of 12 pages.  On Wednesday, he reads the third book.  If he has read a total of 51 pages from Monday to Wednesday, how many pages did he read on Wednesday?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nFrom Monday to Tuesday, Nico reads",
+        "completion": " 20 pages (Monday) + 12 pages (Tuesday) = 32 pages.\nAdding Wednesday, he has already read 32 pages + 51 pages (Monday to Wednesday) = 83 pages in total.\nTherefore, Nico read 83 pages - 32 pages = 51 pages on Wednesday.",
+        "target": "19",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nSuraya picked 12 apples more than Caleb, and Caleb picked 5 apples less than Kayla. If Kayla picked 20 apples, how many more apples did Suraya pick than Kayla?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nCaleb picked 20 -",
+        "completion": " 5 = 15 apples.\n\nSuraya picked 15 + 12 = 27 apples.\n\nTherefore, Suraya picked 27 - 20 = 7 more apples than Kayla. Thus the answer is 7.",
+        "target": "7",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nSuraya picked 12 apples more than Caleb, and Caleb picked 5 apples less than Kayla. If Kayla picked 20 apples, how many more apples did Suraya pick than Kayla?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nCaleb picked 20 -",
+        "completion": " 5 = 15 apples.\nSuraya picked 15 + 12 = 27 apples.\nSuraya picked 27 - 20 = 7 more apples than Kayla.",
+        "target": "7",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nChris buys 2 and a half dozen donuts on his way to work to share with his co-workers.  While driving, he eats 10% of the donuts.  Once inside, he grabs another 4 donuts for his afternoon snack.  How many donuts are left for his co-workers?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nHe buys 2 and a half dozen donuts so that's 2.5*12 = <<2.5*12=30>>30 donuts\nHe eats 10% of the",
+        "completion": " donuts, so he eats 10/100*30 = <<10/100*30=3>>3 donuts\nHe ends up with 30-3 = <<30-3=27>>27 donuts\nHe grabs 4 more, leaving 27-4 = <<27-4=23>>23 donuts\n\nTherefore, the final answer is 23.",
+        "target": "23",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nChris buys 2 and a half dozen donuts on his way to work to share with his co-workers.  While driving, he eats 10% of the donuts.  Once inside, he grabs another 4 donuts for his afternoon snack.  How many donuts are left for his co-workers?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nHe buys 2 and a half dozen donuts so that's 2.5*12 = <<2.5*12=30>>30 donuts\nHe eats 10% of the",
+        "completion": " donuts while driving so that's 0.1*30 = <<0.1*30=3>>3 donuts\nHe grabs an additional 4 donuts for his afternoon donuts so that's 4 donuts\nSo in total he has 30 - 3 + 4 = <<30-3+4=31>>31 donuts left for his co-workers.",
+        "target": "23",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nThere are one-third as many Ford trucks as Dodge trucks in the parking lot of the Taco Castle.  But there are twice as many Ford trucks as Toyota trucks in this parking lot, and there are half as many Volkswagen Bugs as there are Toyota trucks in this same parking lot.  If there are 5 Volkswagon Bugs in the parking lot, how many Dodge trucks are in the parking lot of the Taco Castle?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nIf there are half as many VW Bugs as",
+        "completion": " there are Toyota trucks, and there are 5 VW Bugs, then there are 5 Toyota trucks.\nIf there are twice as many Ford trucks as Toyota trucks, then there are 5 * 2 = 10 Ford trucks.\nAnd if there are one-third as many Ford trucks as Dodge trucks, then there are 10 * 3 = 30 Dodge trucks.\nTherefore, there are 30 Dodge trucks in the parking lot of the Taco Castle.",
+        "target": "60",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nThere are one-third as many Ford trucks as Dodge trucks in the parking lot of the Taco Castle.  But there are twice as many Ford trucks as Toyota trucks in this parking lot, and there are half as many Volkswagen Bugs as there are Toyota trucks in this same parking lot.  If there are 5 Volkswagon Bugs in the parking lot, how many Dodge trucks are in the parking lot of the Taco Castle?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nIf there are half as many VW Bugs as",
+        "completion": " there are Toyota trucks, and there are 5 VW Bugs, then the number of Toyota trucks is \\(5 \\times 2 = 10\\).\nIf there are twice as many Ford trucks as Toyota trucks, then the number of Ford trucks is \\(10 \\times 2 = 20\\).\nIf there are one-third as many Ford trucks as Dodge trucks, then the number of Dodge trucks is \\(20 \\times 3 = 60\\).\nTherefore, there are 60 Dodge trucks in the parking lot of the Taco Castle.",
+        "target": "60",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nDylan filled his glass with ice cubes before he poured his soda into it. He counted and there were 8 ice cubes in his glass. Later when he prepares a pitcher of lemonade he puts two times as many ice cubes in the pitcher. Then it is time to refill the ice cube trays which have 12 spaces each for ice cubes. How many trays does Dylan need to fill if he used exactly all the ice they had in them?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nDylan uses 8 ice cubes in his glass plus 2 x as many for the pitcher of lemonade, 8 x 2 = 16",
+        "completion": " ice cubes for the pitcher.\nThe total number of ice cubes used is 8 (in his glass) + 16 (in the pitcher) = 24 ice cubes.\nEach ice cube tray has 12 spaces for ice cubes. Therefore, Dylan needs to fill 24/12 = 2 trays.",
+        "target": "2",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nDylan filled his glass with ice cubes before he poured his soda into it. He counted and there were 8 ice cubes in his glass. Later when he prepares a pitcher of lemonade he puts two times as many ice cubes in the pitcher. Then it is time to refill the ice cube trays which have 12 spaces each for ice cubes. How many trays does Dylan need to fill if he used exactly all the ice they had in them?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nDylan uses 8 ice cubes in his glass plus 2 x as many for the pitcher of lemonade, 8 x 2 = 16",
+        "completion": " ice cubes.\n\nThe answer is 16/12 = 1.333 trays. Since you can't have decimal trays, Dylan needs to purchase an additional 1 tray.",
+        "target": "2",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nHanna has $300. She wants to buy roses at $2 each and give some of the roses to her friends, Jenna and Imma. Jenna will receive  1/3 of the roses, and  Imma will receive 1/2 of the roses. How many roses does Hanna give to her friends?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nHanna can buy $300/$2 = <<300/2=150>>150",
+        "completion": " roses from the $300.\n\nJenna receives 1/3 of the total roses, so Jenna gets 150 * (1/3) = 50 roses.\n\nImma receives 1/2 of the total roses, so Imma gets 150 * (1/2) = 75 roses.\n\nIn total, Hanna gives her friends 50 + 75 = 125 roses.",
+        "target": "125",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nHanna has $300. She wants to buy roses at $2 each and give some of the roses to her friends, Jenna and Imma. Jenna will receive  1/3 of the roses, and  Imma will receive 1/2 of the roses. How many roses does Hanna give to her friends?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nHanna can buy $300/$2 = <<300/2=150>>150",
+        "completion": " roses. Hanna will buy 150*(1/3) = <<150/3=50>>50 roses for Jenna. Hanna will also buy 150*(1/2) = <<150/2=75>>75 roses for Imma. Therefore, Hanna will give a total of 50+75 = <<50+75=125>>125 roses to her friends. Thus, Hanna gives all 125 roses to her friends.",
+        "target": "125",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nJessica's family is 300 km away from New York. If they are traveling at the rate of 50 km/h and stop to rest for 30 minutes every 2 hours, how long will it take them to reach New York?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nWithout stopping to rest",
+        "completion": ", it takes Jessica's family 50 km/h * 2 hours = 100 km to reach New York.\nSince they are traveling 300 km away, it would take them 300 km / 100 km/h = 3 hours to reach New York.\nSo, it will take them 3 hours to travel from their current location to New York.\nLet me perform the calculation.\n\n300 km / 50 km/h = 6 hours.",
+        "target": "7",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nJessica's family is 300 km away from New York. If they are traveling at the rate of 50 km/h and stop to rest for 30 minutes every 2 hours, how long will it take them to reach New York?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nWithout stopping to rest",
+        "completion": ", Jessica's family will travel 300 km in 300 \u00f7 50 = 6 hours.\nSince they stop every 2 hours, they will rest for \\(6 \\div 2 = 3\\) times during their journey.\nAfter each stop, they will travel 50 km in 6 - 3 = 3 hours.\nTherefore, in total, they will take \\(3 \\times 3 = 9\\) hours to reach New York.\nThe answer is $\\boxed{9}$.",
+        "target": "7",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nBetty has a tray of cookies and a tray of brownies.  She has a real sweet tooth and eats 3 cookies a day and 1 brownie a day.  If she starts with 60 cookies and 10 brownies, how many more cookies than brownies does she have after a week of eating like this?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nFirst we find how many cookies Betty will eat in a week by multiplying her daily amount by 7, meaning 7*3=<<21=21>>21 cookies eaten in a week.\nWe repeat this for the brownies, finding she",
+        "completion": " eats 7*1=<<7=7>>7 brownies in a week.\nAdd the number of cookies eaten (21) to the number of brownies she eats (7), getting 21+7=<<28=28>>28 cookies and brownies eaten in a week.\nBetty started with 60 cookies and this equals 60 cookies.\nThe number of cookies less than the brownies is 60-28=<<32=32>>32\nBetty has _____ more cookies than brownies after a week of eating like this. The answer is: 32.",
+        "target": "36",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nBetty has a tray of cookies and a tray of brownies.  She has a real sweet tooth and eats 3 cookies a day and 1 brownie a day.  If she starts with 60 cookies and 10 brownies, how many more cookies than brownies does she have after a week of eating like this?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nFirst we find how many cookies Betty will eat in a week by multiplying her daily amount by 7, meaning 7*3=<<21=21>>21 cookies eaten in a week.\nWe repeat this for the brownies, finding she",
+        "completion": " will eat 7*1=<<7=7>>7 brownies in a week.\n\nWith these totals, we can determine how many more cookies she has than brownies by taking the difference in number of items she has versus those she already has.\nThe difference is thus 21-7=<<21-7=14>>14 cookies.\n\nSince this is a negative number, we get that she has fewer cookies than brownies, according to the given data. \n\nThus, Betty has 14 fewer cookies than brownies after a week. \n\nEnd of solution",
+        "target": "36",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nThe math teacher would be happy if the class average test score was at least 85. There are 10 students in the class, 5 of which scored a 92 on the test and 4 of which scored an 80. What would the last student have to score to at least make the teacher happy?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\n5 students scored a combined total of 92 * 5 = <<92*5=460>>460\n4 additional students scored a combined total of",
+        "completion": " 80 * 4 = <<80*4=320>>320\nTotal of 460 + 320 = <<460+320=780>>780\nThe math teacher would be happy if the class average test score is at least 85, so 780 / 10 = 78\nTherefore, the last student would have to score at least 85 to make the teacher happy.",
+        "target": "70",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nThe math teacher would be happy if the class average test score was at least 85. There are 10 students in the class, 5 of which scored a 92 on the test and 4 of which scored an 80. What would the last student have to score to at least make the teacher happy?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\n5 students scored a combined total of 92 * 5 = <<92*5=460>>460\n4 additional students scored a combined total of",
+        "completion": " 80 * 4 = <<80*4=320>>320.\nThus, the combined total of all students' scores is 460 + 320 = <<460+320=780>>780.\nTherefore, the score of the last student needs to be 780 - 85 = <<780-85=695>>695 to meet the teacher's average score of at least 85.\n#### 695",
+        "target": "70",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nPedro, Linden, and Jesus are playing a game. Jesus has 60 squares. Linden has 75 squares. Pedro has 200. How many more squares does Pedro have than both Jesus and Linden combined?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nPedro has 100 squares - 60 squares = <<100-60=40>>40 more",
+        "completion": " squares than Jesus.\nPedro has 100 squares - 75 squares = <<100-75=25>>25 more squares than Linden.\n\nPedro has 25 squares more than both Jesus and Linden combined.\nSo, the answer is:\nPedro has 25 more squares than both Jesus and Linden combined.",
+        "target": "65",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nPedro, Linden, and Jesus are playing a game. Jesus has 60 squares. Linden has 75 squares. Pedro has 200. How many more squares does Pedro have than both Jesus and Linden combined?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nPedro has 100 squares - 60 squares = <<100-60=40>>40 more",
+        "completion": " squares than Jesus and Linden combined.  \nTo find out how many more squares Pedro has than both Jesus and Linden combined, I'll calculate the difference between the squares that Pedro has and the squares that Jesus and Linden have combined.  \nThus, Pedro has 40 squares - 75 squares = <<40-75=-35>>-35 more squares than Jesus and Linden combined.  \nI'll assume that the answer is negative since it is not possible for a person to have negative squares.  \nTherefore, Pedro has 35 more squares than both Jesus and Linden combined.",
+        "target": "65",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nEmmett does 12 jumping jacks, 8 pushups, and 20 situps. What percentage of his exercises were pushups?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\n",
+        "completion": "1. Emmett does 12 jumping jacks.\n2. Emmett does 8 pushups.\n3. Emmett does 20 situps.\n4. Total number of exercises = 12 + 8 + 20 = 40\n5. To find percentage of pushups, we divide the number of pushups by the total number of exercises and multiply by 100.\n6. Percentage of pushups = (Number of pushups / Total number of exercises) x 100\n7. Percentage of pushups = (8 / 40) x 100\n8. Percentage of pushups = 0.20 x 100\n9. Percentage of pushups = 20%\n\nTherefore, 20% of Emmett's exercises were pushups, considering the given data.",
+        "target": "20",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nEmmett does 12 jumping jacks, 8 pushups, and 20 situps. What percentage of his exercises were pushups?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\n",
+        "completion": "1. First, add the number of jumping jacks, pushups, and situps: 12 + 8 + 20 = 40 exercises\n2. Then, to find the percentage, divide the number of exercises by the total number of exercises and multiply by 100: (8/40) * 100 = 20%",
+        "target": "20",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nA store sold a certain brand of jeans for $40. They only have few pairs of jeans left so they decided to give 10% discount on every two pairs of jeans bought by a customer at any one time. How much will a customer pay for 3 pairs of jeans?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nTwo pairs of jeans cost $40 x 2 = $<<40*2=80>>80.\nA discount of $80 x",
+        "completion": " 10 percent = $<<80*10/100=8>>8 is applied to $80.\nA customer will pay $80 - $8 = $<<80-8=72>>72 for 3 pairs of jeans.\nThe answer is <72>.",
+        "target": "112",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nA store sold a certain brand of jeans for $40. They only have few pairs of jeans left so they decided to give 10% discount on every two pairs of jeans bought by a customer at any one time. How much will a customer pay for 3 pairs of jeans?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nTwo pairs of jeans cost $40 x 2 = $<<40*2=80>>80.\nA discount of $80 x",
+        "completion": " 10/100 = $<<80*10/100=8>>8 will be deducted from this amount.\nSo the price of 2 pairs of jeans will be $80 - $8 = $<<80-8=72>>72.\nTherefore, a customer will pay $72 x 3 = $<<72*3=216>>216 for 3 pairs of jeans. <answer>216</answer>",
+        "target": "112",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nNico borrows 3 books from the library on Monday.  On Monday, he reads the first book with a total of 20 pages.  On Tuesday, he reads the second book with a total of 12 pages.  On Wednesday, he reads the third book.  If he has read a total of 51 pages from Monday to Wednesday, how many pages did he read on Wednesday?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nFrom Monday to Tuesday, Nico reads",
+        "completion": " 20 pages and 12 pages, which total 32 pages.\nThe total pages he read in the first two days is 32.\nIf he read a total of 51 pages from Monday to Wednesday, this means that on Wednesday he read 51 - 32 = 19 pages.\nSince he read a total of 3 books, each with 51 pages, he read 3 x 51 = 153 pages on Monday and Tuesday.\nTherefore, on Wednesday, Nico read 19 pages.\nTo find out how many pages he read on Wednesday, we subtract the pages already read on Tuesday and Monday from the total pages read from Monday to Wednesday.\nNumber of pages Nico read from Wednesday = Total pages - Pages from Monday to Tuesday - Pages from Tuesday to Wednesday\nNumber of pages Nico read from Wednesday = 19 - 32 - 12\nNumber of pages Nico read from Wednesday = 19 - 44\nNumber of pages Nico read from Wednesday = -25 (Negative since he read 19 pages)\nSince pages cannot be negative, it means Nico read a total of 25 pages on Wednesday.\nTherefore, Nico read 19 pages on Wednesday.",
+        "target": "19",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nNico borrows 3 books from the library on Monday.  On Monday, he reads the first book with a total of 20 pages.  On Tuesday, he reads the second book with a total of 12 pages.  On Wednesday, he reads the third book.  If he has read a total of 51 pages from Monday to Wednesday, how many pages did he read on Wednesday?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nFrom Monday to Tuesday, Nico reads",
+        "completion": " 20 pages (Monday) + 12 pages (Tuesday) = 32 pages.\nAdding Wednesday, he has already read 32 pages + 51 pages (Monday to Wednesday) = 83 pages in total.\nTherefore, Nico read 83 pages - 32 pages = 51 pages on Wednesday.",
+        "target": "19",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nSuraya picked 12 apples more than Caleb, and Caleb picked 5 apples less than Kayla. If Kayla picked 20 apples, how many more apples did Suraya pick than Kayla?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nCaleb picked 20 -",
+        "completion": " 5 = 15 apples.\n\nSuraya picked 15 + 12 = 27 apples.\n\nTherefore, Suraya picked 27 - 20 = 7 more apples than Kayla. Thus the answer is 7.",
+        "target": "7",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nSuraya picked 12 apples more than Caleb, and Caleb picked 5 apples less than Kayla. If Kayla picked 20 apples, how many more apples did Suraya pick than Kayla?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nCaleb picked 20 -",
+        "completion": " 5 = 15 apples.\nSuraya picked 15 + 12 = 27 apples.\nSuraya picked 27 - 20 = 7 more apples than Kayla.",
+        "target": "7",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nChris buys 2 and a half dozen donuts on his way to work to share with his co-workers.  While driving, he eats 10% of the donuts.  Once inside, he grabs another 4 donuts for his afternoon snack.  How many donuts are left for his co-workers?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nHe buys 2 and a half dozen donuts so that's 2.5*12 = <<2.5*12=30>>30 donuts\nHe eats 10% of the",
+        "completion": " donuts, so he eats 10/100*30 = <<10/100*30=3>>3 donuts\nHe ends up with 30-3 = <<30-3=27>>27 donuts\nHe grabs 4 more, leaving 27-4 = <<27-4=23>>23 donuts\n\nTherefore, the final answer is 23.",
+        "target": "23",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nChris buys 2 and a half dozen donuts on his way to work to share with his co-workers.  While driving, he eats 10% of the donuts.  Once inside, he grabs another 4 donuts for his afternoon snack.  How many donuts are left for his co-workers?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nHe buys 2 and a half dozen donuts so that's 2.5*12 = <<2.5*12=30>>30 donuts\nHe eats 10% of the",
+        "completion": " donuts while driving so that's 0.1*30 = <<0.1*30=3>>3 donuts\nHe grabs an additional 4 donuts for his afternoon donuts so that's 4 donuts\nSo in total he has 30 - 3 + 4 = <<30-3+4=31>>31 donuts left for his co-workers.",
+        "target": "23",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nThere are one-third as many Ford trucks as Dodge trucks in the parking lot of the Taco Castle.  But there are twice as many Ford trucks as Toyota trucks in this parking lot, and there are half as many Volkswagen Bugs as there are Toyota trucks in this same parking lot.  If there are 5 Volkswagon Bugs in the parking lot, how many Dodge trucks are in the parking lot of the Taco Castle?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nIf there are half as many VW Bugs as",
+        "completion": " there are Toyota trucks, and there are 5 VW Bugs, then there are 5 Toyota trucks.\nIf there are twice as many Ford trucks as Toyota trucks, then there are 5 * 2 = 10 Ford trucks.\nAnd if there are one-third as many Ford trucks as Dodge trucks, then there are 10 * 3 = 30 Dodge trucks.\nTherefore, there are 30 Dodge trucks in the parking lot of the Taco Castle.",
+        "target": "60",
+        "reward": 0.0
+    },
+    {
+        "prompt": "<|im_start|>system\n1. Always present the final answer on the last line of your response in the format: #### <answer> Ensure that the answer is a single number. \n 2. End each sentence with a newline character ('\\n'). \n 3. Perform any calculations within a <<...>> block before outputing the result of this calculation.<|im_end|>\n<|im_start|>user\nHere is the question:\nThere are one-third as many Ford trucks as Dodge trucks in the parking lot of the Taco Castle.  But there are twice as many Ford trucks as Toyota trucks in this parking lot, and there are half as many Volkswagen Bugs as there are Toyota trucks in this same parking lot.  If there are 5 Volkswagon Bugs in the parking lot, how many Dodge trucks are in the parking lot of the Taco Castle?<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\nIf there are half as many VW Bugs as",
+        "completion": " there are Toyota trucks, and there are 5 VW Bugs, then the number of Toyota trucks is \\(5 \\times 2 = 10\\).\nIf there are twice as many Ford trucks as Toyota trucks, then the number of Ford trucks is \\(10 \\times 2 = 20\\).\nIf there are one-third as many Ford trucks as Dodge trucks, then the number of Dodge trucks is \\(20 \\times 3 = 60\\).\nTherefore, there are 60 Dodge trucks in the parking lot of the Taco Castle.",
+        "target": "60",
+        "reward": 0.0
+    }
+]

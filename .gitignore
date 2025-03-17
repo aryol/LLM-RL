@@ -3,6 +3,8 @@
 /srv_config/
 /outputs
 /runs
+/data/
+logs/
 
 # wandb
 .wandb.yaml

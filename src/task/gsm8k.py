@@ -1,43 +1,85 @@
 import os
 import random
+import json 
 
-def GSM8KReward(completions, prompts, target, **kwargs):
+class GSM8KReward:
+    def __init__(self, **kwargs):
+        self.LOG_FILE = kwargs.get("LOG_FILE", "completion_logs.json")
+        self.prob_save = kwargs.get("prob_save", 0.05)
+
+    def CorrectnessReward(self, completions, prompts, target, **kwargs):
+        """
+        Evaluates completions based on the correctness of the final answer. 
+
+        Args:
+            completions (list[str]): Generated outputs
+            target (list[str]): Expected answers
+        
+        Returns:
+            list[float]: Reward scores
+        """
+        rewards = []
+        log_entries = []  # Store log data
+        for completion, prompt, gt in zip(completions, prompts, target):
+            try:
+                if "####" in completion:
+                    answer = int(completion.split("####")[1].strip())
+                    if answer == int(gt):
+                        reward = 1.0
+                    else:
+                        reward = 0.0
+                else:
+                    reward = 0.0
+            except Exception:
+                reward = 0.0
+            rewards.append(reward)
+            # Log this completion
+            log_entries.append({
+                "prompt": prompt,
+                "completion": completion,
+                "target": gt,
+                "reward": reward
+            })
+        # Save logs
+        if random.random() < self.prob_save:
+            if not os.path.exists(self.LOG_FILE):
+                with open(self.LOG_FILE, "w") as f:
+                    json.dump([], f)  # Initialize empty list
+
+            with open(self.LOG_FILE, "r+") as f:
+                logs = json.load(f)
+                logs.extend(log_entries)  # Append new logs
+                f.seek(0)
+                json.dump(logs, f, indent=4)
+
+        return rewards
+
+def ExtractAnswerFromDataset(text):
     """
-    Evaluates completions based on the correctness of the final answer. 
+    Extracts the answer from the dataset.
+    The dataset separates the answer using the '####' delimiter.
+    """
+    if "####" not in text:
+        return None
+    return text.split("####")[1].strip()
 
+def FormatRewardFunction(completions, target, **kwargs):
+    """
+    Format: thinking process \n #### answer
     Args:
         completions (list[str]): Generated outputs
         target (list[str]): Expected answers
-    
-    Returns:
-        list[float]: Reward scores
+      
+      Returns:
+          list[float]: Reward scores
     """
     rewards = []
-    for completion, prompt, gt in zip(completions, prompts, target):
-      try:
-        if random.random() < 1:  # 1% chance to write samples into a file
-          os.makedirs("completion_samples", exist_ok=True)
-          log_file = os.path.join("completion_samples", "completion_samples_answer.txt")
-          with open(log_file, "a") as f:
-            f.write(f"\n\n==============\n")
-            f.write(prompt)
-            f.write("\n$$\n")
-            f.write(completion)
 
+    for completion in completions:
+      try:
         if "####" in completion:
             answer = int(completion.split("####")[1].strip())
-            if answer == int(gt):
-                rewards.append(1.0)
-                if random.random() < 1:  # 10% chance to write fully successful samples into a file
-                    os.makedirs("completion_samples", exist_ok=True)
-                    log_file = os.path.join("completion_samples", "success_completion_samples_answer.txt")
-                    with open(log_file, "a") as f:
-                        f.write(f"\n\n==============\n")
-                        f.write(prompt)
-                        f.write("\n$$\n")
-                        f.write(completion)
-            else:
-               rewards.append(0.0)
+            rewards.append(1.0)
         else:
             rewards.append(0.0)
       except Exception:

@@ -1,4 +1,4 @@
-_target_: src.curriculum.PortionBetaUpdate
+_target_: src.callbacks.curriculum.PortionBetaUpdate
 init_alpha: 2
 init_beta: 5
 final_alpha: 5
