@@ -2,5 +2,5 @@
 defaults:
   - curriculum_update_callback: null
 
-# rollout_logger:
-#   _target_: src.callbacks.rollout_logger.RolloutLogger
+activate_logger_main_process:
+  _target_: src.callbacks.activate_in_main_process.ActivateInMainProcess

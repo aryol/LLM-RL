@@ -4,5 +4,5 @@ lower_bound_final: 0.0
 upper_bound_init: 1.0
 upper_bound_final: 1.0
 warmup_timesteps: 0
-total_timesteps: 450
+total_timesteps: 300
 

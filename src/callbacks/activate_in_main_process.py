@@ -1,4 +1,23 @@
-# from transformers import TrainerCallback
+from transformers import TrainerCallback
+
+class ActivateInMainProcess(TrainerCallback):
+    def __init__(self, object):
+        """
+        Args:
+        """
+        super().__init__()
+        self.object = object
+
+    def on_init_end(self, args, state, control, **kwargs):
+        """Initialize log file paths and create necessary directories."""
+        if state.is_world_process_zero:
+            self.object.is_main_process = True
+            print('set shod lol')
+        else:
+            self.object.is_main_process = False
+
+
+# code that didn't work 
 # import json
 # import os
 # import torch

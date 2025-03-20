@@ -6,6 +6,7 @@ class GSM8KReward:
     def __init__(self, **kwargs):
         self.LOG_FILE = kwargs.get("LOG_FILE", "completion_logs.json")
         self.prob_save = kwargs.get("prob_save", 0.05)
+        self.is_main_process = False
 
     def CorrectnessReward(self, completions, prompts, target, **kwargs):
         """
@@ -41,7 +42,7 @@ class GSM8KReward:
                 "reward": reward
             })
         # Save logs
-        if random.random() < self.prob_save:
+        if self.is_main_process and random.random() < self.prob_save:
             if not os.path.exists(self.LOG_FILE):
                 with open(self.LOG_FILE, "w") as f:
                     json.dump([], f)  # Initialize empty list

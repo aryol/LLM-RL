@@ -1,11 +1,10 @@
 # @package _global_
 
 defaults:
-  - override /callbacks/curriculum_update_callback: beta
+  - override /callbacks/curriculum_update_callback: uniform
   - override /task: gsm8k
   - override /model: qwen_0.5b
 
-
 trainer:
-  eval_steps: 30
-  logging_steps: 2
+  eval_steps: 40
+  logging_steps: 10

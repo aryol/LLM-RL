@@ -67,7 +67,8 @@ def trainer(config):
     test_dataset = dataset["test"].shuffle(seed=42)
     
     extract_answer_from_dataset = hydra.utils.get_method(config.task.extract_answer_from_dataset)
-    answer_reward_func = hydra.utils.instantiate(config.task.reward_class).CorrectnessReward
+    answer_reward_class = hydra.utils.instantiate(config.task.reward_class)
+    answer_reward_func = answer_reward_class.CorrectnessReward
     format_reward_func = hydra.utils.get_method(config.task.format_reward_function)
     DEFAULT_PROMPT = config.task.get("default_prompt", "Solve the following problem:")
     def generate_prompt(example, prompt_key="prompt", target_key="target"):
@@ -111,6 +112,8 @@ def trainer(config):
             callback = config.callbacks[callback_key]
             if 'curriculum' in callback._target_:
                 callback = hydra.utils.instantiate(callback, dataset=train_dataset)
+            elif 'logger' in callback_key:
+                callback = hydra.utils.instantiate(callback, object=answer_reward_class)
             else:
                 callback = hydra.utils.instantiate(callback)
             callbacks.append(callback)
