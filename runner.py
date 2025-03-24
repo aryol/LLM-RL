@@ -8,13 +8,22 @@ def load_yaml(file_path):
         return yaml.safe_load(file)
 
 # Function to execute a command
-def execute_command(config_file, name, command):
+def execute_command(config_file, name, model, command, mode='vllm'):
     try:
         # Run the command in the shell
+        command = command.strip() + " wandb_config.name=" + name.strip()
         with open(config_file, 'r') as f:
             content = f.read()
-        command = command.strip() + " wandb_config.name=" + name.strip()
-        content = content.replace('command_template', command)
+        if not mode == 'vllm':
+            content = content.replace('command_template', command)
+        else:
+            lines = content.split('\n')
+            for i in range(len(lines)):
+                if lines[i].startswith("command:"):
+                    break
+            bin_adrs = lines[i].replace('/command_template', "").replace("command:", "").strip()
+            lines[i] = f"command: export VLLM_LOGGING_LEVEL=ERROR && CUDA_VISIBLE_DEVICES=7 {bin_adrs}/trl vllm-serve --model {model} > vllm_logs.txt 2>&1 & CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 {bin_adrs}/{command} && kill %1"
+            content = "\n".join(lines)
         with open(f"tmp/config_for_{name}.yaml", 'w') as f:
             f.write(content)
         result = subprocess.run(f"zsh -i -c 'conda activate dev; bolt task submit --tar=. --config=tmp/config_for_{name}.yaml'", shell=True, check=True, capture_output=True, text=True)
@@ -37,6 +46,7 @@ def main():
     parser = argparse.ArgumentParser(description="Runs selected tasks based on their IDs.")
     parser.add_argument('--config', type=str, required=True)
     parser.add_argument('--inputs', metavar='N', type=str, nargs='+', help='List of IDs to execute', required=True)
+    parser.add_argument('--mode', type=str, help='How to run the code, mostly for backward compatibilty', required=False, default='vllm')
     args = parser.parse_args()
 
     # Path to your YAML file
@@ -52,7 +62,7 @@ def main():
         if len(matching_entities) > 0:
             for entity in matching_entities:
                 print(f"Executing command for {entity['name']} (ID: {entity['id']})")
-                execute_command(args.config, entity['name'], entity['command'])
+                execute_command(args.config, entity['name'], entity['model'], entity['command'], args.mode)
         else:
             print(f"No matching entity found for input: {input_item}")
 

@@ -1,21 +1,18 @@
-- id: 100
-  name: 'Qwen2.5-0.5B-GSM8k-uniform-1to1-0to0'
-  command: "accelerate launch --num_processes 7 --config_file ./config/accelerate_deepspeed_zero3.yaml ./src/train.py experiment=qwen_gsm8k"
+# Use callbacks/curriculum_update_callback=uniform to override callback. The default is uniform. 
+
 - id: 1
   name: 'Qwen2.5-0.5B-GSM8k-uniform-1to1-0to0'
-  command: "accelerate launch --num_processes 7 --config_file ./config/accelerate_deepspeed_zero3.yaml ./src/train.py experiment=qwen_gsm8k /callbacks/curriculum_update_callback=uniform"
-- id: 11
-  name: '11-Qwen2.5-0.5B-GSM8k-uniform-1to1-0to0'
-  command: "accelerate launch --num_processes 7 --config_file ./config/accelerate_deepspeed_zero3.yaml ./src/train.py experiment=qwen_gsm8k callbacks/curriculum_update_callback=uniform"
-- id: 111
-  name: '111-Qwen2.5-0.5B-GSM8k-uniform-1to1-0to0'
-  command: "accelerate launch --num_processes 7 --config_file ./config/accelerate_deepspeed_zero3.yaml ./src/train.py experiment=qwen_gsm8k callbacks.curriculum_update_callback=uniform"
+  model: 'Qwen/Qwen2-0.5B-Instruct'
+  command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=qwen_gsm8k"
 - id: 2
   name: 'Qwen2.5-0.5B-GSM8k-uniform-1to0-0.8to0'
-  command: "accelerate launch --num_processes 7 --config_file ./config/accelerate_deepspeed_zero3.yaml ./src/train.py experiment=qwen_gsm8k /callbacks/curriculum_update_callback=uniform callbacks.curriculum_update_callback.uniform.lower_bound_init=0.8 callbacks.curriculum_update_callback.uniform.upper_bound_final=0.0"
+  model: 'Qwen/Qwen2-0.5B-Instruct'
+  command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=qwen_gsm8k callbacks.curriculum_update_callback.lower_bound_init=0.8 callbacks.curriculum_update_callback.upper_bound_final=0.0"
 - id: 3
   name: 'Qwen2.5-0.5B-GSM8k-uniform-1to0-0to0'
-  command: "accelerate launch --num_processes 7 --config_file ./config/accelerate_deepspeed_zero3.yaml ./src/train.py experiment=qwen_gsm8k /callbacks/curriculum_update_callback=uniform callbacks.curriculum_update_callback.uniform.upper_bound_final=0.0"
+  model: 'Qwen/Qwen2-0.5B-Instruct'
+  command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=qwen_gsm8k callbacks.curriculum_update_callback.upper_bound_final=0.0"
 - id: 4
-  name: 'Qwen2.5-0.5B-GSM8k-uniform-0to0-0to0'
-  command: "accelerate launch --num_processes 7 --config_file ./config/accelerate_deepspeed_zero3.yaml ./src/train.py experiment=qwen_gsm8k /callbacks/curriculum_update_callback=uniform callbacks.curriculum_update_callback.uniform.upper_bound_final=0.0 callbacks.curriculum_update_callback.uniform.upper_bound_init=0.0"
+  name: 'Qwen2.5-0.5B-GSM8k-uniform-0to0-0to0-no-cur'
+  model: 'Qwen/Qwen2-0.5B-Instruct'
+  command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=qwen_gsm8k callbacks.curriculum_update_callback.upper_bound_final=0.0 callbacks.curriculum_update_callback.upper_bound_init=0.0"

@@ -28,7 +28,10 @@ training_args:
   num_generations: 8
   use_vllm: true
   vllm_device: "cuda:7"
-  vllm_gpu_memory_utilization: 0.8
+  vllm_server_host: "localhost"
+  vllm_server_port: 8000
+  vllm_gpu_memory_utilization: 0.9
+
   output_dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
   run_name: ${task.task_name}-${model.model_name}
   bf16: true

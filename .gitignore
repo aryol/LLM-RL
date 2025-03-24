@@ -9,6 +9,12 @@ logs/
 # wandb
 .wandb.yaml
 
+# DS Store
+.DS_Store
+
+# Runner tmp folder
+tmp/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
