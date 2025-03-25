@@ -3,12 +3,11 @@ from sympy.parsing.latex import parse_latex
 import contextlib
 import json
 import random
+from .utils import BaseReward
 
-
-class MATHReward:
+class MATHReward(BaseReward):
     def __init__(self, **kwargs):
-        self.LOG_FILE = kwargs.get("LOG_FILE", "completion_logs.json")
-        self.prob_save = kwargs.get("prob_save", 0.05)
+        super(MATHReward, self).__init__(**kwargs)
 
     def CorrectnessReward(self, completions, prompts, target, **kwargs):
         """
@@ -46,19 +45,11 @@ class MATHReward:
                 "reward": reward
             })
 
-            # Save logs
-            if random.random() < self.prob_save:
-                if not os.path.exists(self.LOG_FILE):
-                    with open(self.LOG_FILE, "w") as f:
-                        json.dump([], f)  # Initialize empty list
-
-                with open(self.LOG_FILE, "r+") as f:
-                    logs = json.load(f)
-                    logs.extend(log_entries)  # Append new logs
-                    f.seek(0)
-                    json.dump(logs, f, indent=4)
-
-            return rewards
+        # Save logs
+        self.log_completions_to_file(log_entries)
+        self.update_datasets_with_ratios(kwargs, rewards)
+        return rewards
+        
 
 ###### utils #######
 

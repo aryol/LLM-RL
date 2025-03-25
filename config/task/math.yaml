@@ -18,7 +18,7 @@ task_name: MATH
 
 reward_class: 
   _target_: src.task.gsm8k.MATHReward
-  LOG_FILE: ${training_args.output_dir}/completions.json
+  LOG_FILE: ${trainer_args.output_dir}/completions.json
 
 # reward_function: src.task.math.CorrectnessReward
 format_reward_function: src.task.math.FormatRewardFunction

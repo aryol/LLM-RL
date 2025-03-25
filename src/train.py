@@ -65,11 +65,8 @@ def trainer(config):
     dataset = hydra.utils.instantiate(config.task.dataset, _convert_="all")
     train_dataset = dataset["train"].shuffle(seed=42)
     test_dataset = dataset["test"].shuffle(seed=42)
-    
+
     extract_answer_from_dataset = hydra.utils.get_method(config.task.extract_answer_from_dataset)
-    answer_reward_class = hydra.utils.instantiate(config.task.reward_class)
-    answer_reward_func = answer_reward_class.CorrectnessReward
-    format_reward_func = hydra.utils.get_method(config.task.format_reward_function)
     DEFAULT_PROMPT = config.task.get("default_prompt", "Solve the following problem:")
     def generate_prompt(example, prompt_key="prompt", target_key="target"):
         partial_answer = example.get("partial_target", "")
@@ -95,13 +92,21 @@ def trainer(config):
                 "role": "assistant",
                 "content": "Let me solve this step by step.\n" + partial_answer
             }]
-        return {"prompt": tokenizer.apply_chat_template(prefix, tokenize=False, continue_final_message=True), "target": extract_answer_from_dataset(example[target_key])}
+
+        rest_of_keys = set(example.keys()) - set([prompt_key, target_key])
+        rest_of_example = {k: example[k] for k in rest_of_keys}
+        return { **rest_of_example,
+            "prompt": tokenizer.apply_chat_template(prefix, tokenize=False, continue_final_message=True), "target": extract_answer_from_dataset(example[target_key])}
 
     generate_prompt = partial(generate_prompt, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
     train_dataset = CurriculumDatasetWrapper(train_dataset, generate_prompt, initial_portion=0.0, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
     test_dataset = test_dataset.map(lambda x: generate_prompt(x))
 
-    training_args = OmegaConf.to_container(config.training_args, resolve=True)
+    answer_reward_class = hydra.utils.instantiate(config.task.reward_class, dataset=train_dataset)
+    answer_reward_func = answer_reward_class.CorrectnessReward
+    format_reward_func = hydra.utils.get_method(config.task.format_reward_function)
+
+    training_args = OmegaConf.to_container(config.trainer_args, resolve=True)
     training_args = GRPOConfig(**training_args)
     model_args = hydra.utils.instantiate(config.model.model_config)
 

@@ -14,7 +14,8 @@ pip install  --upgrade \
   "accelerate==1.3.0" \
   "hf-transfer==0.1.9" \
   "deepspeed==0.15.4" \
-  "hydra-core==1.3.2"
+  "hydra-core==1.3.2" \
+  "trl==0.16.0"
 
 pip uninstall -y pynvml
 pip install -U nvidia-ml-py
@@ -23,8 +24,7 @@ pip install rootutils
 
 # install vLLM 
 pip install -U vllm
-pip install git+https://github.com/huggingface/trl.git
-# pip install -U trl
+# pip install git+https://github.com/huggingface/trl.git
  
 ## IMPORTANT: If you want to run the notebook and the interactive cells you also need to install the following libraries:
 # But first read it the blog post and then decide as they might conflict with the libraries for distributed training. 

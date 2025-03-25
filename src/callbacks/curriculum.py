@@ -43,6 +43,9 @@ class PortionBaseUpdate(TrainerCallback):
             if wandb.run is not None and state.is_world_process_zero:
                 wandb.log(wandb_logs, commit=False)
             logs.update(wandb_logs)
+    
+    def get_hyperparameters(self,):
+        return {}
 
     # def on_init_end(self, args, state, control, **kwargs):
     #     pass

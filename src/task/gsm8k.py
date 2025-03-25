@@ -1,12 +1,11 @@
 import os
 import random
 import json 
+from .utils import BaseReward
 
-class GSM8KReward:
+class GSM8KReward(BaseReward):
     def __init__(self, **kwargs):
-        self.LOG_FILE = kwargs.get("LOG_FILE", "completion_logs.json")
-        self.prob_save = kwargs.get("prob_save", 0.05)
-        self.is_main_process = False
+        super(GSM8KReward, self).__init__(**kwargs)
 
     def CorrectnessReward(self, completions, prompts, target, **kwargs):
         """
@@ -42,18 +41,10 @@ class GSM8KReward:
                 "reward": reward
             })
         # Save logs
-        if self.is_main_process and random.random() < self.prob_save:
-            if not os.path.exists(self.LOG_FILE):
-                with open(self.LOG_FILE, "w") as f:
-                    json.dump([], f)  # Initialize empty list
-
-            with open(self.LOG_FILE, "r+") as f:
-                logs = json.load(f)
-                logs.extend(log_entries)  # Append new logs
-                f.seek(0)
-                json.dump(logs, f, indent=4)
-
+        self.log_completions_to_file(log_entries)
+        self.update_datasets_with_ratios(kwargs, rewards)
         return rewards
+
 
 def ExtractAnswerFromDataset(text):
     """
