@@ -17,7 +17,7 @@ extract_answer_from_dataset: src.task.math.ExtractAnswerFromDataset
 task_name: MATH
 
 reward_class: 
-  _target_: src.task.gsm8k.MATHReward
+  _target_: src.task.math.MATHReward
   LOG_FILE: ${trainer_args.output_dir}/completions.json
 
 # reward_function: src.task.math.CorrectnessReward

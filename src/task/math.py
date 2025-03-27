@@ -118,3 +118,5 @@ def FormatRewardFunction(completions, target, **kwargs):
             rewards.append(0.0)
             continue
         rewards.append(1.0)
+
+    return rewards

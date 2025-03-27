@@ -10,6 +10,8 @@ defaults:
 
 log_dir: ${oc.env:PROJECT_ROOT}/logs
 
+generate_prompt: src.utils.return_generate_prompt
+
 wandb_config:
   name: ${model.model_name}
   project: progressive_rl_on_${task.task_name}

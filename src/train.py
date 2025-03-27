@@ -31,7 +31,7 @@ rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 # more info: https://github.com/ashleve/rootutils
 # ------------------------------------------------------------------------------------ #
 
-from src.utils import get_checkpoint, CurriculumDatasetWrapper
+from src.utils import get_checkpoint, CurriculumDatasetWrapper, PerSampleCurriculumDatasetWrapper
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -46,10 +46,6 @@ logger.addHandler(handler)
 
 def trainer(config):
 
-    supports_system_prompt = True
-    if config.model.model_name_or_path is not None and "mathstral" in config.model.model_name_or_path.lower():
-       supports_system_prompt = False
-
     # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(
         (
@@ -63,44 +59,16 @@ def trainer(config):
 
     # Load dataset from Hugging Face Hub or local file
     dataset = hydra.utils.instantiate(config.task.dataset, _convert_="all")
+    # take a portion of training data for validation
+    train_dataset, val_dataset = dataset["train"].train_test_split(test_size=0.1, seed=42).values()
     train_dataset = dataset["train"].shuffle(seed=42)
     test_dataset = dataset["test"].shuffle(seed=42)
 
-    extract_answer_from_dataset = hydra.utils.get_method(config.task.extract_answer_from_dataset)
-    DEFAULT_PROMPT = config.task.get("default_prompt", "Solve the following problem:")
-    def generate_prompt(example, prompt_key="prompt", target_key="target"):
-        partial_answer = example.get("partial_target", "")
-        if supports_system_prompt:
-            prefix = [{
-                "role": "system",
-                "content": DEFAULT_PROMPT
-            },
-            { 
-                "role": "user",
-                "content": "Here is the question:\n" + example[prompt_key]
-            },
-            {
-                "role": "assistant",
-                "content": "Let me solve this step by step.\n" + partial_answer
-            }]
-        else:
-            prefix = [{ 
-                "role": "user",
-                "content": DEFAULT_PROMPT + "\n#\n" "Here is the question you need to solve:\n" + example[prompt_key]
-            },
-            {
-                "role": "assistant",
-                "content": "Let me solve this step by step.\n" + partial_answer
-            }]
-
-        rest_of_keys = set(example.keys()) - set([prompt_key, target_key])
-        rest_of_example = {k: example[k] for k in rest_of_keys}
-        return { **rest_of_example,
-            "prompt": tokenizer.apply_chat_template(prefix, tokenize=False, continue_final_message=True), "target": extract_answer_from_dataset(example[target_key])}
-
-    generate_prompt = partial(generate_prompt, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
-    train_dataset = CurriculumDatasetWrapper(train_dataset, generate_prompt, initial_portion=0.0, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
-    test_dataset = test_dataset.map(lambda x: generate_prompt(x))
+    generate_prompt = hydra.utils.get_method(config.generate_prompt)(config, tokenizer=tokenizer)
+    train_dataset = PerSampleCurriculumDatasetWrapper(train_dataset, generate_prompt, initial_portion=0.0, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
+    val_dataset = CurriculumDatasetWrapper(val_dataset, generate_prompt, initial_portion=0.0, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
+    test_dataset = CurriculumDatasetWrapper(test_dataset, generate_prompt, initial_portion=0.0, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
+    # test_dataset = test_dataset.map(lambda x: generate_prompt(x))
 
     answer_reward_class = hydra.utils.instantiate(config.task.reward_class, dataset=train_dataset)
     answer_reward_func = answer_reward_class.CorrectnessReward
@@ -130,7 +98,7 @@ def trainer(config):
       processing_class=tokenizer,
       args=training_args,
       train_dataset=train_dataset,
-      eval_dataset=test_dataset,
+      eval_dataset=val_dataset,
       peft_config=get_peft_config(model_args),
       callbacks=callbacks,
     )

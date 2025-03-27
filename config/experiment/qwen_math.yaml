@@ -3,4 +3,4 @@
 defaults:
   - override /task: math
   - override /model: qwen_0.5b
-  - override /callbacks/curriculum_update_callback: beta
+  - override /callbacks/curriculum_update_callback: just_log

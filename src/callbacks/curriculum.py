@@ -59,7 +59,6 @@ class PortionBaseUpdate(TrainerCallback):
     #     pass
    
 
-
 class PortionBetaUpdate(PortionBaseUpdate):
     def __init__(self, dataset, init_alpha, init_beta, final_alpha, final_beta, warmup_timesteps, total_timesteps):
         super().__init__(dataset)
