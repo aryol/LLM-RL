@@ -97,8 +97,8 @@ class CurriculumDatasetWrapper:
 
     def update_attempted_ratios(self, ids, portions, rewards):
         """Updates the dataset with the attempted ratios and rewards."""
-        gathered_data = [None for _ in range(get_world_size())]
-        if get_world_size() > 1:
+        if torch.distributed.is_initialized() and get_world_size() > 1:
+            gathered_data = [None for _ in range(get_world_size())]
             all_gather_object(gathered_data, (ids, portions, rewards))
         else:
             gathered_data = [(ids, portions, rewards)]   
