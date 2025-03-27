@@ -60,13 +60,13 @@ def trainer(config):
     # Load dataset from Hugging Face Hub or local file
     dataset = hydra.utils.instantiate(config.task.dataset, _convert_="all")
     # take a portion of training data for validation
-    train_dataset, val_dataset = dataset["train"].train_test_split(test_size=0.1, seed=42).values()
+    # train_dataset, val_dataset = dataset["train"].train_test_split(test_size=0.1, seed=42).values()
     train_dataset = dataset["train"].shuffle(seed=42)
     test_dataset = dataset["test"].shuffle(seed=42)
 
     generate_prompt = hydra.utils.get_method(config.generate_prompt)(config, tokenizer=tokenizer)
     train_dataset = PerSampleCurriculumDatasetWrapper(train_dataset, generate_prompt, initial_portion=0.0, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
-    val_dataset = CurriculumDatasetWrapper(val_dataset, generate_prompt, initial_portion=0.0, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
+    # val_dataset = CurriculumDatasetWrapper(val_dataset, generate_prompt, initial_portion=0.0, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
     test_dataset = CurriculumDatasetWrapper(test_dataset, generate_prompt, initial_portion=0.0, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
     # test_dataset = test_dataset.map(lambda x: generate_prompt(x))
 
@@ -98,7 +98,7 @@ def trainer(config):
       processing_class=tokenizer,
       args=training_args,
       train_dataset=train_dataset,
-      eval_dataset=val_dataset,
+      eval_dataset=test_dataset,
       peft_config=get_peft_config(model_args),
       callbacks=callbacks,
     )
