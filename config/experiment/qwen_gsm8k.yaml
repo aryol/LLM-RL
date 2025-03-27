@@ -5,6 +5,7 @@ defaults:
   - override /task: gsm8k
   - override /model: qwen_0.5b
 
-trainer:
+trainer_args:
   eval_steps: 40
   logging_steps: 10
+  gradient_accumulation_steps: 5

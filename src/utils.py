@@ -51,7 +51,8 @@ def return_generate_prompt(config, tokenizer):
 class CurriculumDatasetWrapper:
     def __init__(self, dataset, generate_prompt, initial_portion=0.0, prompt_key='prompt', target_key='target'):
         self.dataset = dataset  # Keep as HF Dataset
-        self.attempted_ratios_list = [[]]*len(dataset)
+        # self.attempted_ratios_list = [[]]*len(dataset) this will create a list of the same object! jesus christ
+        self.attempted_ratios_list = [[] for _ in range(len(dataset))]
         self.generate_prompt = generate_prompt
         self.ground_truth_portion_dist = initial_portion  # Start with a small proportion
         self.prompt_key = prompt_key
