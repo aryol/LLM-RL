@@ -51,8 +51,9 @@ def return_generate_prompt(config, tokenizer):
             "target": extract_answer_from_dataset(example[target_key])}
     return partial(generate_prompt, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
 
+
 class CurriculumDatasetWrapper:
-    def __init__(self, dataset, generate_prompt, initial_portion=0.0, prompt_key='prompt', target_key='target'):
+    def __init__(self, dataset, generate_prompt, initial_portion=0.0, prompt_key='prompt', target_key='target',):
         self.dataset = dataset  # Keep as HF Dataset
         # self.attempted_ratios_list = [[]]*len(dataset) this will create a list of the same object! jesus christ
         self.attempted_ratios_list = [[] for _ in range(len(dataset))]
@@ -60,9 +61,10 @@ class CurriculumDatasetWrapper:
         self.ground_truth_portion_dist = initial_portion  # Start with a small proportion
         self.prompt_key = prompt_key
         self.target_key = target_key
+        self.newly_added_ids = set()
+        self.flush_newly_added_ids = False
         self.global_step = 0
         self.portions = []
-        self.ids = []
 
     def set_portion(self, portion):
         """Updates the portion of ground-truth CoT reasoning used in training."""
@@ -82,13 +84,13 @@ class CurriculumDatasetWrapper:
         sample = self.dataset[idx]  # Directly access HF dataset
         portion = self.sample_portion(seed=self.return_seed(idx), size=1)[0] # Get current difficulty proportion
         self.portions.append(portion)
-        self.ids.append(idx)
         
         # Modify reasoning exposure based on `portion`
         reasoning_steps = sample.get(self.target_key, '')
         word_list = reasoning_steps.split(' ')
         cut_answer = ' '.join(word_list[:int(len(word_list) * portion)])  # Partial CoT answer
 
+        self.flush_newly_added_ids = True
         # Apply the chat prompt formatting
         return self.generate_prompt({**sample, 'partial_target':cut_answer, 'portion':portion, 'id':idx})
 
@@ -97,6 +99,11 @@ class CurriculumDatasetWrapper:
 
     def update_attempted_ratios(self, ids, portions, rewards):
         """Updates the dataset with the attempted ratios and rewards."""
+
+        if self.flush_newly_added_ids:
+            self.newly_added_ids.clear()
+            self.flush_newly_added_ids = False
+
         if torch.distributed.is_initialized() and get_world_size() > 1:
             gathered_data = [None for _ in range(get_world_size())]
             all_gather_object(gathered_data, (ids, portions, rewards))
@@ -111,16 +118,8 @@ class CurriculumDatasetWrapper:
                     self.attempted_ratios_list[id_].append({'portion': portion, 'reward': [reward]})
                 else:
                     self.attempted_ratios_list[id_][-1]['reward'].append(reward)
+                self.newly_added_ids.add(id_)
         
-        
-        # printing to check if sync is working
-        # print("World size:", get_world_size())
-        # tmp_list = []
-        # for i, l in enumerate(self.attempted_ratios_list):
-        #     if len(l) > 0:
-        #         tmp_list.append((getpid(), i, l))
-        # print(tmp_list)
-
     def __len__(self):
         return len(self.dataset)
 
@@ -138,27 +137,38 @@ class CurriculumDatasetWrapper:
 
 
 class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
-    def __init__(self, dataset, generate_prompt, initial_portion=0.0, prompt_key='prompt', target_key='target'):
+    def __init__(self, dataset, generate_prompt, initial_portion=0.0, prompt_key='prompt', target_key='target', min_ratio=0.0, max_ratio=0.9, reward_threshold=0.5, moving_avg_alpha=0.8):
         super().__init__(dataset, generate_prompt, initial_portion, prompt_key, target_key)
-        self.history_reward = 8
+        self.min_ratio = min_ratio
+        self.max_ratio = max_ratio
+        self.reward_threshold = reward_threshold
+        self.moving_avg_alpha = moving_avg_alpha
+        self.mean_min_ratio = min_ratio
+        self.mean_max_ratio = max_ratio
+
+        self.max_per_sample_ratio = np.ones(len(dataset)) * self.max_ratio
 
     def __getitem__(self, idx):
         """Retrieves a dataset sample with a dynamically adjusted reasoning portion."""
         sample = self.dataset[idx]  # Directly access HF dataset
-        lower_bound = 0.0
-        upper_bound = 0.9
+        lower_bound = self.min_ratio
+        upper_bound = self.max_per_sample_ratio[idx] # because we never go back/ Ma be aghab bar nemigardim
         if self.attempted_ratios_list[idx]:
             last_gen_portion = self.attempted_ratios_list[idx][-1]['portion']
             last_gen_avg_reward = np.mean(self.attempted_ratios_list[idx][-1]['reward'])
             if last_gen_avg_reward < 0.5:
-                lower_bound = min(last_gen_portion, upper_bound)
+                lower_bound = last_gen_portion
             else:
                 upper_bound = last_gen_portion
+                self.max_per_sample_ratio[idx] = upper_bound
+        else:
+            # moving average of the min and max ratio
+            lower_bound = self.mean_min_ratio
+            upper_bound = self.mean_max_ratio
                                   
         portion = self._sample_ratio_with_seed(seed=self.return_seed(idx), size=1, lower_bound=lower_bound, upper_bound=upper_bound)[0]
         self.portions.append(portion)
-        self.ids.append(idx)
-        
+        self.flush_newly_added_ids = True
         # Modify reasoning exposure based on `portion`
         reasoning_steps = sample.get(self.target_key, '')
         word_list = reasoning_steps.split(' ')
@@ -166,6 +176,31 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
 
         # Apply the chat prompt formatting
         return self.generate_prompt({**sample, 'partial_target':cut_answer, 'portion':portion, 'id':idx})
+
+    def update_attempted_ratios(self, ids, portions, rewards):
+        """Updates the dataset with the attempted ratios and rewards."""
+        if self.flush_newly_added_ids and self.newly_added_ids:
+            # compute moving averages of max and min ratios over samples 
+            # (to be used in the first epoch when we havent seen any rewards for each sample yet.)
+            avg_macro_batch_upperbound = 0
+            avg_macro_batch_lowerbound = 0
+            for id_ in self.newly_added_ids:
+                last_gen_portion = self.attempted_ratios_list[id_][-1]['portion']
+                last_gen_avg_reward = np.mean(self.attempted_ratios_list[id_][-1]['reward'])
+                if last_gen_avg_reward < self.reward_threshold:
+                    avg_macro_batch_lowerbound += last_gen_portion
+                    avg_macro_batch_upperbound += self.max_per_sample_ratio[id_]
+                else:
+                    avg_macro_batch_upperbound += last_gen_portion
+                    avg_macro_batch_lowerbound += self.min_ratio
+            avg_macro_batch_upperbound /= len(self.newly_added_ids)
+            avg_macro_batch_lowerbound /= len(self.newly_added_ids)
+
+            self.mean_max_ratio = self.moving_avg_alpha * self.mean_max_ratio + (1 - self.moving_avg_alpha) * avg_macro_batch_upperbound
+            self.mean_min_ratio = self.moving_avg_alpha * self.mean_min_ratio + (1 - self.moving_avg_alpha) * avg_macro_batch_lowerbound
+
+        super().update_attempted_ratios(ids, portions, rewards)
+
 
     # Sample new portion from updated uniform distribution
     def _sample_ratio_with_seed(self, seed=42, size=1, lower_bound=0.0, upper_bound=1.0):
