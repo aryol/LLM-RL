@@ -16,3 +16,52 @@
   name: 'Qwen2.5-0.5B-GSM8k-uniform-0to0-0to0-no-cur'
   model: 'Qwen/Qwen2-0.5B-Instruct'
   command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=qwen_gsm8k callbacks.curriculum_update_callback.upper_bound_final=0.0 callbacks.curriculum_update_callback.upper_bound_init=0.0"
+
+# MATH - Qwen 0.5B
+
+- id: 5
+  name: 'Qwen2.5-0.5B-MATH-uniform-1to1-0to0'
+  model: 'Qwen/Qwen2-0.5B-Instruct'
+  command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=qwen_math"
+
+- id: 6
+  name: 'Qwen2.5-0.5B-MATH-uniform-1to0-0.8to0'
+  model: 'Qwen/Qwen2-0.5B-Instruct'
+  command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=qwen_math callbacks.curriculum_update_callback.lower_bound_init=0.8 callbacks.curriculum_update_callback.upper_bound_final=0.0"
+
+- id: 7
+  name: 'Qwen2.5-0.5B-MATH-uniform-1to0-0to0'
+  model: 'Qwen/Qwen2-0.5B-Instruct'
+  command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=qwen_math callbacks.curriculum_update_callback.upper_bound_final=0.0"
+
+- id: 8
+  name: 'Qwen2.5-0.5B-MATH-uniform-0to0-0to0-no-cur'
+  model: 'Qwen/Qwen2-0.5B-Instruct'
+  command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=qwen_math callbacks.curriculum_update_callback.upper_bound_final=0.0 callbacks.curriculum_update_callback.upper_bound_init=0.0"
+
+# MATH - Qwen 1.5B
+- id: 9
+  name: 'Qwen2.5-1.5B-MATH-uniform-1to1-0to0'
+  model: 'Qwen/Qwen2-1.5B-Instruct'
+  command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=qwen_math model=qwen_1.5b"
+
+- id: 10
+  name: 'Qwen2.5-1.5B-MATH-uniform-1to0-0.8to0'
+  model: 'Qwen/Qwen2-1.5B-Instruct'
+  command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=qwen_math model=qwen_1.5b callbacks.curriculum_update_callback.lower_bound_init=0.8 callbacks.curriculum_update_callback.upper_bound_final=0.0"
+
+- id: 11
+  name: 'Qwen2.5-1.5B-MATH-uniform-1to0-0to0'
+  model: 'Qwen/Qwen2-1.5B-Instruct'
+  command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=qwen_math model=qwen_1.5b callbacks.curriculum_update_callback.upper_bound_final=0.0"
+
+- id: 12
+  name: 'Qwen2.5-1.5B-MATH-uniform-0to0-0to0-no-cur'
+  model: 'Qwen/Qwen2-1.5B-Instruct'
+  command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=qwen_math model=qwen_1.5b callbacks.curriculum_update_callback.upper_bound_final=0.0 callbacks.curriculum_update_callback.upper_bound_init=0.0"
+
+- id: 13
+  name: ''
+  model: 'Qwen/Qwen2-0.5B-Instruct'
+  command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=qwen_gsm8k model=qwen_0.5b trainer_args=vllm"
+

@@ -3,6 +3,9 @@ import os
 import numpy as np
 from functools import partial
 import hydra
+from os import getpid
+from torch.distributed import all_gather_object, get_rank, get_world_size
+import torch
 
 def get_checkpoint(training_args):
     last_checkpoint = None
@@ -94,13 +97,29 @@ class CurriculumDatasetWrapper:
 
     def update_attempted_ratios(self, ids, portions, rewards):
         """Updates the dataset with the attempted ratios and rewards."""
-        for i, (id_, portion, reward) in enumerate(zip(ids, portions, rewards)):
-            if self.attempted_ratios_list[id_]==[]:
-                self.attempted_ratios_list[id_].append({'portion': portion, 'reward': [reward]})
-            elif self.attempted_ratios_list[id_][-1]['portion'] != portion:
-                self.attempted_ratios_list[id_].append({'portion': portion, 'reward': [reward]})
-            else:
-                self.attempted_ratios_list[id_][-1]['reward'].append(reward)
+        gathered_data = [None for _ in range(get_world_size())]
+        if get_world_size() > 1:
+            all_gather_object(gathered_data, (ids, portions, rewards))
+        else:
+            gathered_data = [(ids, portions, rewards)]   
+
+        for ids, portions, rewards in gathered_data:
+            for i, (id_, portion, reward) in enumerate(zip(ids, portions, rewards)):
+                if self.attempted_ratios_list[id_]==[]:
+                    self.attempted_ratios_list[id_].append({'portion': portion, 'reward': [reward]})
+                elif self.attempted_ratios_list[id_][-1]['portion'] != portion:
+                    self.attempted_ratios_list[id_].append({'portion': portion, 'reward': [reward]})
+                else:
+                    self.attempted_ratios_list[id_][-1]['reward'].append(reward)
+        
+        
+        # printing to check if sync is working
+        # print("World size:", get_world_size())
+        # tmp_list = []
+        # for i, l in enumerate(self.attempted_ratios_list):
+        #     if len(l) > 0:
+        #         tmp_list.append((getpid(), i, l))
+        # print(tmp_list)
 
     def __len__(self):
         return len(self.dataset)
