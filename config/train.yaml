@@ -7,6 +7,7 @@ defaults:
   - model: ???
   - experiment: qwen_gsm8k
   - trainer_args: default
+  - dataset_wrapper: default
 
 log_dir: ${oc.env:PROJECT_ROOT}/logs
 

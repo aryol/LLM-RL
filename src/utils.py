@@ -156,11 +156,10 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
         if self.attempted_ratios_list[idx]:
             last_gen_portion = self.attempted_ratios_list[idx][-1]['portion']
             last_gen_avg_reward = np.mean(self.attempted_ratios_list[idx][-1]['reward'])
-            if last_gen_avg_reward < 0.5:
+            if last_gen_avg_reward < self.reward_threshold:
                 lower_bound = last_gen_portion
             else:
                 upper_bound = last_gen_portion
-                self.max_per_sample_ratio[idx] = upper_bound
         else:
             # moving average of the min and max ratio
             lower_bound = self.mean_min_ratio
@@ -192,7 +191,9 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
                     avg_macro_batch_upperbound += self.max_per_sample_ratio[id_]
                 else:
                     avg_macro_batch_upperbound += last_gen_portion
-                    avg_macro_batch_lowerbound += self.min_ratio
+                    avg_macro_batch_lowerbound += self.min_ratio    
+                    self.max_per_sample_ratio[id_] = last_gen_portion
+        
             avg_macro_batch_upperbound /= len(self.newly_added_ids)
             avg_macro_batch_lowerbound /= len(self.newly_added_ids)
 

@@ -1,0 +1,6 @@
+_target_: src.utils.PerSampleCurriculumDatasetWrapper
+
+min_ratio: 0.0
+max_ratio: 0.9
+reward_threshold: 0.5
+moving_avg_alpha: 0.8

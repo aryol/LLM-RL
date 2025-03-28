@@ -65,7 +65,7 @@ def trainer(config):
     test_dataset = dataset["test"].shuffle(seed=42)
 
     generate_prompt = hydra.utils.get_method(config.generate_prompt)(config, tokenizer=tokenizer)
-    train_dataset = PerSampleCurriculumDatasetWrapper(train_dataset, generate_prompt, initial_portion=0.0, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
+    train_dataset = hydra.utils.instantiate(config.dataset_wrapper, dataset=train_dataset, generate_prompt=generate_prompt, initial_portion=0.0, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
     # val_dataset = CurriculumDatasetWrapper(val_dataset, generate_prompt, initial_portion=0.0, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
     test_dataset = CurriculumDatasetWrapper(test_dataset, generate_prompt, initial_portion=0.0, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
     # test_dataset = test_dataset.map(lambda x: generate_prompt(x))

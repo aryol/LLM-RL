@@ -6,6 +6,6 @@ defaults:
   - override /model: qwen_0.5b
 
 trainer_args:
-  eval_steps: 40
+  eval_steps: 80
   logging_steps: 10
-  gradient_accumulation_steps: 5
+  gradient_accumulation_steps: 8
