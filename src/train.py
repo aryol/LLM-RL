@@ -104,7 +104,7 @@ def trainer(config):
     )
 
     if trainer.accelerator.is_main_process:
-        logger.info(f"Model parameters {model_args}")
+        logger.info(f"Model peft parameters {model_args}")
         logger.info(f"Training/evaluation parameters {training_args}")
         wandb.init(**OmegaConf.to_container(config.wandb_config, resolve=True))
 

@@ -16,39 +16,43 @@ def get_checkpoint(training_args):
 def return_generate_prompt(config, tokenizer):
     DEFAULT_PROMPT = config.task.default_prompt if config.task.get("default_prompt") is not None else "Solve the following math problem:"
     extract_answer_from_dataset = hydra.utils.get_method(config.task.extract_answer_from_dataset)
+
     supports_system_prompt = True
     if config.model.model_name_or_path is not None and "mathstral" in config.model.model_name_or_path.lower():
         supports_system_prompt = False
+    supports_chat_template = hasattr(tokenizer, "apply_chat_template") and tokenizer.chat_template is not None
+
     def generate_prompt(example, prompt_key="prompt", target_key="target"):
         partial_answer = example.get("partial_target", "")
         if supports_system_prompt:
-            prefix = [{
-                "role": "system",
-                "content": DEFAULT_PROMPT
-            },
-            { 
-                "role": "user",
-                "content": "Here is the question:\n" + example[prompt_key]
-            },
-            {
-                "role": "assistant",
-                "content": "Let me solve this step by step.\n" + partial_answer
-            }]
+            prefix = [
+                {"role": "system", "content": DEFAULT_PROMPT},
+                {"role": "user", "content": "Here is the question:\n" + example[prompt_key]},
+                {"role": "assistant", "content": "Let me solve this step by step.\n" + partial_answer}
+            ]
         else:
-            prefix = [{ 
-                "role": "user",
-                "content": DEFAULT_PROMPT + "\n#\n" "Here is the question you need to solve:\n" + example[prompt_key]
-            },
-            {
-                "role": "assistant",
-                "content": "Let me solve this step by step.\n" + partial_answer
-            }]
+            prefix = [
+                {"role": "user", "content": DEFAULT_PROMPT + "\n#\nHere is the question you need to solve:\n" + example[prompt_key]},
+                {"role": "assistant", "content": "Let me solve this step by step.\n" + partial_answer}
+            ]
+
+        if supports_chat_template:
+            formatted_prompt = tokenizer.apply_chat_template(prefix, tokenize=False, continue_final_message=True)
+        else:
+            # Manual fallback formatting for non-chat models like GPT2
+            if supports_system_prompt:
+                formatted_prompt = f"{DEFAULT_PROMPT}\n\nHere is the question:\n{example[prompt_key]}\n\nLet me solve this step by step.\n{partial_answer}"
+            else:
+                formatted_prompt = f"{DEFAULT_PROMPT}\n#\nHere is the question you need to solve:\n{example[prompt_key]}\n\nLet me solve this step by step.\n{partial_answer}"
 
         rest_of_keys = set(example.keys()) - set([prompt_key, target_key])
         rest_of_example = {k: example[k] for k in rest_of_keys}
-        return { **rest_of_example,
-            "prompt": tokenizer.apply_chat_template(prefix, tokenize=False, continue_final_message=True), 
-            "target": extract_answer_from_dataset(example[target_key])}
+        return {
+            **rest_of_example,
+            "prompt": formatted_prompt,
+            "target": extract_answer_from_dataset(example[target_key])
+        }
+
     return partial(generate_prompt, prompt_key=config.task.prompt_key, target_key=config.task.target_key)
 
 
