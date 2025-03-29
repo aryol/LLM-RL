@@ -5,9 +5,9 @@ defaults:
   - callbacks: default
   - task: ???
   - model: ???
-  - experiment: qwen_gsm8k
   - trainer_args: default
   - dataset_wrapper: default
+  - experiment: qwen_gsm8k
 
 log_dir: ${oc.env:PROJECT_ROOT}/logs
 
