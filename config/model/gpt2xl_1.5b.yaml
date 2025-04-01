@@ -1,7 +1,5 @@
+defaults:
+  - default
+
 model_name_or_path: openai-community/gpt2-xl
 model_name: gpt2-xl
-model_config:
-  _target_: trl.ModelConfig
-  model_revision: main
-  torch_dtype: float32
-  attn_implementation: flash_attention_2

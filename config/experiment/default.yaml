@@ -17,5 +17,7 @@ trainer_args:
   per_device_eval_batch_size: 16
   max_prompt_length: 6144
   max_completion_length: 400 # for gsm8k
+
+
   
 

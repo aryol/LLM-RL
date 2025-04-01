@@ -1,0 +1,33 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - task: ???
+  - model: ???
+  - dataset_wrapper: default
+
+log_dir: ${oc.env:PROJECT_ROOT}/logs/sft_pretrain_and_pushtohub
+
+generate_prompt: src.utils.return_generate_prompt
+
+wandb_config:
+  name: ${model.model_name}
+  project: sft_on_${task.task_name}
+  dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+  notes: null
+
+hydra:
+  run:
+    dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+  sweep:
+    dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
+
+trainer_args:
+  per_device_train_batch_size: 8
+  per_device_eval_batch_size: 8
+  num_train_epochs: 10
+  logging_dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+  push_to_hub: false
+  save_strategy: "epoch"
+  evaluation_strategy: "epoch"

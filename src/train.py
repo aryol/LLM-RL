@@ -2,7 +2,6 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from typing import Optional
 from omegaconf import OmegaConf
-from trl import GRPOConfig
 import logging
 from datetime import datetime
 from typing import Optional
@@ -51,7 +50,7 @@ def trainer(config):
         (
             config.model.tokenizer_name_or_path if config.model.get('tokenizer_name_or_path') else config.model.model_name_or_path
         ),
-        revision=config.model.model_config.model_revision,
+        # revision=config.model.model_config.model_revision,
         padding_side="left"
     )
     if tokenizer.pad_token is None:
@@ -76,7 +75,7 @@ def trainer(config):
 
     training_args = OmegaConf.to_container(config.trainer_args, resolve=True)
     training_args = GRPOConfig(**training_args)
-    model_args = hydra.utils.instantiate(config.model.model_config)
+    peft_config = get_peft_config(hydra.utils.instantiate(config.model.model_config))
 
     # instantiating callbacks
     callbacks = []
@@ -93,18 +92,19 @@ def trainer(config):
 
     # GRPO Trainer
     trainer = GRPOTrainer(
-      model=config.model.model_name_or_path,
+      model=model,
       reward_funcs=[format_reward_func, answer_reward_func],
       processing_class=tokenizer,
       args=training_args,
       train_dataset=train_dataset,
       eval_dataset=test_dataset,
-      peft_config=get_peft_config(model_args),
+      peft_config=peft_config,
       callbacks=callbacks,
     )
 
     if trainer.accelerator.is_main_process:
-        logger.info(f"Model peft parameters {model_args}")
+        if peft_config is not None:
+            logger.info(f"PEFT config {peft_config}")
         logger.info(f"Training/evaluation parameters {training_args}")
         wandb.init(**OmegaConf.to_container(config.wandb_config, resolve=True))
 
