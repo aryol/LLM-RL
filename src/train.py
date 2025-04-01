@@ -92,7 +92,7 @@ def trainer(config):
 
     # GRPO Trainer
     trainer = GRPOTrainer(
-      model=model,
+      model=config.model.model_name_or_path,
       reward_funcs=[format_reward_func, answer_reward_func],
       processing_class=tokenizer,
       args=training_args,
