@@ -24,10 +24,19 @@ hydra:
     subdir: ${hydra.job.num}
 
 trainer_args:
+  _target_: trl.SFTConfig
   per_device_train_batch_size: 8
-  per_device_eval_batch_size: 8
+  per_device_eval_batch_size: 16
   num_train_epochs: 10
   logging_dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
   push_to_hub: false
   save_strategy: "epoch"
   evaluation_strategy: "epoch"
+  # evaluation_strategy: "steps"
+  # eval_steps: 10
+  batch_eval_metrics: true
+  do_train: true,
+  do_eval: true,
+  output_dir: ${.logging_dir}
+  report_to: "wandb"
+  logging_steps: 10

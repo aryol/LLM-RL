@@ -9,6 +9,8 @@ import wandb
 import rootutils
 from transformers import TrainerCallback
 from trl import DataCollatorForCompletionOnlyLM
+from omegaconf import OmegaConf
+import torch
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
@@ -102,31 +104,7 @@ def trainer(config):
         remove_columns=val_dataset.column_names,)
 
     wandb.init(**OmegaConf.to_container(config.wandb_config, resolve=True))
-
-    # callbacks = []
-    extract_answer_from_prompt = hydra.utils.get_method(config.task.extract_answer_from_dataset,)
-
-    def compute_accuracy(eval_preds):
-        logits, labels = eval_preds
-        labels[labels == -100] = tokenizer.pad_token_id  # Replace -100 with pad token ID
-        # Convert logits to predicted token IDs
-        if isinstance(logits, tuple):
-            logits = logits[0]
-        preds = np.argmax(logits, axis=-1)
-
-        # Decode predictions and labels
-        decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True)
-        decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
-
-        # Extract final answers
-        pred_answers = [extract_answer_from_prompt(p) for p in decoded_preds]
-        label_answers = [extract_answer_from_prompt(l) for l in decoded_labels]
-
-        # Compute exact match accuracy
-        correct = sum(p == l for p, l in zip(pred_answers, label_answers))
-        acc = correct / len(pred_answers)
-
-        return {"accuracy": acc}
+    
     callbacks = [
         PushToHubCallback(
             tokenizer=tokenizer,
@@ -137,22 +115,24 @@ def trainer(config):
         )
     ]
 
-    training_args = SFTConfig(
-        do_train=True,
-        do_eval=True,
-        output_dir="sft_checkpoints",
-        evaluation_strategy="epoch",
-        save_strategy="epoch",
-        per_device_train_batch_size=config.trainer_args.per_device_train_batch_size,
-        per_device_eval_batch_size=config.trainer_args.per_device_eval_batch_size,
-        num_train_epochs=config.trainer_args.num_train_epochs,
-        logging_dir=config.trainer_args.logging_dir,
-        report_to="wandb",
-        logging_steps=10,
-        push_to_hub=False,
-        # push_to_hub=True,
-        # push_to_hub_model_id=f"{config.model.model_name_or_path.split('/')[-1]}-{config.task.task_name}-{config.task.default_prompt[:10]}",
-    )
+    training_args = hydra.utils.instantiate(config.trainer_args, _convert_="all")
+
+    # training_args = SFTConfig(
+    #     do_train=True,
+    #     do_eval=True,
+    #     output_dir="sft_checkpoints",
+    #     evaluation_strategy=config.trainer_args.evaluation_strategy,
+    #     save_strategy="epoch",
+    #     per_device_train_batch_size=config.trainer_args.per_device_train_batch_size,
+    #     per_device_eval_batch_size=config.trainer_args.per_device_eval_batch_size,
+    #     num_train_epochs=config.trainer_args.num_train_epochs,
+    #     logging_dir=config.trainer_args.logging_dir,
+    #     report_to="wandb",
+    #     logging_steps=10,
+    #     push_to_hub=False,
+    #     # push_to_hub=True,
+    #     # push_to_hub_model_id=f"{config.model.model_name_or_path.split('/')[-1]}-{config.task.task_name}-{config.task.default_prompt[:10]}",
+    # )
     
     collator = DataCollatorForCompletionOnlyLM(tokenizer.encode("Let me solve this step by step.")[2:], tokenizer=tokenizer) #to skip BOS token and the first token sometimes being weirdly generated _Let vs Let_
     trainer = SFTTrainer(
@@ -161,7 +141,6 @@ def trainer(config):
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
         tokenizer=tokenizer,
-        compute_metrics=compute_accuracy,
         callbacks=callbacks,
         formatting_func=lambda examples: [p + c for p, c in zip(examples["prompt"], examples["completion"])],
         data_collator=collator,
