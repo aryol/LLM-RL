@@ -5,6 +5,7 @@
 /runs
 /data/
 logs/
+scripts/tmp_scripts
 
 # wandb
 .wandb.yaml

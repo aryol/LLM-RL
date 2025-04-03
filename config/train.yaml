@@ -2,10 +2,10 @@
 
 defaults:
   - _self_
-  - callbacks: default
   - task: ???
   - model: ???
-  - trainer_args: default
+  - callbacks: default
+  - trainer: GRPO
   - dataset_wrapper: default
   - experiment: qwen_gsm8k
 

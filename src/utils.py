@@ -6,6 +6,7 @@ import hydra
 from os import getpid
 from torch.distributed import all_gather_object, get_rank, get_world_size
 import torch
+import datasets
 
 def get_checkpoint(training_args):
     last_checkpoint = None
@@ -93,10 +94,10 @@ class CurriculumDatasetWrapper:
         reasoning_steps = sample.get(self.target_key, '')
         word_list = reasoning_steps.split(' ')
         cut_answer = ' '.join(word_list[:int(len(word_list) * portion)])  # Partial CoT answer
-
+        completion = ''.join(word_list[int(len(word_list) * portion):])  # Remaining CoT answer
         self.flush_newly_added_ids = True
         # Apply the chat prompt formatting
-        return self.generate_prompt({**sample, 'partial_target':cut_answer, 'portion':portion, 'id':idx})
+        return self.generate_prompt({**sample, 'partial_target':cut_answer, 'completion':completion, 'portion':portion, 'id':idx})
 
     def return_seed(self, idx):
         return self.global_step + 1024 * idx
@@ -126,18 +127,23 @@ class CurriculumDatasetWrapper:
         
     def __len__(self):
         return len(self.dataset)
+    
+    def __iter__(self):
+        """Iterates over the dataset."""
+        for i in range(len(self.dataset)):
+            yield self[i]
 
-    def map(self, function, **kwargs):
-        """Allows dataset-wide transformation using Hugging Face's .map() method."""
-        return CurriculumDatasetWrapper(self.dataset.map(function, **kwargs), self.generate_prompt, self.ground_truth_portion_dist)
+    # def map(self, function, **kwargs):
+    #     """Allows dataset-wide transformation using Hugging Face's .map() method."""
+    #     return CurriculumDatasetWrapper(self.dataset.map(function, **kwargs), self.generate_prompt, self.ground_truth_portion_dist)
 
-    def shuffle(self, seed=None):
-        """Allows shuffling while keeping the curriculum learning functionality."""
-        return CurriculumDatasetWrapper(self.dataset.shuffle(seed=seed), self.generate_prompt, self.ground_truth_portion_dist)
+    # def shuffle(self, seed=None):
+    #     """Allows shuffling while keeping the curriculum learning functionality."""
+    #     return CurriculumDatasetWrapper(self.dataset.shuffle(seed=seed), self.generate_prompt, self.ground_truth_portion_dist)
 
-    def select(self, indices):
-        """Allows selecting a subset of data."""
-        return CurriculumDatasetWrapper(self.dataset.select(indices), self.generate_prompt, self.ground_truth_portion_dist)
+    # def select(self, indices):
+    #     """Allows selecting a subset of data."""
+    #     return CurriculumDatasetWrapper(self.dataset.select(indices), self.generate_prompt, self.ground_truth_portion_dist)
 
 
 class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
@@ -176,9 +182,10 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
         reasoning_steps = sample.get(self.target_key, '')
         word_list = reasoning_steps.split(' ')
         cut_answer = ' '.join(word_list[:int(len(word_list) * portion)])  # Partial CoT answer
-
+        completion = ''.join(word_list[int(len(word_list) * portion):])
         # Apply the chat prompt formatting
-        return self.generate_prompt({**sample, 'partial_target':cut_answer, 'portion':portion, 'id':idx})
+        return self.generate_prompt({**sample, 'partial_target':cut_answer, 'completion':completion,
+                                     'portion':portion, 'id':idx})
 
     def update_attempted_ratios(self, ids, portions, rewards):
         """Updates the dataset with the attempted ratios and rewards."""

@@ -1,0 +1,12 @@
+
+
+# Run the training script
+python src/sft_pretrain_and_pushtohub.py model=gpt2xl_1.5b task=gsm8k
+
+### END OF COMMAND ###
+
+
+# Run the training script
+python src/sft_pretrain_and_pushtohub.py model=tinyllama_1b task=gsm8k
+
+### END OF COMMAND ###
