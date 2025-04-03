@@ -55,7 +55,7 @@ def ExtractAnswerFromDataset(text):
         return None
     return text.split("####")[1].strip()
 
-def FormatRewardFunction(completions, target, **kwargs):
+def FormatRewardFunction(completions, **kwargs):
     """
     Format: thinking process \n #### answer
     Args:

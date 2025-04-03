@@ -97,7 +97,7 @@ def are_latex_expressions_equal(expr1, expr2):
         except:
             return expr1 == expr2
     
-def FormatRewardFunction(completions, target, **kwargs):
+def FormatRewardFunction(completions, **kwargs):
     """
     Only checking if the output format is correct, i.e.
     Format: thinking process... \\boxed{answer}

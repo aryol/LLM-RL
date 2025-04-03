@@ -32,7 +32,7 @@ rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 # more info: https://github.com/ashleve/rootutils
 # ------------------------------------------------------------------------------------ #
 
-from src.utils import get_checkpoint, CurriculumDatasetWrapper, PerSampleCurriculumDatasetWrapper
+from src.utils import CurriculumDatasetWrapper
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -45,7 +45,7 @@ handler.setFormatter(
 logger.addHandler(handler)
 
 
-def trainer(config):
+def train(config):
 
     # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(
@@ -76,18 +76,17 @@ def trainer(config):
     format_reward_func = hydra.utils.get_method(config.task.format_reward_function)
 
 
-    if config.trainer._target_ == "trl.PPOTrainer":
+    if 'PPO' in config.trainer._target_:
         # jesus christ, the reward has to be torch module.
         model = AutoModelForCausalLM.from_pretrained(config.model.model_name_or_path)
         class reward_model(torch.nn.Module):
             def __init__(self,):
                 super().__init__()
-            def forward(self, samples):
-                rewards = []
-                for s in samples:
-                    r = format_reward_func(s) + answer_reward_func(s)
-                    rewards.append(torch.tensor(r, dtype=torch.float32))
-                return torch.stack(rewards)
+            def forward(self, completions, prompts, target, **kwargs):
+                format_reward = torch.tensor(format_reward_func(completions)).to(kwargs['input_ids'].device)
+                correctness_reward = torch.tensor(answer_reward_func(completions, prompts, target, **kwargs)).to(kwargs['input_ids'].device)
+                reward = format_reward + correctness_reward
+                return reward
 
         class CausalLMValueModel(torch.nn.Module):
             def __init__(self, base_model_name_or_path):
@@ -109,9 +108,8 @@ def trainer(config):
                 )
                 return outputs  # contains hidden_states
 
-            def score(self, hidden_states):
-                last_hidden = hidden_states[-1]  # shape: (batch, seq_len, hidden)
-                return self.v_head(last_hidden).squeeze(-1)  # (batch, seq_len)
+            def score(self, hidden_state):
+                return self.v_head(hidden_state).squeeze(-1)  # (batch, seq_len)
         
         class PromptCollator:
             def __init__(self, tokenizer):
@@ -119,9 +117,16 @@ def trainer(config):
 
             def __call__(self, batch):
                 # batch: list of dicts with "prompt"
+                output_dict = {}
                 prompts = [sample["prompt"] for sample in batch]
+                output_dict["prompts"] = prompts
+                # make other keys to be lists too
+                for key in batch[0].keys():
+                    if key != "prompt":
+                        output_dict[key] = [sample[key] for sample in batch]
+                # tokenize the prompts
                 tokenized = self.tokenizer(prompts, return_tensors="pt", padding=True, truncation=True)
-                return tokenized
+                return { **output_dict, **tokenized }
         
         trainer_kwargs = {
             'reward_model': reward_model(),
@@ -212,7 +217,7 @@ def main(cfg: DictConfig) -> Optional[float]:
     :param cfg: DictConfig configuration composed by Hydra.
     :return: Optional[float] with optimized metric value.
     """
-    outputs  = trainer(cfg)
+    outputs  = train(cfg)
     return outputs
 
 if __name__ == "__main__":
