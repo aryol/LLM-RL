@@ -39,6 +39,7 @@ args:
   per_gpu_eval_batch_size: None
 
   # somehow these are the only parameters described in the trl documentation
+  response_length: 256
   exp_name: ${.run_name}
   reward_model_path: null
   model_adapter_name: null
