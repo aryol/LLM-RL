@@ -467,3 +467,111 @@
   name: "Qwen2-7B-Instruct-math-baseline-id-115"
   model: "Qwen/Qwen2-7B-Instruct"
   command: "accelerate launch --num_processes 7 --config_file ./config/deepspeed_zero3.yaml src/train.py experiment=default trainer_args=vllm model=qwen_instr_7b task=math trainer_args.max_completion_length=1000"
+
+
+# PPO
+
+- id: 202
+  name: "phi4mini-math-PPO-baseline-id-202"
+  model: "microsoft/Phi-4-mini-instruct"
+  command: "accelerate launch src/train.py experiment=PPO model=phi4_4b task=math dataset_wrapper=default"
+- id: 203
+  name: "phi4mini-math-PPO-adaptive-0.5-id-203"
+  model: "microsoft/Phi-4-mini-instruct"
+  command: "accelerate launch src/train.py experiment=PPO model=phi4_4b task=math dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5"
+- id: 204
+  name: "Qwen2-0.5B-gsm8k-PPO-baseline-id-204"
+  model: "Qwen/Qwen2-0.5B"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_0.5b task=gsm8k dataset_wrapper=default"
+- id: 205
+  name: "Qwen2-0.5B-gsm8k-PPO-adaptive-0.5-id-205"
+  model: "Qwen/Qwen2-0.5B"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5"
+- id: 206
+  name: "Qwen2-0.5B-math-PPO-baseline-id-206"
+  model: "Qwen/Qwen2-0.5B"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_0.5b task=math dataset_wrapper=default"
+- id: 207
+  name: "Qwen2-0.5B-math-PPO-adaptive-0.5-id-207"
+  model: "Qwen/Qwen2-0.5B"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_0.5b task=math dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5"
+- id: 208
+  name: "Qwen2-1.5B-gsm8k-PPO-baseline-id-208"
+  model: "Qwen/Qwen2-1.5B"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_1.5b task=gsm8k dataset_wrapper=default"
+- id: 209
+  name: "Qwen2-1.5B-gsm8k-PPO-adaptive-0.5-id-209"
+  model: "Qwen/Qwen2-1.5B"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_1.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5"
+- id: 210
+  name: "Qwen2-1.5B-math-PPO-baseline-id-210"
+  model: "Qwen/Qwen2-1.5B"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_1.5b task=math dataset_wrapper=default"
+- id: 211
+  name: "Qwen2-1.5B-math-PPO-adaptive-0.5-id-211"
+  model: "Qwen/Qwen2-1.5B"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_1.5b task=math dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5"
+- id: 212
+  name: "Qwen2-7B-gsm8k-PPO-baseline-id-212"
+  model: "Qwen/Qwen2-7B"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_7b task=gsm8k dataset_wrapper=default"
+- id: 213
+  name: "Qwen2-7B-gsm8k-PPO-adaptive-0.5-id-213"
+  model: "Qwen/Qwen2-7B"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_7b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5"
+- id: 214
+  name: "Qwen2-7B-math-PPO-baseline-id-214"
+  model: "Qwen/Qwen2-7B"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_7b task=math dataset_wrapper=default"
+- id: 215
+  name: "Qwen2-7B-math-PPO-adaptive-0.5-id-215"
+  model: "Qwen/Qwen2-7B"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_7b task=math dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5"
+- id: 216
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-baseline-id-216"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default"
+- id: 217
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-id-217"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5"
+- id: 218
+  name: "Qwen2-0.5B-Instruct-math-PPO-baseline-id-218"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_instr_0.5b task=math dataset_wrapper=default"
+- id: 219
+  name: "Qwen2-0.5B-Instruct-math-PPO-adaptive-0.5-id-219"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_instr_0.5b task=math dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5"
+- id: 220
+  name: "Qwen2-1.5B-Instruct-gsm8k-PPO-baseline-id-220"
+  model: "Qwen/Qwen2-1.5B-Instruct"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_instr_1.5b task=gsm8k dataset_wrapper=default"
+- id: 221
+  name: "Qwen2-1.5B-Instruct-gsm8k-PPO-adaptive-0.5-id-221"
+  model: "Qwen/Qwen2-1.5B-Instruct"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_instr_1.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5"
+- id: 222
+  name: "Qwen2-1.5B-Instruct-math-PPO-baseline-id-222"
+  model: "Qwen/Qwen2-1.5B-Instruct"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_instr_1.5b task=math dataset_wrapper=default"
+- id: 223
+  name: "Qwen2-1.5B-Instruct-math-PPO-adaptive-0.5-id-223"
+  model: "Qwen/Qwen2-1.5B-Instruct"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_instr_1.5b task=math dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5"
+- id: 224
+  name: "Qwen2-7B-Instruct-gsm8k-PPO-baseline-id-224"
+  model: "Qwen/Qwen2-7B-Instruct"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_instr_7b task=gsm8k dataset_wrapper=default"
+- id: 225
+  name: "Qwen2-7B-Instruct-gsm8k-PPO-adaptive-0.5-id-225"
+  model: "Qwen/Qwen2-7B-Instruct"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_instr_7b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5"
+- id: 226
+  name: "Qwen2-7B-Instruct-math-PPO-baseline-id-226"
+  model: "Qwen/Qwen2-7B-Instruct"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_instr_7b task=math dataset_wrapper=default"
+- id: 227
+  name: "Qwen2-7B-Instruct-math-PPO-adaptive-0.5-id-227"
+  model: "Qwen/Qwen2-7B-Instruct"
+  command: "accelerate launch src/train.py experiment=PPO model=qwen_instr_7b task=math dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5"
