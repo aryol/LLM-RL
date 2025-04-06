@@ -10,7 +10,7 @@ class BaseReward():
         self.dataset = dataset
         self.is_main_process = False
 
-    def CorrectnessReward(self, completions, prompts, target, **kwargs):
+    def CorrectnessReward(self, completions, prompts, target, do_log=True, **kwargs):
         """
         Evaluates completions based on the correctness of the final answer. 
 

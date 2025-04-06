@@ -7,7 +7,7 @@ class GSM8KReward(BaseReward):
     def __init__(self, **kwargs):
         super(GSM8KReward, self).__init__(**kwargs)
 
-    def CorrectnessReward(self, completions, prompts, target, **kwargs):
+    def CorrectnessReward(self, completions, prompts, target, do_log = True, do_update=True, **kwargs):
         """
         Evaluates completions based on the correctness of the final answer. 
 
@@ -33,16 +33,19 @@ class GSM8KReward(BaseReward):
             except Exception:
                 reward = 0.0
             rewards.append(reward)
-            # Log this completion
-            log_entries.append({
-                "prompt": prompt,
-                "completion": completion,
-                "target": gt,
-                "reward": reward
-            })
-        # Save logs
-        self.log_completions_to_file(log_entries)
-        self.update_datasets_with_ratios(kwargs, rewards)
+            if do_log:
+                # Log this completion
+                log_entries.append({
+                    "prompt": prompt,
+                    "completion": completion,
+                    "target": gt,
+                    "reward": reward
+                })
+        if do_log:
+            # Save logs
+            self.log_completions_to_file(log_entries)
+        if do_update:
+            self.update_datasets_with_ratios(kwargs, rewards)
         return rewards
 
 
@@ -60,7 +63,6 @@ def FormatRewardFunction(completions, **kwargs):
     Format: thinking process \n #### answer
     Args:
         completions (list[str]): Generated outputs
-        target (list[str]): Expected answers
       
       Returns:
           list[float]: Reward scores

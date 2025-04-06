@@ -1,0 +1,32 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - task: gsm8k
+  - model: qwen_instr_7b
+  - dataset_wrapper: default
+
+
+sampling_params:
+  _target_: vllm.SamplingParams
+  temperature: 0.7
+  stop: "\nuser:"
+  n: 8
+  seed: 0
+
+
+log_dir: ${oc.env:PROJECT_ROOT}/logs/eval_ratio_sol_prob
+
+trainer:
+  args:
+    output_dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+    # logging_dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+
+
+generate_prompt: src.utils.return_generate_prompt
+
+# wandb_config:
+#   name: ${model.model_name}
+#   project: sft_on_${task.task_name}
+#   dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+#   notes: null
