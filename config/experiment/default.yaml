@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - override /callbacks/curriculum_update_callback: just_log
+  - override /dataset_wrapper: default
+  - override /trainer: ???
+  - override /task: ???
+  - override /model: ???
+
+
+    
+

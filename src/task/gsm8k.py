@@ -20,7 +20,7 @@ class GSM8KReward(BaseReward):
         """
         rewards = []
         log_entries = []  # Store log data
-        for completion, prompt, gt in zip(completions, prompts, target):
+        for completion, prompt, gt, idd in zip(completions, prompts, target, kwargs['id']):
             try:
                 if "####" in completion:
                     answer = int(completion.split("####")[1].strip())
@@ -38,11 +38,12 @@ class GSM8KReward(BaseReward):
                 "prompt": prompt,
                 "completion": completion,
                 "target": gt,
-                "reward": reward
+                "reward": reward,
+                "id": idd
             })
         # Save logs
         self.log_completions_to_file(log_entries)
-        self.update_datasets_with_ratios(kwargs, rewards)
+        self.update_datasets_with_ratios({'prompt': prompts, 'target': target, **kwargs}, rewards)
         return rewards
 
 

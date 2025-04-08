@@ -5,7 +5,7 @@ model_config:
   _target_: trl.ModelConfig
   use_peft: false
   # doesn't matter what you give here! only the peft config is extracted and passed to the trainer.
-  # model_revision: main
-  # torch_dtype: bfloat16
-  # attn_implementation: flash_attention_2
+  model_revision: main
+  torch_dtype: bfloat16
+  attn_implementation: flash_attention_2
   

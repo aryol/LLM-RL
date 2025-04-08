@@ -25,6 +25,7 @@ from trl.trainer.utils import (
     selective_log_softmax,
     truncate_response,
 )
+import code
 
 INVALID_LOGPROB = 1.0
 
