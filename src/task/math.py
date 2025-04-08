@@ -9,7 +9,7 @@ class MATHReward(BaseReward):
     def __init__(self, **kwargs):
         super(MATHReward, self).__init__(**kwargs)
 
-    def CorrectnessReward(self, completions, prompts, target, **kwargs):
+    def CorrectnessReward(self, completions, prompts, target, do_log=True, do_update=True, **kwargs):
         """
         Evaluates completions based on the correctness of the final answer. 
 
@@ -47,8 +47,10 @@ class MATHReward(BaseReward):
             })
 
         # Save logs
-        self.log_completions_to_file(log_entries)
-        self.update_datasets_with_ratios({'prompt': prompts, 'target': target, **kwargs}, rewards)
+        if do_log:
+            self.log_completions_to_file(log_entries)
+        if do_update:
+            self.update_datasets_with_ratios({'prompt': prompts, 'target': target, **kwargs}, rewards)
         return rewards
         
 

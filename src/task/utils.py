@@ -12,6 +12,7 @@ class BaseReward():
         self.dataset_clone = copy.deepcopy(dataset)
         self.is_main_process = False
 
+<<<<<<< HEAD
     def is_train_dataset_or_eval_dataset(self, target, idd):
         for i in range(len(target)):
             if idd[i] >= len(self.dataset):
@@ -22,6 +23,9 @@ class BaseReward():
         return True
 
     def CorrectnessReward(self, completions, prompts, target, **kwargs):
+=======
+    def CorrectnessReward(self, completions, prompts, target, do_log=True, **kwargs):
+>>>>>>> 75addd76baa2f06fb446fdcc99bfa86fadca4642
         """
         Evaluates completions based on the correctness of the final answer. 
 
