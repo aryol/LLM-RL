@@ -33,7 +33,6 @@ class GSM8KReward(BaseReward):
             except Exception:
                 reward = 0.0
             rewards.append(reward)
-<<<<<<< HEAD
             # Log this completion
             log_entries.append({
                 "prompt": prompt,
@@ -47,21 +46,6 @@ class GSM8KReward(BaseReward):
             self.log_completions_to_file(log_entries)
         if do_update:
             self.update_datasets_with_ratios({'prompt': prompts, 'target': target, **kwargs}, rewards)
-=======
-            if do_log:
-                # Log this completion
-                log_entries.append({
-                    "prompt": prompt,
-                    "completion": completion,
-                    "target": gt,
-                    "reward": reward
-                })
-        if do_log:
-            # Save logs
-            self.log_completions_to_file(log_entries)
-        if do_update:
-            self.update_datasets_with_ratios(kwargs, rewards)
->>>>>>> 75addd76baa2f06fb446fdcc99bfa86fadca4642
         return rewards
 
 

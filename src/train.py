@@ -46,9 +46,11 @@ logger.addHandler(handler)
 
 def train(config):
 
-    from accelerate import Accelerator
-    if config.get('accelerator') is not None:
-        accelerator = Accelerator(config.accelerator)
+    # from accelerate import Accelerator
+    # if config.get('accelerator') is not None:
+        # accelerator = Accelerator(config.accelerator)
+    
+    # accelerator = Accelerator()
     # Accelerator().is_main_process
     # # Set up accelerator    
     # accelerator = Accelerator()
@@ -73,11 +75,11 @@ def train(config):
     dataset = hydra.utils.instantiate(config.task.dataset, _convert_="all")
     # take a portion of training data for validation
     # train_dataset, val_dataset = dataset["train"].train_test_split(test_size=0.1, seed=42).values()
-    # train_dataset = dataset["train"].shuffle(seed=42)
-    # test_dataset = dataset["test"].shuffle(seed=42)
+    train_dataset = dataset["train"].shuffle(seed=42)
+    test_dataset = dataset["test"].shuffle(seed=42)
     # only sample few samples for debugging
-    train_dataset = dataset["train"].select(range(7))
-    test_dataset = dataset["test"].select(range(8))
+    # train_dataset = dataset["train"].select(range(64))
+    # test_dataset = dataset["test"].select(range(64))
 
     generate_prompt = hydra.utils.get_method(config.generate_prompt)(config, tokenizer=tokenizer)
     train_dataset = hydra.utils.instantiate(config.dataset_wrapper, dataset=train_dataset, generate_prompt=generate_prompt, initial_portion=0.0, prompt_key=config.task.prompt_key, target_key=config.task.target_key)

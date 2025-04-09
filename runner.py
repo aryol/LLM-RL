@@ -8,10 +8,10 @@ def load_yaml(file_path):
         return yaml.safe_load(file)
 
 # Function to execute a command
-def execute_command(config_file, name, model, command, mode='vllm'):
+def execute_command(config_file, name, model, command, id, mode='vllm'):
     try:
         # Run the command in the shell
-        command = command.strip() + " wandb_config.name=" + name.strip()
+        command = command.strip() + " wandb_config.name=" + name.strip() + f" log_dir=$BOLT_ARTIFACT_DIR"
         with open(config_file, 'r') as f:
             content = f.read()
         if not mode == 'vllm':
@@ -19,7 +19,9 @@ def execute_command(config_file, name, model, command, mode='vllm'):
         else:
             lines = content.split('\n')
             for i in range(len(lines)):
-                if lines[i].startswith("command:"):
+                if lines[i].startswith("name:"):
+                    lines[i] = lines[i].strip() + f" - {id}"
+                elif lines[i].startswith("command:"):
                     break
             bin_adrs = lines[i].replace('/command_template', "").replace("command:", "").strip()
             lines[i] = f"command: export VLLM_LOGGING_LEVEL=ERROR && CUDA_VISIBLE_DEVICES=7 {bin_adrs}/trl vllm-serve --model {model} > vllm_logs.txt 2>&1 & CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 {bin_adrs}/{command} && kill %1"
@@ -62,7 +64,7 @@ def main():
         if len(matching_entities) > 0:
             for entity in matching_entities:
                 print(f"Executing command for {entity['name']} (ID: {entity['id']})")
-                execute_command(args.config, entity['name'], entity['model'], entity['command'], args.mode)
+                execute_command(args.config, entity['name'], entity['model'], entity['command'], entity['id'], args.mode)
         else:
             print(f"No matching entity found for input: {input_item}")
 

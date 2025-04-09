@@ -10,4 +10,4 @@ conda activate LLM-RL
 # accelerate launch --num_processes 1 --config_file ./config/deepspeed_zero2.yaml \
 # src/train.py experiment=GRPO model=qwen_0.5b task=gsm8k wandb_config.name=Qwen0.5Bdebug dataset_wrapper=adaptive
 
-accelerate launch --num_processes 1 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO model=qwen_0.5b task=gsm8k wandb_config.name=Qwen0.5Bdebug dataset_wrapper=adaptive
+accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero3.yaml src/train.py experiment=PPO model=qwen_0.5b task=gsm8k wandb_config.name=Qwen0.5Bdebug dataset_wrapper=adaptive
