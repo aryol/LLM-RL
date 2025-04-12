@@ -10,7 +10,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from trl import get_peft_config
 import torch
 import code
-
+from functools import partial
 
 import rootutils
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
@@ -90,6 +90,7 @@ def train(config):
     answer_reward_class = hydra.utils.instantiate(config.task.reward_class, dataset=train_dataset)
     answer_reward_func = answer_reward_class.CorrectnessReward
     format_reward_func = hydra.utils.get_method(config.task.format_reward_function)
+    format_reward_func = partial(format_reward_func, coef=config.task.format_reward_coefficient)
 
 
     if 'PPO' in config.trainer._target_:

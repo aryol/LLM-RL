@@ -23,7 +23,7 @@ class GSM8KReward(BaseReward):
         for completion, prompt, gt, idd in zip(completions, prompts, target, kwargs['id']):
             try:
                 if "####" in completion:
-                    answer = int(completion.split("####")[1].strip())
+                    answer = int(completion.split("####")[1].strip().replace(',', ''))
                     if answer == int(gt):
                         reward = 1.0
                     else:
@@ -58,7 +58,7 @@ def ExtractAnswerFromDataset(text):
         return None
     return text.split("####")[1].strip()
 
-def FormatRewardFunction(completions, **kwargs):
+def FormatRewardFunction(completions, coef=1.0, **kwargs):
     """
     Format: thinking process \n #### answer
     Args:
@@ -72,8 +72,8 @@ def FormatRewardFunction(completions, **kwargs):
     for completion in completions:
       try:
         if "####" in completion:
-            answer = int(completion.split("####")[1].strip())
-            rewards.append(1.0)
+            # answer = int(completion.split("####")[1].strip())
+            rewards.append(coef)
         else:
             rewards.append(0.0)
       except Exception:

@@ -26,11 +26,23 @@ def return_generate_prompt(config, tokenizer):
     def generate_prompt(example, prompt_key="prompt", target_key="target"):
         partial_answer = example.get("partial_target", "")
         if supports_system_prompt:
-            prefix = [
-                {"role": "system", "content": DEFAULT_PROMPT},
-                {"role": "user", "content": "Here is the question:\n" + example[prompt_key]},
-                {"role": "assistant", "content": "Let me solve this step by step.\n" + partial_answer}
-            ]
+            # prefix = [
+            #     {"role": "system", "content": DEFAULT_PROMPT},
+            #     {"role": "user", "content": "Here is the question:\n" + example[prompt_key]},
+            #     {"role": "assistant", "content": "Let me solve this step by step.\n" + partial_answer}
+            # ]
+            if partial_answer == "":
+                prefix = [
+                    # {"role": "system", "content": DEFAULT_PROMPT},
+                    {"role": "user", "content": example[prompt_key] + "\n" + DEFAULT_PROMPT},
+                ]
+            else:
+                prefix = [
+                    # {"role": "system", "content": DEFAULT_PROMPT},
+                    {"role": "user", "content": example[prompt_key] + "\n" + DEFAULT_PROMPT},
+                    {"role": "assistant", "content": partial_answer}
+                ]
+
         else:
             prefix = [
                 {"role": "user", "content": DEFAULT_PROMPT + "\n#\nHere is the question you need to solve:\n" + example[prompt_key]},

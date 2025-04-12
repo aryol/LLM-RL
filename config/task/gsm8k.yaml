@@ -7,7 +7,7 @@ dataset:
 prompt_key: question
 target_key: answer
 
-default_prompt: "Present the final answer on the last line of your response in the format: #### <answer>.\n Make sure that the final answer is an integer number without any units."
+default_prompt: "Let's think step by step and present the final answer on the last line of your response in the format: #### <answer>.\n"
 
 extract_answer_from_dataset: src.task.gsm8k.ExtractAnswerFromDataset
 
@@ -19,3 +19,4 @@ reward_class:
 
 # reward_function: src.task.gsm8k.CorrectnessReward
 format_reward_function: src.task.gsm8k.FormatRewardFunction
+format_reward_coefficient: 1

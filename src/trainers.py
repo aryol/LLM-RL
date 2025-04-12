@@ -151,7 +151,7 @@ class PPOTrainerWithCustomReward(PPOTrainer):
             self.ref_model = ref_model
         elif self.is_peft_model:
             self.ref_model = None
-        else:
+        elif args.kl_coef != 0:
             self.ref_model = create_reference_model(self.policy_model)
 
         self.reward_model = reward_model
@@ -272,7 +272,7 @@ class PPOTrainerWithCustomReward(PPOTrainer):
             # self.reward_model = prepare_deepspeed(
             #     self.reward_model, args.per_device_train_batch_size, args.fp16, args.bf16
             # )
-            if self.ref_model is None:
+            if self.ref_model is None and args.kl_coef != 0:
                 if not self.is_peft_model:
                     raise ValueError("No reference model and model is not a Peft model.")
             else:
@@ -281,7 +281,7 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                 )
             print("prepared deepspeed")
         else:
-            if self.ref_model is None:
+            if self.ref_model is None and args.kl_coef != 0:
                 if not self.is_peft_model:
                     raise ValueError("No reference model and model is not a Peft model.")
             else:
@@ -499,17 +499,17 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                     logprob = selective_log_softmax(logits, response)
                     del logits
                     torch.cuda.empty_cache()
-
-                    if ref_policy is None:
-                        with self.null_ref_context():
-                            ref_output = forward(model.policy, query_response, processing_class.pad_token_id)
-                    else:
-                        ref_output = forward(ref_policy, query_response, processing_class.pad_token_id)
-                    ref_logits = ref_output.logits[:, context_length - 1 : -1]
-                    ref_logits /= args.temperature + 1e-7
-                    ref_logprob = selective_log_softmax(ref_logits, response)
-                    del ref_output, ref_logits
-                    torch.cuda.empty_cache()
+                    if args.kl_coef != 0:
+                        if ref_policy is None:
+                            with self.null_ref_context():
+                                ref_output = forward(model.policy, query_response, processing_class.pad_token_id)
+                        else:
+                            ref_output = forward(ref_policy, query_response, processing_class.pad_token_id)
+                        ref_logits = ref_output.logits[:, context_length - 1 : -1]
+                        ref_logits /= args.temperature + 1e-7
+                        ref_logprob = selective_log_softmax(ref_logits, response)
+                        del ref_output, ref_logits
+                        torch.cuda.empty_cache()
 
                     # Response Processing 1. truncate response after the first occurrence of `stop_token_id`
                     postprocessed_response = response
@@ -537,7 +537,8 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                     responses.append(response)
                     postprocessed_responses.append(postprocessed_response)
                     logprobs.append(logprob)
-                    ref_logprobs.append(ref_logprob)
+                    if args.kl_coef != 0:
+                        ref_logprobs.append(ref_logprob)
                     sequence_lengths.append(sequence_length)
                     scores.append(score)
                     scores_format.append(score_format)
@@ -546,13 +547,16 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                 responses = torch.cat(responses, 0)
                 postprocessed_responses = torch.cat(postprocessed_responses, 0)
                 logprobs = torch.cat(logprobs, 0)
-                ref_logprobs = torch.cat(ref_logprobs, 0)
+                if args.kl_coef != 0:
+                    ref_logprobs = torch.cat(ref_logprobs, 0)
                 sequence_lengths = torch.cat(sequence_lengths, 0)
                 scores = torch.cat(scores, 0)
                 scores_format = torch.cat(scores_format, 0)
                 scores_correctness = torch.cat(scores_correctness, 0)
                 values = torch.cat(values, 0)
-                del (unwrapped_model, logprob, ref_logprob, full_value, value, score, score_format, score_correctness)
+                del (unwrapped_model, logprob, full_value, value, score, score_format, score_correctness)
+                if args.kl_coef != 0:
+                    del ref_logprob
                 gc.collect()
                 torch.cuda.empty_cache()
                 
@@ -568,13 +572,17 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                 response_idxs = torch.arange(responses.shape[1], device=responses.device).repeat(responses.shape[0], 1)
                 padding_mask = response_idxs > sequence_lengths.unsqueeze(1)
                 logprobs = torch.masked_fill(logprobs, padding_mask, INVALID_LOGPROB)
-                ref_logprobs = torch.masked_fill(ref_logprobs, padding_mask, INVALID_LOGPROB)
+                if args.kl_coef != 0:
+                    ref_logprobs = torch.masked_fill(ref_logprobs, padding_mask, INVALID_LOGPROB)
                 sequence_lengths_p1 = sequence_lengths + 1
                 padding_mask_p1 = response_idxs > (sequence_lengths_p1.unsqueeze(1))
                 values = torch.masked_fill(values, padding_mask_p1, 0)
 
                 # 4. compute rewards
-                kl = logprobs - ref_logprobs
+                if args.kl_coef != 0:
+                    kl = logprobs - ref_logprobs
+                else:
+                    kl = logprobs
                 non_score_reward = -args.kl_coef * kl
                 rewards = non_score_reward.clone()
                 actual_start = torch.arange(rewards.size(0), device=rewards.device)
@@ -734,7 +742,6 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                 responses,
                 postprocessed_responses,
                 logprobs,
-                ref_logprobs,
                 values,
                 sequence_lengths,
                 contain_eos_token,
@@ -748,6 +755,8 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                 advantages,
                 returns,
             )
+            if args.kl_coef != 0:
+                del ref_logprobs
             torch.cuda.empty_cache()
 
         # HF trainer specifics

@@ -100,7 +100,7 @@ def are_latex_expressions_equal(expr1, expr2):
         except:
             return expr1 == expr2
     
-def FormatRewardFunction(completions, **kwargs):
+def FormatRewardFunction(completions, coef=1.0, **kwargs):
     """
     Only checking if the output format is correct, i.e.
     Format: thinking process... \\boxed{answer}
@@ -120,6 +120,6 @@ def FormatRewardFunction(completions, **kwargs):
         if pred_answer is None:
             rewards.append(0.0)
             continue
-        rewards.append(1.0)
+        rewards.append(coef)
 
     return rewards

@@ -22,3 +22,4 @@ reward_class:
 
 # reward_function: src.task.math.CorrectnessReward
 format_reward_function: src.task.math.FormatRewardFunction
+format_reward_coefficient: 1
