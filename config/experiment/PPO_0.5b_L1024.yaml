@@ -7,7 +7,13 @@ defaults:
   - override /task: ???
   - override /model: ???
 
-
+trainer:
+  args:
+    num_train_epochs: 40
+    per_device_train_batch_size: 4
+    per_device_eval_batch_size: 16
+    gradient_accumulation_steps: 8    
+    response_length: 1024
 
     
 

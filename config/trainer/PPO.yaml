@@ -4,10 +4,13 @@ _target_: src.trainers.PPOTrainerWithCustomReward
 args:
   _target_: trl.PPOConfig
 
+  save_only_model: true
+  load_best_model_at_end: false
+
   num_train_epochs: 20
   per_device_train_batch_size: 2
-  per_device_eval_batch_size: 2
-  gradient_accumulation_steps: 2
+  per_device_eval_batch_size: 8
+  gradient_accumulation_steps: 8
   gradient_checkpointing: true
   gradient_checkpointing_kwargs:
     use_reentrant: false
@@ -16,31 +19,27 @@ args:
   lr_scheduler_type: cosine
   warmup_ratio: 0.03
   
-  output_dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+  output_dir: ${log_dir}/${task.task_name}-${model.model_name}/${day_time}
   run_name: ${task.task_name}-${model.model_name}
 
   bf16: true
   tf32: true
   logging_strategy: steps
-  logging_steps: 1
+  logging_steps: 4
   report_to: wandb
   save_strategy: "steps"
-  save_steps: 10
+  save_steps: 20
   seed: 42
   torch_compile: false
 
   eval_strategy: "steps"
-  eval_steps: 7
+  eval_steps: 40
   do_eval: true
   do_train: true
 
-  # PPO specific parameters starting here:
-  per_gpu_train_batch_size: None
-  per_gpu_eval_batch_size: None
-
   # somehow these are the only parameters described in the trl documentation
   stop_token: eos
-  response_length: 512
+  response_length: 400
   exp_name: ${.run_name}
   reward_model_path: null
   model_adapter_name: null
@@ -53,4 +52,4 @@ args:
   cliprange_value: 0.2
   gamma: 1.0
   lam: 0.95
-  ds3_gather_for_generation: True 
+  ds3_gather_for_generation: true 

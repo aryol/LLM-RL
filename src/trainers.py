@@ -3,7 +3,6 @@ import torch
 from typing import Optional
 import gc
 import math
-
 import time
 from collections import defaultdict
 
@@ -163,6 +162,11 @@ class PPOTrainerWithCustomReward(PPOTrainer):
         self.eval_dataset = eval_dataset
         self.optimizer, self.lr_scheduler = optimizers
         self.optimizer_cls_and_kwargs = None  # needed for transformers >= 4.47
+        # activating gradient checkpointing if needed
+        if args.gradient_checkpointing:
+            self.policy_model.gradient_checkpointing_enable()
+            if self.value_model is not None:
+                self.value_model.model.gradient_checkpointing_enable()
         #########
         # calculate various batch sizes
         #########
@@ -299,7 +303,7 @@ class PPOTrainerWithCustomReward(PPOTrainer):
             state_dict = {name.removeprefix('policy.'): param for name, param in state_dict.items()
                           if name.startswith('policy.')}
 
-        super()._save(output_dir, state_dict)
+        super(PPOTrainer, self)._save(output_dir, state_dict)
 
     def compute_rewards(
         self, query_responses, context_length, rest_of_dataset
@@ -329,6 +333,9 @@ class PPOTrainerWithCustomReward(PPOTrainer):
         with unwrap_model_for_generation(
             self.model, self.accelerator, gather_deepspeed3_params=self.args.ds3_gather_for_generation
         ) as unwrapped_model:
+            counter = 0
+            score_sum_format = 0
+            score_sum_correctness = 0
             for batch in self.eval_dataloader:
                 query = batch["input_ids"]
                 with torch.no_grad():
@@ -358,7 +365,19 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                     #     self.reward_model, postprocessed_query_response, processing_class.pad_token_id, context_length
                     # )
                     score = self.compute_rewards(postprocessed_query_response, context_length, batch)
-                    table["score"].extend(self.accelerator.gather_for_metrics(score).float().cpu().numpy())
+                    score_format = score[0, :]
+                    score_correctness = score[1, :]
+                    del postprocessed_query_response, postprocessed_response, response, query_response, query
+                    gc.collect()
+                    torch.cuda.empty_cache()
+                    
+                    new_scores_format = self.accelerator.gather_for_metrics(score_format).float().cpu().numpy()
+                    new_scores_correctness = self.accelerator.gather_for_metrics(score_correctness).float().cpu().numpy()
+                    score_sum_format += sum(new_scores_format)
+                    score_sum_correctness += sum(new_scores_correctness)
+                    counter += len(new_scores_format)
+                    table["score_format"].extend(new_scores_format)
+                    table["score_correctness"].extend(new_scores_correctness)
 
                 if sampling:
                     break
@@ -370,7 +389,10 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                 import wandb
 
                 if wandb.run is not None:
-                    wandb.log({"completions": wandb.Table(dataframe=df)})
+                    wandb.log({"eval/completions": wandb.Table(dataframe=df)}, commit=False)
+                    wandb.log({"eval/score_format": score_sum_format / counter}, commit=False)
+                    wandb.log({"eval/score_correctness": score_sum_correctness / counter}, commit=False)
+                    wandb.log({"eval/counter": counter}, commit=False)
 
             if "comet_ml" in args.report_to:
                 log_table_to_comet_experiment(
@@ -443,6 +465,7 @@ class PPOTrainerWithCustomReward(PPOTrainer):
             self.model_wrapped = self.model
 
         for update in range(1, args.num_total_batches + 1):
+            self.control.should_evaluate = False # to avoid going into a non-existing evaluation loop
             self.state.episode += 1 * args.batch_size
             data = next(iter_dataloader)
             with torch.no_grad():
@@ -453,6 +476,8 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                 logprobs = []
                 ref_logprobs = []
                 scores = []
+                scores_format = []
+                scores_correctness = []
                 sequence_lengths = []
                 values = []
                 with unwrap_model_for_generation(
@@ -505,6 +530,9 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                     #     reward_model, postprocessed_query_response, processing_class.pad_token_id, context_length
                     # )
                     score = self.compute_rewards(postprocessed_query_response, context_length, data)
+                    score_format = score[0, :]
+                    score_correctness = score[1, :]
+                    score = score.sum(axis=0)
                     
                     responses.append(response)
                     postprocessed_responses.append(postprocessed_response)
@@ -512,6 +540,8 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                     ref_logprobs.append(ref_logprob)
                     sequence_lengths.append(sequence_length)
                     scores.append(score)
+                    scores_format.append(score_format)
+                    scores_correctness.append(score_correctness)
                     values.append(value)
                 responses = torch.cat(responses, 0)
                 postprocessed_responses = torch.cat(postprocessed_responses, 0)
@@ -519,10 +549,13 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                 ref_logprobs = torch.cat(ref_logprobs, 0)
                 sequence_lengths = torch.cat(sequence_lengths, 0)
                 scores = torch.cat(scores, 0)
+                scores_format = torch.cat(scores_format, 0)
+                scores_correctness = torch.cat(scores_correctness, 0)
                 values = torch.cat(values, 0)
-                del (logprob, ref_logprob, full_value, value, score, unwrapped_model)
-                torch.cuda.empty_cache()
+                del (unwrapped_model, logprob, ref_logprob, full_value, value, score, score_format, score_correctness)
                 gc.collect()
+                torch.cuda.empty_cache()
+                
 
                 # Response Processing 3. Filter completion. Ensure that the sample contains stop_token_id
                 # Completions not passing that filter will receive a lower score.
@@ -663,6 +696,8 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                 )
                 metrics["objective/rlhf_reward"] = self.accelerator.gather_for_metrics(rlhf_reward).mean().item()
                 metrics["objective/scores"] = self.accelerator.gather_for_metrics(scores.mean()).mean().item()
+                metrics["objective/scores_format"] = self.accelerator.gather_for_metrics(scores_format.mean()).mean().item()
+                metrics["objective/scores_correctness"] = self.accelerator.gather_for_metrics(scores_correctness.mean()).mean().item()
                 metrics["policy/approxkl_avg"] = self.accelerator.gather_for_metrics(approxkl_stats).mean().item()
                 metrics["policy/clipfrac_avg"] = self.accelerator.gather_for_metrics(pg_clipfrac_stats).mean().item()
                 metrics["loss/policy_avg"] = self.accelerator.gather_for_metrics(pg_loss_stats).mean().item()
@@ -681,15 +716,19 @@ class PPOTrainerWithCustomReward(PPOTrainer):
             self.lr_scheduler.step()
             self.control = self.callback_handler.on_step_end(args, self.state, self.control)
             if self.control.should_save:
-                self._save_checkpoint(model, trial=None)
+                if self.state.global_step < 100 or self.state.global_step % 200 == 0:
+                    self._save_checkpoint(model, trial=None)
                 self.control = self.callback_handler.on_save(self.args, self.state, self.control)
             del kl, mean_kl, mean_entropy, mean_non_score_reward, scores, metrics, non_score_reward
             torch.cuda.empty_cache()
             gc.collect()
 
-            if args.num_sample_generations > 0 and (update - 1) % self.sample_generations_freq == 0:
-                self.generate_completions(sampling=True)
+            # if args.num_sample_generations > 0 and (update - 1) % self.sample_generations_freq == 0:
+            # this line has changed.
+            if (update - 1) % self.args.eval_steps == 0:
+                self.generate_completions(sampling=False)
                 torch.cuda.empty_cache()
+                gc.collect()
             del (
                 query_responses,
                 responses,

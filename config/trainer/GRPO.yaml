@@ -28,7 +28,9 @@ args:
   logging_steps: 2
   report_to: wandb
   save_strategy: "steps"
-  save_steps: 1000
+  save_steps: 20
+  save_only_model: true
+  load_best_model_at_end: false
   seed: 42
   torch_compile: false
 

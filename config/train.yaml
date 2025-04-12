@@ -10,18 +10,20 @@ defaults:
   - experiment: qwen_gsm8k
 
 log_dir: ${oc.env:PROJECT_ROOT}/logs
+# day_time: ${now:%Y-%m-%d}_${now:%H-%M-%S}
+day_time: 0
 
 generate_prompt: src.utils.return_generate_prompt
 
 wandb_config:
   name: ${model.model_name}
   project: progressive_rl_on_${task.task_name}
-  dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+  dir: ${log_dir}/${task.task_name}-${model.model_name}/${day_time}
   notes: null
 
 hydra:
   run:
-    dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+    dir: ${log_dir}/${task.task_name}-${model.model_name}/${day_time}
   sweep:
-    dir: ${log_dir}/${task.task_name}-${model.model_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+    dir: ${log_dir}/${task.task_name}-${model.model_name}/${day_time}
     subdir: ${hydra.job.num}

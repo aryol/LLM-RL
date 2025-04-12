@@ -16,6 +16,7 @@ def execute_command(config_file, name, model, command, id, mode='vllm'):
             content = f.read()
         if not mode == 'vllm':
             content = content.replace('command_template', command)
+            content = content.replace('Progressive-RL', f'Progressive-RL - {id}')
         else:
             lines = content.split('\n')
             for i in range(len(lines)):
