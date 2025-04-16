@@ -7,10 +7,10 @@ from datetime import datetime
 import logging
 import wandb
 import rootutils
-from transformers import TrainerCallback
+from transformers import TrainerCallback, AutoModelForCausalLM
 from trl import DataCollatorForCompletionOnlyLM
 from omegaconf import OmegaConf
-import torch
+import os
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
@@ -23,7 +23,8 @@ handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s -
 logger.addHandler(handler)
 
 import numpy as np
-
+from huggingface_hub import create_repo, HfApi
+username = HfApi().whoami()["name"]
 
 class PushToHubCallback(TrainerCallback):
     def __init__(self, tokenizer, base_name, dataset_name, prompt_name, push_dir="sft_checkpoints", push_to_hub=True):
@@ -38,35 +39,45 @@ class PushToHubCallback(TrainerCallback):
     def on_epoch_end(self, args, state, control, **kwargs):
         if self.trainer is None:
             return
+        
+        model_hub_name = f"sft-{self.base_name}-{self.dataset_name}-epoch{int(state.epoch)}-longsysprompt"
+        repo_id = f"{username}/{model_hub_name}" 
+        create_repo(repo_id, exist_ok=True)
 
-        output_dir = f"{self.push_dir}/epoch{int(state.epoch)}"
-        self.trainer.save_model(output_dir)
-        self.tokenizer.save_pretrained(output_dir)
+        save_dir = os.path.join(self.trainer.args.output_dir, f"epoch-{int(state.epoch)}")
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        self.trainer.save_model(save_dir)
+        self.tokenizer.save_pretrained(save_dir)
 
-        metrics = self.trainer.evaluate()
-        acc = metrics.get("eval_accuracy", 0.0)
-        acc_str = f"acc{int(acc * 100)}"
-        model_id = f"{self.base_name}-{self.dataset_name}-epoch{int(state.epoch)}-{acc_str}-{self.prompt_name}"
-
-        if self.push_to_hub:
-            self.trainer.push_to_hub(model_name=model_id)
+        self.trainer.model.push_to_hub(repo_id)
+        self.trainer.tokenizer.push_to_hub(repo_id)
 
 
 
 def trainer(config):
     global tokenizer
+
+    # import debugpy
+    # debugpy.listen(("0.0.0.0", 5678))  # Or another port
+    # print("Waiting for debugger to attach...")
+    # debugpy.wait_for_client()
+    
+    model = AutoModelForCausalLM.from_pretrained(config.model.model_name_or_path,)
     tokenizer = AutoTokenizer.from_pretrained(
         config.model.tokenizer_name_or_path if config.model.get("tokenizer_name_or_path") else config.model.model_name_or_path,
         padding_side="left"
     )
     if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
+        # tokenizer.pad_token = tokenizer.eos_token
+        tokenizer.add_special_tokens({"pad_token": "<|reserved_special_token_0|>"})
+        model.config.pad_token_id = tokenizer.pad_token_id # updating model config
+        model.resize_token_embeddings(len(tokenizer) + 1)
 
     default_COT_prompt = config.task.default_prompt
     supports_system_prompt = hasattr(tokenizer, "apply_system_prompt") and tokenizer.system_prompt is not None
     supports_chat_template = hasattr(tokenizer, "apply_chat_template") and tokenizer.chat_template is not None
-    prompt_key = config.task.prompt_key
-    target_key = config.task.target_key
+    
     def generate_prompt(example, prompt_key, target_key):
         partial_answer = example.get("partial_target", "")
         if supports_system_prompt:
@@ -90,12 +101,14 @@ def trainer(config):
             else:
                 formatted_prompt = f"{default_COT_prompt}\n#\nHere is the question you need to solve:\n{example[prompt_key]}\n\nLet me solve this step by step.\n{partial_answer}"
 
-        return {'prompt': formatted_prompt, 'completion': example[target_key]}
+        return {'prompt': formatted_prompt, 'completion': example[target_key]+tokenizer.eos_token}
 
     dataset = hydra.utils.instantiate(config.task.dataset, _convert_="all")
-    train_dataset = dataset["train"].shuffle(seed=42) # .select(range(20)) for debugging
-    val_dataset = dataset["test"].shuffle(seed=42) # .select(range(20))
-
+    train_dataset = dataset["train"].shuffle(seed=42).select(range(20)) # for debugging
+    val_dataset = dataset["test"].shuffle(seed=42).select(range(20)) # for debugging
+    
+    prompt_key = config.task.prompt_key
+    target_key = config.task.target_key
     train_dataset = train_dataset.map(
         lambda x: generate_prompt(x, prompt_key, target_key),
         remove_columns=train_dataset.column_names,)
@@ -136,7 +149,7 @@ def trainer(config):
     
     collator = DataCollatorForCompletionOnlyLM(tokenizer.encode("Let me solve this step by step.")[2:], tokenizer=tokenizer) #to skip BOS token and the first token sometimes being weirdly generated _Let vs Let_
     trainer = SFTTrainer(
-        model=config.model.model_name_or_path,
+        model=model,
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,

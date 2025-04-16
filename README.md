@@ -8,6 +8,8 @@ conda activate LLM-RL
 source ./install.sh
 ``` 
 
+downloading the data
+https://github.com/eric-haibin-lin/verl-data/tree/main
 
 ## Running commands
 
