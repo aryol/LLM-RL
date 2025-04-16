@@ -706,6 +706,8 @@ class PPOTrainerWithCustomReward(PPOTrainer):
                 metrics["objective/scores"] = self.accelerator.gather_for_metrics(scores.mean()).mean().item()
                 metrics["objective/scores_format"] = self.accelerator.gather_for_metrics(scores_format.mean()).mean().item()
                 metrics["objective/scores_correctness"] = self.accelerator.gather_for_metrics(scores_correctness.mean()).mean().item()
+                metrics["policy/gen_lengths"] = self.accelerator.gather_for_metrics(sequence_length.float().mean()).mean().item()
+                metrics["policy/gen_lengths_p1"] = self.accelerator.gather_for_metrics(sequence_lengths_p1.float().mean()).mean().item()
                 metrics["policy/approxkl_avg"] = self.accelerator.gather_for_metrics(approxkl_stats).mean().item()
                 metrics["policy/clipfrac_avg"] = self.accelerator.gather_for_metrics(pg_clipfrac_stats).mean().item()
                 metrics["loss/policy_avg"] = self.accelerator.gather_for_metrics(pg_loss_stats).mean().item()

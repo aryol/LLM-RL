@@ -565,3 +565,177 @@
   name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.00001-id-221"
   model: "Qwen/Qwen2-0.5B-Instruct"
   command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.00001"
+
+- id: 222
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.1-id-222"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.1"
+
+- id: 223
+  name: "RhoMath-1B-gsm8k-PPO-baseline-coef.1-id-223"
+  model: "microsoft/rho-math-1b-v0.1"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_1.5b_L512 model=rhomath-1b task=gsm8k dataset_wrapper=default task.format_reward_coefficient=0.1"
+
+
+- id: 224
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-224"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2"
+
+- id: 225
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-225"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001"
+
+- id: 226
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-226"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.15"
+
+- id: 227
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-227"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.learning_rate=1.0e-6"
+
+- id: 228
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-228"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.gradient_accumulation_steps=12"
+
+- id: 229
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-229"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.num_ppo_epochs=3"
+
+- id: 230
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-230"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.vf_coef=0.5"
+
+######
+
+- id: 231
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-baseline-0.5-coef.2-id-231"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default task.format_reward_coefficient=0.2"
+
+- id: 232
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-baseline-0.5-coef.2-id-232"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001"
+
+- id: 233
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-baseline-0.5-coef.2-id-233"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.15"
+
+- id: 234
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-baseline-0.5-coef.2-id-234"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.learning_rate=1.0e-6"
+
+- id: 235
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-baseline-0.5-coef.2-id-235"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.gradient_accumulation_steps=12"
+
+- id: 236
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-baseline-0.5-coef.2-id-236"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.num_ppo_epochs=3"
+
+- id: 237
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-baseline-0.5-coef.2-id-237"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=default task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.vf_coef=0.5"
+
+######
+
+- id: 238
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-238"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.num_ppo_epochs=4"
+
+- id: 239
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-239"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.01 trainer.args.num_ppo_epochs=4"
+
+- id: 240
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-240"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.05 trainer.args.num_ppo_epochs=4"
+
+- id: 241
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-241"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.num_ppo_epochs=4 +trainer.args.missing_eos_penalty=0.3"
+
+- id: 242
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-242"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L1024 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.num_ppo_epochs=4"
+
+- id: 243
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-243"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L1024 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.01 trainer.args.num_ppo_epochs=4"
+
+######
+
+- id: 244
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-244"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.01 trainer.args.num_ppo_epochs=3"
+
+- id: 245
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-245"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.05 trainer.args.num_ppo_epochs=3"
+
+- id: 246
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-246"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.0 trainer.args.num_ppo_epochs=3"
+
+- id: 247
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-247"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.5 trainer.args.kl_coef=0.001 trainer.args.num_ppo_epochs=3"
+
+- id: 248
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-248"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.num_ppo_epochs=3 trainer.args.vf_coef=0.03"
+
+- id: 249
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-249"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.num_ppo_epochs=3 trainer.args.whiten_rewards=true"
+
+- id: 250
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-250"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.05 trainer.args.num_ppo_epochs=3 trainer.args.whiten_rewards=true"
+
+- id: 251
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-251"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.num_ppo_epochs=3 trainer.args.learning_rate=1.0e-6"
+
+- id: 252
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-252"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.num_ppo_epochs=3 trainer.args.learning_rate=1.0e-7"
+
+- id: 253
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-253"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.num_ppo_epochs=3 trainer.args.learning_rate=3.0e-7"
+
+- id: 254
+  name: "Qwen2-0.5B-Instruct-gsm8k-PPO-adaptive-0.5-coef.2-id-254"
+  model: "Qwen/Qwen2-0.5B-Instruct"
+  command: "accelerate launch --num_processes 8 --config_file ./config/deepspeed_zero2.yaml src/train.py experiment=PPO_0.5b_L512 model=qwen_instr_0.5b task=gsm8k dataset_wrapper=adaptive dataset_wrapper.reward_threshold=0.5 task.format_reward_coefficient=0.2 trainer.args.kl_coef=0.001 trainer.args.num_ppo_epochs=3 trainer.args.learning_rate=3.0e-7 +trainer.args.missing_eos_penalty=1.0"
+
+

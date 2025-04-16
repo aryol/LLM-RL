@@ -26,22 +26,22 @@ def return_generate_prompt(config, tokenizer):
     def generate_prompt(example, prompt_key="prompt", target_key="target"):
         partial_answer = example.get("partial_target", "")
         if supports_system_prompt:
-            # prefix = [
-            #     {"role": "system", "content": DEFAULT_PROMPT},
-            #     {"role": "user", "content": "Here is the question:\n" + example[prompt_key]},
-            #     {"role": "assistant", "content": "Let me solve this step by step.\n" + partial_answer}
-            # ]
-            if partial_answer == "":
-                prefix = [
-                    # {"role": "system", "content": DEFAULT_PROMPT},
-                    {"role": "user", "content": example[prompt_key] + "\n" + DEFAULT_PROMPT},
-                ]
-            else:
-                prefix = [
-                    # {"role": "system", "content": DEFAULT_PROMPT},
-                    {"role": "user", "content": example[prompt_key] + "\n" + DEFAULT_PROMPT},
-                    {"role": "assistant", "content": partial_answer}
-                ]
+            prefix = [
+                {"role": "system", "content": DEFAULT_PROMPT},
+                {"role": "user", "content": "Here is the question:\n" + example[prompt_key]},
+                {"role": "assistant", "content": "Let me solve this step by step.\n" + partial_answer}
+            ]
+            # if partial_answer == "":
+            #     prefix = [
+            #         # {"role": "system", "content": DEFAULT_PROMPT},
+            #         {"role": "user", "content": example[prompt_key] + "\n" + DEFAULT_PROMPT},
+            #     ]
+            # else:
+            #     prefix = [
+            #         # {"role": "system", "content": DEFAULT_PROMPT},
+            #         {"role": "user", "content": example[prompt_key] + "\n" + DEFAULT_PROMPT},
+            #         {"role": "assistant", "content": partial_answer}
+            #     ]
 
         else:
             prefix = [
@@ -63,7 +63,8 @@ def return_generate_prompt(config, tokenizer):
         return {
             **rest_of_example,
             "prompt": formatted_prompt,
-            "target": extract_answer_from_dataset(example[target_key])
+            "target": extract_answer_from_dataset(example[target_key]),
+            "sol_len": 0 if partial_answer == "" else len(tokenizer.encode(partial_answer, add_special_tokens=False)), 
         }
 
     return partial(generate_prompt, prompt_key=config.task.prompt_key, target_key=config.task.target_key)

@@ -1,0 +1,5 @@
+defaults:
+  - default
+
+model_name_or_path: microsoft/rho-math-1b-v0.1
+model_name: RhoMath-1B
