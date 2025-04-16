@@ -89,6 +89,25 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
         with open_dict(self.config):
             self.config.actor_rollout_ref.actor.optim.total_training_steps = total_training_steps
             self.config.critic.optim.total_training_steps = total_training_steps
+        
+    def log(self, data, reward_extra_info):
+        portions = reward_extra_info['portions']
+        mean_portion = np.mean(portions)
+        std_portion = np.std(portions)
+        is_train_set =  data.non_tensor_batch['extra_info'][0]['split']
+        stage = 'train' if is_train_set=='train' else 'val' 
+        wandb.log({f'portions/{stage}_portions_mean': mean_portion}, step=self.global_steps)
+        wandb.log({f'portions/{stage}_portions_std': std_portion}, step=self.global_steps)
+
+    def update_datasets_with_ratios(self, data, scores, reward_extra_info):
+        ids = reward_extra_info['index']
+        portions = reward_extra_info['portions']
+        if data.non_tensor_batch['extra_info'][0]['split'] == 'train':
+            # Update the training dataset
+            self.train_dataset.dataframe.ratio_actor.update_attempted_ratios.remote([(ids, portions, scores)])
+            self.train_dataset.dataframe.ratio_actor.set_global_step.remote(self.global_steps)
+            self.train_dataset.dataframe.sync_with_all_datasets()
+
 
 from verl.utils.dataset.rl_dataset import RLHFDataset, collate_fn
 from verl.utils.model import compute_position_id_with_mask
@@ -106,10 +125,17 @@ class AdaptiveRLHFDataset(RLHFDataset):
     def _read_files_and_tokenize(self):
         super()._read_files_and_tokenize()
         # pass to curriculum dataset wrapper
+        ratio_actor = RatioAttemptsVarActor.remote(
+            dataset_length=len(self.dataframe),
+            min_ratio=0.0,
+            max_ratio=0.9,
+            moving_avg_alpha=0.8,
+            reward_threshold=0.5
+        )
         if self.type == 'base':
-            self.dataframe = CurriculumDatasetWrapper(self.dataframe)
+            self.dataframe = CurriculumDatasetWrapper(self.dataframe, ratio_actor)
         elif self.type == 'adaptive':
-            self.dataframe = PerSampleCurriculumDatasetWrapper(self.dataframe)
+            self.dataframe = PerSampleCurriculumDatasetWrapper(self.dataframe, ratio_actor)
         else:
             raise NotImplementedError(f"Unknown dataset type: {self.type}")
 
@@ -153,22 +179,114 @@ class AdaptiveRLHFDataset(RLHFDataset):
 
         return row_dict 
     
+import ray
+import numpy as np
 
+@ray.remote
+class RatioAttemptsVarActor:
+    def __init__(self, dataset_length, min_ratio=0.0, max_ratio=0.9, moving_avg_alpha=0.8, reward_threshold=0.5):
+        self.attempted_ratios_list = [[] for _ in range(dataset_length)]
+        self.newly_added_ids = set()
+        self.min_ratio = min_ratio
+        self.max_ratio = max_ratio
+        self.reward_threshold = reward_threshold
+        self.moving_avg_alpha = moving_avg_alpha
+        self.global_step = 0
+        self.mean_min_ratio = min_ratio
+        self.mean_max_ratio = max_ratio        
+        self.max_per_sample_ratio = np.ones(dataset_length) * self.max_ratio
+
+    def update_attempted_ratios(self, gathered_data):
+        for ids, portions, rewards in gathered_data:
+            for id_, portion, reward in zip(ids, portions, rewards):
+                entry_list = self.attempted_ratios_list[id_]
+                if not entry_list or entry_list[-1]['portion'] != portion:
+                    entry_list.append({'portion': portion, 'reward': [reward]})
+                else:
+                    entry_list[-1]['reward'].append(reward)
+                self.newly_added_ids.add(id_)
+        return 1
+
+    def update_min_max_avg_ratios(self,):
+        # Update global mean bounds using newly added IDs
+        avg_macro_upper = 0
+        avg_macro_lower = 0
+        for id_ in self.newly_added_ids:
+            entry = self.attempted_ratios_list[id_][-1]
+            avg_reward = np.mean(entry['reward'])
+            if avg_reward < self.reward_threshold:
+                avg_macro_lower += entry['portion']
+                avg_macro_upper += self.max_per_sample_ratio[id_]
+            else:
+                avg_macro_upper += entry['portion']
+                avg_macro_lower += self.min_ratio
+                self.max_per_sample_ratio[id_] = entry['portion']
+
+        count = len(self.newly_added_ids)
+        if count > 0:
+            self.mean_max_ratio = (
+                self.moving_avg_alpha * self.mean_max_ratio +
+                (1 - self.moving_avg_alpha) * (avg_macro_upper / count)
+            )
+            self.mean_min_ratio = (
+                self.moving_avg_alpha * self.mean_min_ratio +
+                (1 - self.moving_avg_alpha) * (avg_macro_lower / count)
+            )
+
+        self.newly_added_ids.clear()
+        return 1
+
+    def set_global_step(self, step):
+        self.global_step = step
+        return 1
+
+    def get_newly_added_ids(self):
+        return list(self.newly_added_ids)
+
+    def get_max_per_sample_ratio(self):
+        return self.max_per_sample_ratio
+    
+    def get_sample_attempted_ratio_list(self):
+        return self.attempted_ratios_list
+    
+    def get_min_mean_ratio(self):
+        return self.mean_min_ratio
+
+    def get_max_mean_ratio(self):
+        return self.mean_max_ratio
+    
+    def get_global_step(self):
+        return self.global_step
+
+    def get_state_summary(self):
+        return {
+            'mean_min_ratio': self.mean_min_ratio,
+            'mean_max_ratio': self.mean_max_ratio,
+            'num_samples_with_history': sum(1 for x in self.attempted_ratios_list if x),
+            'num_recently_updated': len(self.newly_added_ids)
+        }
 
 class CurriculumDatasetWrapper:
-    def __init__(self, dataset, initial_portion=0.0, prompt_key='prompt', target_key='answer',):
+    def __init__(self, dataset, ratio_attempts_var_actor, initial_portion=0.0, prompt_key='prompt', target_key='answer', ):
         self.dataset = dataset  # Keep as HF Dataset
-        # self.attempted_ratios_list = [[]]*len(dataset) this will create a list of the same object! jesus christ
-        self.attempted_ratios_list = [[] for _ in range(len(dataset))]
-
         self.ground_truth_portion_dist = initial_portion  # Start with a small proportion
         self.prompt_key = prompt_key
         self.target_key = target_key
-        self.newly_added_ids = set()
-        self.flush_newly_added_ids = False
+        self.ratio_actor = ratio_attempts_var_actor
         self.global_step = 0
         self.portions = []
 
+    def __getitem__(self, idx):
+        """Retrieves a dataset sample with a dynamically adjusted reasoning portion."""
+        sample = self.dataset[idx]  # Directly access HF dataset  
+        portion = self._compute_portion_for_sample(idx)
+        # self.global_step = ray.get(self.ratio_actor.get_global_step.remote())
+        return self._apply_portion_to_sample_(sample, portion)
+
+    def _compute_portion_for_sample(self, idx):
+        portion = self.sample_portion(seed=self.return_seed(idx), size=1)[0] # Get current difficulty proportion
+        return portion
+    
     def set_portion(self, portion):
         """Updates the portion of ground-truth CoT reasoning used in training."""
         self.ground_truth_portion_dist = portion
@@ -182,15 +300,6 @@ class CurriculumDatasetWrapper:
         else:
             raise ValueError("ground_truth_portion_dist should be a float or a callable")
 
-    def __getitem__(self, idx):
-        """Retrieves a dataset sample with a dynamically adjusted reasoning portion."""
-        sample = self.dataset[idx]  # Directly access HF dataset
-        portion = self.sample_portion(seed=self.return_seed(idx), size=1)[0] # Get current difficulty proportion
-        self.portions.append(portion)
-        self.flush_newly_added_ids = True
-        
-        return self._apply_portion_to_sample_(sample, portion)
-    
     def _apply_portion_to_sample_(self, sample, portion):
         # Modify reasoning exposure based on `portion`
         if portion > 0.0:
@@ -201,32 +310,8 @@ class CurriculumDatasetWrapper:
             sample['extra_info']['partial_answer'] = cut_answer
             sample['extra_info']['completion'] = completion
             sample['extra_info']['portion'] = portion
-            
         return sample
 
-    def update_attempted_ratios(self, ids, portions, rewards):
-        """Updates the dataset with the attempted ratios and rewards."""
-
-        if self.flush_newly_added_ids:
-            self.newly_added_ids.clear()
-            self.flush_newly_added_ids = False
-
-        if torch.distributed.is_initialized() and torch.distributed.get_world_size() > 1:
-            gathered_data = [None for _ in range(torch.distributed.get_world_size())]
-            torch.distributed.all_gather_object(gathered_data, (ids, portions, rewards))
-        else:
-            gathered_data = [(ids, portions, rewards)]   
-
-        for ids, portions, rewards in gathered_data:
-            for i, (id_, portion, reward) in enumerate(zip(ids, portions, rewards)):
-                if self.attempted_ratios_list[id_]==[]:
-                    self.attempted_ratios_list[id_].append({'portion': portion, 'reward': [reward]})
-                elif self.attempted_ratios_list[id_][-1]['portion'] != portion:
-                    self.attempted_ratios_list[id_].append({'portion': portion, 'reward': [reward]})
-                else:
-                    self.attempted_ratios_list[id_][-1]['reward'].append(reward)
-                self.newly_added_ids.add(id_)
-        
     def return_seed(self, idx):
         return self.global_step + 1024 * idx
 
@@ -241,70 +326,44 @@ class CurriculumDatasetWrapper:
 
 import numpy as np
 class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
-    def __init__(self, dataset, initial_portion=0.0, prompt_key='prompt', target_key='answer', min_ratio=0.0, 
-                 max_ratio=0.9, reward_threshold=0.5, moving_avg_alpha=0.8):
-        super().__init__(dataset, initial_portion, prompt_key, target_key)
-        self.min_ratio = min_ratio
-        self.max_ratio = max_ratio
+    def __init__(self, dataset, ratio_attempts_var_actor, initial_portion=0.0, prompt_key='prompt', target_key='answer',
+                 reward_threshold=0.5):
+        super().__init__(dataset, ratio_attempts_var_actor, initial_portion, prompt_key, target_key)
         self.reward_threshold = reward_threshold
-        self.moving_avg_alpha = moving_avg_alpha
-        self.mean_min_ratio = min_ratio
-        self.mean_max_ratio = max_ratio
+        self.min_mean_ratio = 0.0
+        self.max_mean_ratio = 0.9
+        self.max_per_sample_ratio = np.ones(len(self.dataset)) * self.max_mean_ratio
+        self.attempted_ratio_list = [[] for _ in range(len(self.dataset))]  # Store attempted ratios for each sample
+        self.global_step = 0
 
-        self.max_per_sample_ratio = np.ones(len(dataset)) * self.max_ratio
+    def _compute_portion_for_sample(self, idx):
+        upper_bound = self.max_per_sample_ratio[idx]
+        lower_bound = 0.0 # because we never go back/ Ma be aghab bar nemigardim
+        attempted_ratio_list = self.attempted_ratio_list[idx]
 
-    def __getitem__(self, idx):
-        """Retrieves a dataset sample with a dynamically adjusted reasoning portion."""
-        import os
-        print(f"ACCESSING SAMPLE {idx} in PID {os.getpid()}")
-        sample = self.dataset[idx]  # Directly access HF dataset
-        lower_bound = self.min_ratio
-        upper_bound = self.max_per_sample_ratio[idx] # because we never go back/ Ma be aghab bar nemigardim
-        if self.attempted_ratios_list[idx]:
-            last_gen_portion = self.attempted_ratios_list[idx][-1]['portion']
-            last_gen_avg_reward = np.mean(self.attempted_ratios_list[idx][-1]['reward'])
+        if attempted_ratio_list:
+            last_gen_portion = attempted_ratio_list[-1]['portion']
+            last_gen_avg_reward = np.mean(attempted_ratio_list[-1]['reward'])
             if last_gen_avg_reward < self.reward_threshold:
                 lower_bound = last_gen_portion
             else:
                 upper_bound = last_gen_portion
         else:
             # moving average of the min and max ratio
-            lower_bound = self.mean_min_ratio
-            upper_bound = self.mean_max_ratio
-                                  
+            lower_bound = self.min_mean_ratio
+            upper_bound = self.max_mean_ratio
+        
         portion = self._sample_ratio_with_seed(seed=self.return_seed(idx), size=1, lower_bound=lower_bound, upper_bound=upper_bound)[0]
-        self.portions.append(portion)
-        self.flush_newly_added_ids = True
-        
-        return self._apply_portion_to_sample_(sample, portion)
-
-    def update_attempted_ratios(self, ids, portions, rewards):
-        """Updates the dataset with the attempted ratios and rewards."""
-        import os
-        print(f"updating attempted ratios in PID {os.getpid()}")
-        if self.flush_newly_added_ids and self.newly_added_ids:
-            # compute moving averages of max and min ratios over samples 
-            # (to be used in the first epoch when we havent seen any rewards for each sample yet.)
-            avg_macro_batch_upperbound = 0
-            avg_macro_batch_lowerbound = 0
-            for id_ in self.newly_added_ids:
-                last_gen_portion = self.attempted_ratios_list[id_][-1]['portion']
-                last_gen_avg_reward = np.mean(self.attempted_ratios_list[id_][-1]['reward'])
-                if last_gen_avg_reward < self.reward_threshold:
-                    avg_macro_batch_lowerbound += last_gen_portion
-                    avg_macro_batch_upperbound += self.max_per_sample_ratio[id_]
-                else:
-                    avg_macro_batch_upperbound += last_gen_portion
-                    avg_macro_batch_lowerbound += self.min_ratio    
-                    self.max_per_sample_ratio[id_] = last_gen_portion
-        
-            avg_macro_batch_upperbound /= len(self.newly_added_ids)
-            avg_macro_batch_lowerbound /= len(self.newly_added_ids)
-
-            self.mean_max_ratio = self.moving_avg_alpha * self.mean_max_ratio + (1 - self.moving_avg_alpha) * avg_macro_batch_upperbound
-            self.mean_min_ratio = self.moving_avg_alpha * self.mean_min_ratio + (1 - self.moving_avg_alpha) * avg_macro_batch_lowerbound
-
-        super().update_attempted_ratios(ids, portions, rewards)
+        return portion
+    
+    def sync_with_all_datasets(self):
+        # Sync the ratio actor with all datasets
+        ray.get(self.ratio_actor.update_min_max_avg_ratios.remote())
+        # computing the lowerbound and upperbounds for portion sampling
+        self.max_per_sample_ratio = ray.get(self.ratio_actor.get_max_per_sample_ratio.remote())
+        self.min_mean_ratio = ray.get(self.ratio_actor.get_min_mean_ratio.remote()) # because we never go back/ Ma be aghab bar nemigardim
+        self.attempted_ratio_list = ray.get(self.ratio_actor.get_sample_attempted_ratio_list.remote())
+        self.global_step = ray.get(self.ratio_actor.get_global_step.remote())
 
     # Sample new portion from updated uniform distribution
     def _sample_ratio_with_seed(self, seed=42, size=1, lower_bound=0.0, upper_bound=1.0):
@@ -384,8 +443,8 @@ class NaiveRewardManagerWithPortionLogging(NaiveRewardManager):
                 else:
                     print(f"[score]", score)
 
-        self.log(data, reward_extra_info)
-        self.update_datasets_with_ratios(data, scores ,reward_extra_info)
+        self.trainer.log(data, reward_extra_info)
+        self.trainer.update_datasets_with_ratios(data, scores ,reward_extra_info)
         if return_dict:
             return {
                 "reward_tensor": reward_tensor,
@@ -393,53 +452,3 @@ class NaiveRewardManagerWithPortionLogging(NaiveRewardManager):
             }
         else:
             return reward_tensor
-
-    def log(self, data, reward_extra_info):
-        portions = reward_extra_info['portions']
-        mean_portion = np.mean(portions)
-        std_portion = np.std(portions)
-        is_train_set =  data.non_tensor_batch['extra_info'][0]['split']
-        stage = 'train' if is_train_set=='train' else 'val' 
-        wandb.log({f'portions/{stage}_portions_mean': mean_portion}, step=self.trainer.global_steps)
-        wandb.log({f'portions/{stage}_portions_std': std_portion}, step=self.trainer.global_steps)
-
-    def update_datasets_with_ratios(self, data, scores, reward_extra_info):
-        ids = reward_extra_info['index']
-        portions = reward_extra_info['portions']
-        if data.non_tensor_batch['extra_info'][0]['split'] == 'train':
-            # Update the training dataset
-            self.trainer.train_dataset.dataframe.update_attempted_ratios(ids, portions, scores)
-
-
-# obsolete for now....
-def get_custom_reward_fn(config):
-    import importlib.util, sys
-    reward_fn_config = config.get("custom_reward_function") or {}
-    file_path = reward_fn_config.get("path")
-    if not file_path:
-        return None
-
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"Reward function file '{file_path}' not found.")
-
-    spec = importlib.util.spec_from_file_location("custom_module", file_path)
-    module = importlib.util.module_from_spec(spec)
-    try:
-        sys.modules["custom_module"] = module
-        spec.loader.exec_module(module)
-    except Exception as e:
-        raise RuntimeError(f"Error loading module from '{file_path}': {e}")
-
-    function_name = reward_fn_config.get("name")
-    if not hasattr(module, function_name):
-        raise AttributeError(f"Reward function '{function_name}' not found in '{file_path}'.")
-
-    print(f"using customized reward function '{function_name}' from '{file_path}'")
-    raw_fn = getattr(module, function_name)
-
-    reward_kwargs = dict(reward_fn_config.get("reward_kwargs", {}))
-
-    def wrapped_fn(*args, **kwargs):
-        return raw_fn(*args, **kwargs, **reward_kwargs)
-
-    return wrapped_fn
