@@ -17,6 +17,7 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
     
     def _create_dataloader(self):
         # TODO: we have to make sure the batch size is divisible by the dp size
+        print(self.config.data.train_files)
         self.train_dataset = AdaptiveRLHFDataset(type='adaptive', parquet_files=self.config.data.train_files,
                                         tokenizer=self.tokenizer,
                                         processor=self.processor,
@@ -120,6 +121,7 @@ class AdaptiveRLHFDataset(RLHFDataset):
 
     def __init__(self, *args, **kwargs):
         self.type = kwargs.pop('type', 'base')
+        print(args, kwargs)
         super().__init__(*args, **kwargs)
 
     def _read_files_and_tokenize(self):
