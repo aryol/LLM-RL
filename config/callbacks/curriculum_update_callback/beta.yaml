@@ -1,7 +1,0 @@
-_target_: src.callbacks.curriculum.PortionBetaUpdate
-init_alpha: 2
-init_beta: 5
-final_alpha: 5
-final_beta: 2
-warmup_timesteps: 10
-total_timesteps: 200

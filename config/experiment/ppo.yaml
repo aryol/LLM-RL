@@ -1,0 +1,17 @@
+# @package _global_
+
+defaults:
+  - default
+
+algorithm_name: ppo
+
+algorithm:
+  use_kl_in_reward: False
+  adv_estimator: gae
+
+critic:
+  ppo_micro_batch_size_per_gpu: 8
+  model:
+    path: ${model_path}
+  optim:
+    lr: 1e-5

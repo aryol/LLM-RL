@@ -20,7 +20,7 @@ rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 #
 # more info: https://github.com/ashleve/rootutils
 # ------------------------------------------------------------------------------------ #
-
+from src.utils import hydra_custom_resolvers
 from src.ray_utils import RayPPOTrainerNonParquetteDataset
 
 @ray.remote(num_cpus=1)  # please make sure main_task is not scheduled on head
@@ -33,12 +33,6 @@ class TaskRunner:
         # debugpy.wait_for_client()
         # breakpoint()
         from verl.utils.fs import copy_to_local
-        # print initial config
-        from pprint import pprint
-        from omegaconf import OmegaConf
-        pprint(OmegaConf.to_container(config, resolve=True))  # resolve=True will eval symbol values
-        OmegaConf.resolve(config)
-
         # download the checkpoint from hdfs
         local_path = copy_to_local(config.actor_rollout_ref.model.path)
 
@@ -93,13 +87,13 @@ class TaskRunner:
         reward_fn = reward_manager_cls(tokenizer=tokenizer,
                                        num_examine=0,
                                        compute_score=None,
-                                       reward_fn_key=config.data.reward_fn_key,)
+                                       reward_fn_key='data_source',)
 
         # Note that we always use function-based RM for validation
         val_reward_fn = reward_manager_cls(tokenizer=tokenizer,
                                            num_examine=1,
                                            compute_score=None,
-                                           reward_fn_key=config.data.reward_fn_key)
+                                           reward_fn_key='data_source')
         resource_pool_manager = ResourcePoolManager(resource_pool_spec=resource_pool_spec, mapping=mapping)
 
         trainer = RayPPOTrainerNonParquetteDataset(config=config,
@@ -134,8 +128,13 @@ def run_ppo(config) -> None:
     ray.get(runner.run.remote(config))
 
 
-@hydra.main(config_path='../config', config_name='ppo_trainer', version_base=None)
+@hydra.main(config_path='../config', config_name='train', version_base=None)
 def main(config):
+    # print initial config
+    from pprint import pprint
+    from omegaconf import OmegaConf
+    pprint(OmegaConf.to_container(config, resolve=True))  # resolve=True will eval symbol values
+    OmegaConf.resolve(config)
     run_ppo(config)
 
 if __name__ == '__main__':

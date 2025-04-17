@@ -11,6 +11,10 @@ source ./install.sh
 downloading the data
 https://github.com/eric-haibin-lin/verl-data/tree/main
 
+verl git version to install
+commit 550bbbbffe23bc5450db8ce02b256eb75fbf4129
+
+
 ## Running commands
 
 first activate the conda environment

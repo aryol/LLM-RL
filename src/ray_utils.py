@@ -18,7 +18,7 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
     def _create_dataloader(self):
         # TODO: we have to make sure the batch size is divisible by the dp size
         print(self.config.data.train_files)
-        self.train_dataset = AdaptiveRLHFDataset(type='adaptive', parquet_files=self.config.data.train_files,
+        self.train_dataset = AdaptiveRLHFDataset(type=self.config.data.train_dataset_type, parquet_files=self.config.data.train_files,
                                         tokenizer=self.tokenizer,
                                         processor=self.processor,
                                         prompt_key=self.config.data.prompt_key,

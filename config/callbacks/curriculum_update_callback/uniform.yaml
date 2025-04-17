@@ -1,8 +1,0 @@
-_target_: src.callbacks.curriculum.PortionUniformUpdate
-lower_bound_init: 0.0
-lower_bound_final: 0.0
-upper_bound_init: 1.0
-upper_bound_final: 1.0
-warmup_timesteps: 0
-total_timesteps: 300
-

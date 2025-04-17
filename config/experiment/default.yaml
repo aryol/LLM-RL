@@ -1,12 +1,38 @@
 # @package _global_
 
 defaults:
-  - override /callbacks/curriculum_update_callback: just_log
-  - override /dataset_wrapper: default
-  - override /trainer: ???
-  - override /task: ???
-  - override /model: ???
+  - _self_
 
+model_path: ??? # e.g. Qwen/Qwen2.5-0.5B-Instruct 
 
-    
+trainer:
+  n_gpus_per_node: 1
 
+data:
+  train_dataset_type: adaptive # base or adaptive
+  train_batch_size: 256
+  max_prompt_length: 1024
+  max_response_length: 1024
+
+algorithm:
+  use_kl_in_reward: False
+  adv_estimator: ???
+
+actor_rollout_ref:
+  model:
+    path: ${model_path}
+  actor:
+    ppo_mini_batch_size: 64
+    ppo_micro_batch_size_per_gpu: 8
+    optim:
+      lr: 1e-6
+  rollout:
+    log_prob_micro_batch_size_per_gpu: 2
+    tensor_model_parallel_size: 1
+    gpu_memory_utilization: 0.5
+
+critic:
+  ppo_micro_batch_size_per_gpu: 8
+  optim:
+    lr: 1e-5
+  
