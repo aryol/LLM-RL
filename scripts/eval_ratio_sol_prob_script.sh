@@ -1,0 +1,5 @@
+CUDA_VISIBLE_DEVICES=0 python scripts/eval_ratio_sol_prob.py model.model_name_or_path="trained_model/gsm8k-Qwen2-0.5B-Instruct/0/checkpoint-40/" save_name="Qwen_0.5B_229_40_train" split="train" > logs1.txt &
+CUDA_VISIBLE_DEVICES=1 python scripts/eval_ratio_sol_prob.py model.model_name_or_path="trained_model/gsm8k-Qwen2-0.5B-Instruct/0/checkpoint-40/" save_name="Qwen_0.5B_229_40_test" split="test" > logs2.txt &
+
+CUDA_VISIBLE_DEVICES=2 python scripts/eval_ratio_sol_prob.py model.model_name_or_path="trained_model/gsm8k-Qwen2-0.5B-Instruct/0/checkpoint-80/" save_name="Qwen_0.5B_229_80_train" split="train" > logs3.txt &
+CUDA_VISIBLE_DEVICES=3 python scripts/eval_ratio_sol_prob.py model.model_name_or_path="trained_model/gsm8k-Qwen2-0.5B-Instruct/0/checkpoint-80/" save_name="Qwen_0.5B_229_80_test" split="test" > logs4.txt &

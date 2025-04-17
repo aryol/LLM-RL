@@ -13,6 +13,12 @@ sampling_params:
   stop: "\nuser:"
   n: 8
   seed: 0
+  max_tokens: 1024
+
+
+split: "train"
+save_name: ""
+samples: null
 
 
 log_dir: ${oc.env:PROJECT_ROOT}/logs/eval_ratio_sol_prob
