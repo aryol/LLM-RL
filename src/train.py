@@ -21,7 +21,8 @@ rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 # more info: https://github.com/ashleve/rootutils
 # ------------------------------------------------------------------------------------ #
 from src.utils import hydra_custom_resolvers
-from src.ray_utils import RayPPOTrainerNonParquetteDataset
+from src.ray_trainer import RayPPOTrainerNonParquetteDataset
+from src.utils.naive_verl_reward_wrapper import NaiveRewardManagerWithPortionLogging
 
 @ray.remote(num_cpus=1)  # please make sure main_task is not scheduled on head
 class TaskRunner:
@@ -31,7 +32,7 @@ class TaskRunner:
         # debugpy.listen(("0.0.0.0", 5678))  # Or another port
         # print("Waiting for debugger to attach...")
         # debugpy.wait_for_client()
-        # breakpoint()
+        breakpoint()
         from verl.utils.fs import copy_to_local
         # download the checkpoint from hdfs
         local_path = copy_to_local(config.actor_rollout_ref.model.path)
@@ -79,11 +80,8 @@ class TaskRunner:
             role_worker_mapping[Role.RefPolicy] = ray.remote(ActorRolloutRefWorker)
             mapping[Role.RefPolicy] = global_pool_id
 
-        reward_manager_name = config.reward_model.get("reward_manager", "naive")
-        if reward_manager_name == 'naive':
-            from src.ray_utils import NaiveRewardManagerWithPortionLogging
-            reward_manager_cls = NaiveRewardManagerWithPortionLogging
-
+        # use naive reward manager
+        reward_manager_cls = NaiveRewardManagerWithPortionLogging
         reward_fn = reward_manager_cls(tokenizer=tokenizer,
                                        num_examine=0,
                                        compute_score=None,

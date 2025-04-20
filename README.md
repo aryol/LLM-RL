@@ -15,6 +15,11 @@ verl git version to install
 commit 550bbbbffe23bc5450db8ce02b256eb75fbf4129
 
 
+#### to continue training a model (actor critic etc), find the logging directory, date and time, then write the command with configs you prefer, and append `day_time=${now:%Y-%m-%d}_${now:%H-%M-%S}` (or maybe also `log_dir=... `) e.g.
+```bash
+python ./src/train.py experiment=qwen_gsm8k_uniform day_time="2023-10-12_16-00-00" log_dir=./logs/progressive_rl_ppo_on_gsm8k_Qwen2.5-0.5B-Instruct
+```
+
 ## Running commands
 
 first activate the conda environment
