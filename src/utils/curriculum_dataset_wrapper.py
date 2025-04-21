@@ -60,6 +60,9 @@ class CurriculumDatasetWrapper:
         for i in range(len(self.dataset)):
             yield self[i]
 
+    def sync_with_all_datasets(self):
+        self.global_step = ray.get(self.ratio_actor.get_global_step.remote())
+
 
 import numpy as np
 class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
