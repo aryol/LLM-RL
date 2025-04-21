@@ -21,7 +21,7 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
     def _create_dataloader(self):
         # TODO: we have to make sure the batch size is divisible by the dp size
         print(self.config.data.train_files)
-        self.train_dataset = AdaptiveRLHFDataset(type=self.config.data.train_dataset_type, 
+        self.train_dataset = AdaptiveRLHFDataset(type=self.config.data.train_dataset_type, curriculum_config=self.config.data.curriculum_config,
                                         parquet_files=self.config.data.train_files,
                                         tokenizer=self.tokenizer,
                                         processor=self.processor,
@@ -51,7 +51,7 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
                                                 collate_fn=collate_fn,
                                                 sampler=sampler)
 
-        self.val_dataset = AdaptiveRLHFDataset(type='base', 
+        self.val_dataset = AdaptiveRLHFDataset(type='base', curriculum_config=self.config.data.curriculum_config,
                                     parquet_files=self.config.data.val_files,
                                     tokenizer=self.tokenizer,
                                     processor=self.processor,
@@ -126,6 +126,7 @@ class AdaptiveRLHFDataset(RLHFDataset):
 
     def __init__(self, *args, **kwargs):
         self.type = kwargs.pop('type', 'base')
+        self.curriculum_config = kwargs.pop('curriculum_config', {})
         print(args, kwargs)
         super().__init__(*args, **kwargs)
 
@@ -140,9 +141,9 @@ class AdaptiveRLHFDataset(RLHFDataset):
             reward_threshold=0.5
         )
         if self.type == 'base':
-            self.dataframe = CurriculumDatasetWrapper(self.dataframe, ratio_actor)
+            self.dataframe = CurriculumDatasetWrapper(self.dataframe, ratio_attempts_var_actor=ratio_actor, **self.curriculum_config)
         elif self.type == 'adaptive':
-            self.dataframe = PerSampleCurriculumDatasetWrapper(self.dataframe, ratio_actor)
+            self.dataframe = PerSampleCurriculumDatasetWrapper(self.dataframe, ratio_attempts_var_actor=ratio_actor, **self.curriculum_config)
         else:
             raise NotImplementedError(f"Unknown dataset type: {self.type}")
 

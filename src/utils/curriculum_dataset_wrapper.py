@@ -1,16 +1,17 @@
 
 import ray
 import numpy as np
-
+import re
 
 class CurriculumDatasetWrapper:
-    def __init__(self, dataset, ratio_attempts_var_actor, initial_portion=0.0, prompt_key='prompt', target_key='answer', ):
+    def __init__(self, dataset, ratio_attempts_var_actor, initial_portion=0.0, prompt_key='prompt', target_key='answer', seperator=None):
         self.dataset = dataset  # Keep as HF Dataset
         self.ground_truth_portion_dist = initial_portion  # Start with a small proportion
         self.prompt_key = prompt_key
         self.target_key = target_key
         self.ratio_actor = ratio_attempts_var_actor
         self.global_step = 0
+        self.seperator = seperator
         self.portions = []
 
     def __getitem__(self, idx):
@@ -41,12 +42,27 @@ class CurriculumDatasetWrapper:
         # Modify reasoning exposure based on `portion`
         if portion > 0.0:
             reasoning_steps = sample['extra_info'].get(self.target_key, '')
-            word_list = reasoning_steps.split(' ')
-            cut_answer = ' '.join(word_list[:int(len(word_list) * portion)])  # Partial CoT answer
-            completion = ''.join(word_list[int(len(word_list) * portion):])  # Remaining CoT answer
-            sample['extra_info']['partial_answer'] = cut_answer
-            sample['extra_info']['completion'] = completion
-            sample['extra_info']['portion'] = portion
+            if self.seperator == 'char':
+                word_list = list(reasoning_steps)
+                cut_answer = ''.join(word_list[:int(len(word_list) * portion)])  # Partial CoT answer
+                completion = ''.join(word_list[int(len(word_list) * portion):])  # Remaining CoT answer
+            elif self.seperator is not None:
+                word_list = reasoning_steps.split(self.seperator)
+                cut_answer = self.seperator.join(word_list[:int(len(word_list) * portion)])  # Partial CoT answer
+                completion = self.seperator.join(word_list[int(len(word_list) * portion):])  # Remaining CoT answer
+            elif self.seperator is None:
+                matches = list(re.finditer(r'\S+\s*', reasoning_steps))
+                cut_index = int(len(matches) * portion)
+                cut_answer = ''.join(m.group(0) for m in matches[:cut_index])
+                completion = ''.join(m.group(0) for m in matches[cut_index:])
+                # word_list = reasoning_steps.split()
+                # cut_answer = ' '.join(word_list[:int(len(word_list) * portion)])  # Partial CoT answer
+                # completion = ' '.join(word_list[int(len(word_list) * portion):])  # Remaining CoT answer
+            
+            if cut_answer != '':
+                sample['extra_info']['partial_answer'] = cut_answer
+                sample['extra_info']['completion'] = completion
+                sample['extra_info']['portion'] = portion
         return sample
 
     def return_seed(self, idx):
@@ -67,8 +83,8 @@ class CurriculumDatasetWrapper:
 import numpy as np
 class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
     def __init__(self, dataset, ratio_attempts_var_actor, initial_portion=0.0, prompt_key='prompt', target_key='answer',
-                 reward_threshold=0.5):
-        super().__init__(dataset, ratio_attempts_var_actor, initial_portion, prompt_key, target_key)
+                 reward_threshold=0.5, seperator=None):
+        super().__init__(dataset, ratio_attempts_var_actor, initial_portion, prompt_key, target_key, seperator=seperator)
         self.reward_threshold = reward_threshold
         self.min_mean_ratio = 0.0
         self.max_mean_ratio = 0.9
