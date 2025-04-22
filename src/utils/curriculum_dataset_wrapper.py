@@ -63,6 +63,7 @@ class CurriculumDatasetWrapper:
                 sample['extra_info']['partial_answer'] = cut_answer
                 sample['extra_info']['completion'] = completion
                 sample['extra_info']['portion'] = portion
+        
         return sample
 
     def return_seed(self, idx):
@@ -78,8 +79,11 @@ class CurriculumDatasetWrapper:
 
     def sync_with_all_datasets(self):
         self.global_step = ray.get(self.ratio_actor.get_global_step.remote())
+    
 
 
+
+import os
 import numpy as np
 class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
     def __init__(self, dataset, ratio_attempts_var_actor, initial_portion=0.0, prompt_key='prompt', target_key='answer',
@@ -91,6 +95,9 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
         self.max_per_sample_ratio = np.ones(len(self.dataset)) * self.max_mean_ratio
         self.attempted_ratio_list = [[] for _ in range(len(self.dataset))]  # Store attempted ratios for each sample
         self.global_step = 0
+        
+        self.wrote_file_step = 0
+        self.this_process_tried_portions = []  # for debugging
 
     def _compute_portion_for_sample(self, idx):
         upper_bound = self.max_per_sample_ratio[idx]
@@ -110,10 +117,12 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
             upper_bound = self.max_mean_ratio
         
         portion = self._sample_ratio_with_seed(seed=self.return_seed(idx), size=1, lower_bound=lower_bound, upper_bound=upper_bound)[0]
+        self.this_process_tried_portions.append((idx, portion))
         return portion
     
     def sync_with_all_datasets(self):
         # Sync the ratio actor with all datasets
+        self.save_portions_to_file()
         ray.get(self.ratio_actor.update_min_max_avg_ratios.remote())
         # computing the lowerbound and upperbounds for portion sampling
         self.max_per_sample_ratio = ray.get(self.ratio_actor.get_max_per_sample_ratio.remote())
@@ -127,6 +136,36 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
 
     def set_portion(self, portion):
         raise NotImplementedError("Portion setting is not supported for per-sample curriculum learning.")
+
+    # for debugging if all processes are getting the same portions/values
+    def save_portions_to_file(self,):
+        """Write attempted sample ratios and bounds to file for debugging."""
+        pid = os.getpid()
+        os.makedirs("./debugging", exist_ok=True)
+        os.makedirs(f"./debugging/portion_pid{pid}", exist_ok=True)
+        path = f'./debugging/portion_pid{pid}/step{self.wrote_file_step}.txt'
+
+        with open(path, 'w') as f:
+            f.write(f"=== Debug info for PID {pid} ===\n\n")
+            f.write(f"Global step: {self.global_step}\n")
+            f.write(f"Min mean ratio: {self.min_mean_ratio}\n")
+            f.write(f"Max mean ratio: {self.max_mean_ratio}\n\n")
+
+            f.write("Sampled portions in this process:\n")
+            for idx, portion in self.this_process_tried_portions:
+                f.write(f"  - idx: {idx}, portion: {portion:.4f}\n")
+
+            f.write("\nPer-sample max ratios and attempts:\n")
+            for i in range(len(self.dataset)):
+                f.write(f"\nidx {i}:\n")
+                f.write(f"  max_per_sample_ratio: {self.max_per_sample_ratio[i]:.4f}\n")
+                for entry in self.attempted_ratio_list[i]:
+                    f.write(f"    portion: {entry['portion']}, rewards: {entry['reward']}\n")
+
+        # Reset logging
+        self.wrote_file_step += 1
+        self.this_process_tried_portions = []
+
 
 
 @ray.remote
