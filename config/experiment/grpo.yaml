@@ -13,6 +13,7 @@ actor_rollout_ref:
   ref:
     fsdp_config:
       param_offload: True
+    log_prob_micro_batch_size_per_gpu: 16
 
   model:
     use_remove_padding: True
@@ -22,7 +23,7 @@ actor_rollout_ref:
     gpu_memory_utilization: 0.6
     n: 8 # grpo n > 1
     log_prob_micro_batch_size_per_gpu: 16
-    tensor_model_parallel_size: 2
+    tensor_model_parallel_size: 1
 
   actor:
     optim:
@@ -39,5 +40,3 @@ actor_rollout_ref:
     fsdp_config:
       param_offload: False
       optimizer_offload: False
-
-critic: null

@@ -4,7 +4,7 @@ import numpy as np
 import re
 
 class CurriculumDatasetWrapper:
-    def __init__(self, dataset, ratio_attempts_var_actor, initial_portion=0.0, prompt_key='prompt', target_key='answer', seperator=None):
+    def __init__(self, dataset, ratio_attempts_var_actor, initial_portion=0.0, prompt_key='prompt', target_key='answer', seperator=None, zero_prob=0):
         self.dataset = dataset  # Keep as HF Dataset
         self.ground_truth_portion_dist = initial_portion  # Start with a small proportion
         self.prompt_key = prompt_key
@@ -13,6 +13,7 @@ class CurriculumDatasetWrapper:
         self.global_step = 0
         self.seperator = seperator
         self.portions = []
+        self.zero_prob = 0
 
     def __getitem__(self, idx):
         """Retrieves a dataset sample with a dynamically adjusted reasoning portion."""
@@ -83,7 +84,7 @@ class CurriculumDatasetWrapper:
 import numpy as np
 class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
     def __init__(self, dataset, ratio_attempts_var_actor, initial_portion=0.0, prompt_key='prompt', target_key='answer',
-                 reward_threshold=0.5, seperator=None):
+                 reward_threshold=0.5, seperator=None, zero_prob=0):
         super().__init__(dataset, ratio_attempts_var_actor, initial_portion, prompt_key, target_key, seperator=seperator)
         self.reward_threshold = reward_threshold
         self.min_mean_ratio = 0.0
@@ -91,6 +92,7 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
         self.max_per_sample_ratio = np.ones(len(self.dataset)) * self.max_mean_ratio
         self.attempted_ratio_list = [[] for _ in range(len(self.dataset))]  # Store attempted ratios for each sample
         self.global_step = 0
+        self.zero_prob = zero_prob
 
     def _compute_portion_for_sample(self, idx):
         upper_bound = self.max_per_sample_ratio[idx]
@@ -123,7 +125,33 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
 
     # Sample new portion from updated uniform distribution
     def _sample_ratio_with_seed(self, seed=42, size=1, lower_bound=0.0, upper_bound=1.0):
-        return np.random.default_rng(seed).uniform(low=lower_bound, high=upper_bound, size=size)
+        if self.zero_prob == 0:
+            return np.random.default_rng(seed).uniform(low=lower_bound, high=upper_bound, size=size)
+        elif self.zero_prob == "linear":
+            rng = np.random.default_rng(seed)
+            zero = rng.uniform(low=0, high=1, size=1) >= upper_bound
+            if zero:
+                return [0]
+            else:
+                return rng.uniform(low=lower_bound, high=upper_bound, size=size)
+        elif self.zero_prob == "uniform":
+            return np.random.default_rng(seed).uniform(low=0, high=0.9, size=size)
+        elif self.zero_prob == "uniform-linear":
+            rng = np.random.default_rng(seed)
+            zero = rng.uniform(low=0, high=1, size=1) >= 0.5
+            if zero:
+                return [0]
+            else:
+                return rng.uniform(low=lower_bound, high=upper_bound, size=size)
+        else:
+            rng = np.random.default_rng(seed)
+            zero = rng.uniform(0, 1, 1) <= float(self.zero_prob)
+            if zero:
+                return [0]
+            else:
+                return rng.uniform(low=lower_bound, high=upper_bound, size=size)
+
+
 
     def set_portion(self, portion):
         raise NotImplementedError("Portion setting is not supported for per-sample curriculum learning.")
