@@ -32,7 +32,7 @@ class TaskRunner:
         # debugpy.listen(("0.0.0.0", 5678))  # Or another port
         # print("Waiting for debugger to attach...")
         # debugpy.wait_for_client()
-        # breakpoint()
+        breakpoint()
         from verl.utils.fs import copy_to_local
         # download the checkpoint from hdfs
         local_path = copy_to_local(config.actor_rollout_ref.model.path)
@@ -83,7 +83,7 @@ class TaskRunner:
         # use naive reward manager
         reward_manager_cls = NaiveRewardManagerWithPortionLogging
         reward_fn = reward_manager_cls(tokenizer=tokenizer,
-                                       num_examine=0,
+                                       num_examine=1,
                                        compute_score=None,
                                        reward_fn_key='data_source',)
 

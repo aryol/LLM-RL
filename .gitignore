@@ -13,6 +13,9 @@ scripts/tmp_scripts
 # DS Store
 .DS_Store
 
+# VS Code
+*code-workspace
+
 # Runner tmp folder
 tmp/
 

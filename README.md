@@ -12,7 +12,9 @@ downloading the data
 https://github.com/eric-haibin-lin/verl-data/tree/main
 
 verl git version to install
-commit 550bbbbffe23bc5450db8ce02b256eb75fbf4129
+git checkout 550bbbbffe23bc5450db8ce02b256eb75fbf4129
+
+pip install "triton==3.1.0"
 
 
 #### to continue training a model (actor critic etc), find the logging directory, date and time, then write the command with configs you prefer, and append `day_time=${now:%Y-%m-%d}_${now:%H-%M-%S}` (or maybe also `log_dir=... `) e.g.
