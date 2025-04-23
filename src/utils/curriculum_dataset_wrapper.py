@@ -124,7 +124,7 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
     
     def sync_with_all_datasets(self):
         # Sync the ratio actor with all datasets
-        self.save_portions_to_file()
+        # self.save_portions_to_file()
         ray.get(self.ratio_actor.update_min_max_avg_ratios.remote())
         # computing the lowerbound and upperbounds for portion sampling
         self.max_per_sample_ratio = ray.get(self.ratio_actor.get_max_per_sample_ratio.remote())
@@ -151,7 +151,7 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
             if zero:
                 return [0]
             else:
-                return rng.uniform(low=lower_bound, high=upper_bound, size=size)
+                return rng.uniform(low=0, high=0.9, size=size)
         else:
             rng = np.random.default_rng(seed)
             zero = rng.uniform(0, 1, 1) <= float(self.zero_prob)
