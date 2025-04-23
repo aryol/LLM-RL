@@ -20,6 +20,14 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
     
     def _create_dataloader(self):
         # TODO: we have to make sure the batch size is divisible by the dp size
+
+        # taking care of the cases where a chat template is not defined. 
+        if self.tokenizer.chat_template is None:
+            print("No chat template found. Setting a custom one.")
+            self.tokenizer.chat_template = """{% for message in messages %}
+{{ message['role'] }}: {{ message['content'] }}
+{% endfor %}"""
+
         print(self.config.data.train_files)
         self.train_dataset = AdaptiveRLHFDataset(type=self.config.data.train_dataset_type, curriculum_config=self.config.data.curriculum_config,
                                         parquet_files=self.config.data.train_files,
