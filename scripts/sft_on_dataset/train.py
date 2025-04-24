@@ -642,7 +642,7 @@ class FixedSFTDataset(SFTDataset):
             except Exception:
                 print(f'self.prompts={self.prompts}')
                 raise
-        self.prompts = self.prompts.squeeze().tolist()[:512]
+        self.prompts = self.prompts.squeeze().tolist()
         self.responses = self.dataframe[self.response_key]
         for key in self.response_dict_keys:
             try:
@@ -650,7 +650,7 @@ class FixedSFTDataset(SFTDataset):
             except Exception:
                 print(f'self.responses={self.responses}')
                 raise
-        self.responses = self.responses.squeeze().tolist()[:512]
+        self.responses = self.responses.squeeze().tolist()
     
     def __getitem__(self, item):
         tokenizer = self.tokenizer
