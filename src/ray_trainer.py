@@ -23,10 +23,11 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
 
         # taking care of the cases where a chat template is not defined. 
         if self.tokenizer.chat_template is None:
-            print("No chat template found. Setting a custom one.")
-            self.tokenizer.chat_template = """{% for message in messages %}
-{{ message['role'] }}: {{ message['content'] }}
-{% endfor %}"""
+            print("No chat template found. Setting a custom one. it should take care of add_generation_prompt")
+            self.tokenizer.chat_template = """{% for message in messages -%}
+                                            {{ message['role'] }}: {{ message['content'] }}
+                                            {% endfor -%}{% if add_generation_prompt -%}
+                                            assistant: {% endif %}"""
 
         print(self.config.data.train_files)
         self.train_dataset = AdaptiveRLHFDataset(type=self.config.data.train_dataset_type, curriculum_config=self.config.data.curriculum_config,

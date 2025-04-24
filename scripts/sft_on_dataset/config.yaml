@@ -1,0 +1,75 @@
+
+
+model_path: ??? # e.g. Qwen/Qwen2.5-0.5B-Instruct 
+
+model_name: ${split_string_with_slash_and_take_last:${model.partial_pretrain}}
+day_time: ${now:%Y-%m-%d}_${now:%H-%M-%S}
+log_dir: ${oc.env:PROJECT_ROOT}/logs/SFT_for_rl/${data.name}_${model_name}
+
+hydra:
+  run:
+    dir: ${log_dir}/${day_time}
+  sweep:
+    dir: ${log_dir}/sweep/${day_time}
+    subdir: ${hydra.job.num}
+
+data:
+  train_batch_size: 256
+  micro_batch_size: null # will be deprecated, use micro_batch_size_per_gpu
+  micro_batch_size_per_gpu: 4  # this is also val batch size
+  name: gsm8k # gsm8k or math
+  train_files: ./data/verl-data/${data.name}/train.parquet
+  val_files: ./data/verl-data/${data.name}/test.parquet
+  # Single-turn settings
+  prompt_key: prompt
+  response_key: extra_info
+  prompt_dict_keys: []
+  response_dict_keys: ['answer']
+  # Multi-turn settings
+  multiturn:
+    enable: false  # Set to true to use multi-turn dataset
+    messages_key: messages  # Key for messages list in multi-turn mode
+  max_length: 2048
+  truncation: error
+  balance_dp_token: False
+  chat_template: null
+  custom_cls:
+    path: null
+    name: null
+
+model:
+  partial_pretrain: ~/models/gemma-1.1-7b-it
+  fsdp_config:
+    wrap_policy:
+      min_num_params: 0
+    cpu_offload: False
+    offload_params: False
+  external_lib: null
+  enable_gradient_checkpointing: False
+  trust_remote_code: False
+  lora_rank: 0  # Set to positive value to enable LoRA (e.g., 32)
+  lora_alpha: 16  # LoRA scaling factor
+  target_modules: all-linear  # Target modules for LoRA adaptation
+  use_liger: False
+
+optim:
+  lr: 1e-5
+  betas: [0.9, 0.95]
+  weight_decay: 0.01
+  warmup_steps_ratio: 0.1
+  clip_grad: 1.0
+  lr_scheduler: cosine
+
+ulysses_sequence_parallel_size: 1
+use_remove_padding: False
+
+trainer:
+  default_local_dir: ${log_dir}/${day_time}/checkpoints/
+  default_hdfs_dir: null # hdfs://tmp/experiments/gsm8k/gemma-1.1-7b-it/ # change the hdfs path here
+  resume_path: null
+  project_name: SFT_${data.name}_${model_name}
+  experiment_name: test
+  total_epochs: 5
+  total_training_steps: null
+  logger: ['console', 'wandb']
+  seed: 42

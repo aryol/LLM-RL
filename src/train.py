@@ -1,6 +1,8 @@
 import os
 import ray
 import hydra
+import tokenizers
+import transformers
 
 import rootutils
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
@@ -32,6 +34,7 @@ class TaskRunner:
         # debugpy.listen(("0.0.0.0", 5678))  # Or another port
         # print("Waiting for debugger to attach...")
         # debugpy.wait_for_client()
+        # if using ray debugger, you only need this:
         breakpoint()
         from verl.utils.fs import copy_to_local
         # download the checkpoint from hdfs
