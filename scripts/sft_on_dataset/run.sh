@@ -5,8 +5,9 @@ conda activate verl
 
 set -x
 
-torchrun scripts/sft_on_dataset/train.py \
+torchrun --nproc_per_node=1 scripts/sft_on_dataset/train.py \
     data.name=math \
+    data.max_length=3072 \
     model.partial_pretrain=meta-llama/Llama-3.2-1B \
     data.micro_batch_size_per_gpu=4 \
     data.train_batch_size=256 \

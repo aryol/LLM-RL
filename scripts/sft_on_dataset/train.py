@@ -243,8 +243,8 @@ class FSDPSFTTrainer:
             )
             if self.add_a_dummy_embedding_to_model:
                 # add a dummy embedding to the model
-                self.model.resize_token_embeddings(len(self.tokenizer))
-                self.model.get_input_embeddings().weight.data[self.tokenizer.pad_token_id] = -100.0
+                self.model.resize_token_embeddings(len(self.tokenizer),  mean_resizing=False)
+                # self.model.get_input_embeddings().weight.data[self.tokenizer.pad_token_id] = -100.0
 
             if self.use_remove_padding or self.config.ulysses_sequence_parallel_size > 1:
                 from verl.models.transformers.monkey_patch import apply_monkey_patch
