@@ -720,6 +720,11 @@ class FixedSFTDataset(SFTDataset):
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from huggingface_hub import create_repo, HfApi
 def upload_models_to_hub(saved_models_path: str):
+    # only on the main process
+    if torch.distributed.is_initialized() and torch.distributed.get_world_size() != 1 and torch.distributed.get_rank() != 0:
+        print("Not on main process, skip uploading to huggingface hub")
+        print(f'world size: {torch.distributed.get_world_size()}, rank: {torch.distributed.get_rank()}')
+        return
     username = HfApi().whoami()["name"]
     model_epochs = os.listdir(saved_models_path)
     for epoch in model_epochs:
@@ -750,16 +755,21 @@ def main(config):
 
     local_rank, rank, world_size = initialize_global_process_group()
     device_mesh = init_device_mesh(device_type="cuda", mesh_shape=(world_size,), mesh_dim_names=("fsdp",))
-    dp_size = world_size // config.ulysses_sequence_parallel_size
-    ulysses_device_mesh = init_device_mesh(
-        device_type="cuda", mesh_shape=(dp_size, config.ulysses_sequence_parallel_size), mesh_dim_names=("dp", "sp")
-    )
-    trainer = FSDPSFTTrainer(config=config, device_mesh=device_mesh, ulysses_device_mesh=ulysses_device_mesh)
-    trainer.fit()
 
-    print("Training finished. Uploading models to huggingface hub...")
-    upload_models_to_hub(saved_models_path=config.trainer.default_local_dir)
-    # upload_models_to_hub(saved_models_path='/dlabscratch1/amani/LLM-RL/logs/SFT_for_rl/gsm8k_Llama-3.2-1B/2025-04-24_18-53-50/checkpoints/')
+    if config.get('just_upload_models_to_hub', False):
+        print("not training, just uploading models to huggingface hub...")
+        upload_models_to_hub(saved_models_path=config.path_to_checkpoints_folder)
+    else:
+        dp_size = world_size // config.ulysses_sequence_parallel_size
+        ulysses_device_mesh = init_device_mesh(
+            device_type="cuda", mesh_shape=(dp_size, config.ulysses_sequence_parallel_size), mesh_dim_names=("dp", "sp")
+        )
+        trainer = FSDPSFTTrainer(config=config, device_mesh=device_mesh, ulysses_device_mesh=ulysses_device_mesh)
+        trainer.fit()
+
+        print("Training finished. Uploading models to huggingface hub...")
+        upload_models_to_hub(saved_models_path=config.trainer.default_local_dir)
+        # upload_models_to_hub(saved_models_path='/dlabscratch1/amani/LLM-RL/logs/SFT_for_rl/gsm8k_Llama-3.2-1B/2025-04-24_18-53-50/checkpoints/')
     
 
 if __name__ == "__main__":
