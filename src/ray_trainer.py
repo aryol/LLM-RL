@@ -6,6 +6,10 @@ from torchdata.stateful_dataloader import StatefulDataLoader
 from omegaconf import OmegaConf, open_dict
 import wandb
 import numpy as np
+import os
+import ray
+from verl.utils.checkpoint.checkpoint_manager import find_latest_ckpt_path
+
 
 from src.utils.curriculum_dataset_wrapper import RatioAttemptsVariablesActor, \
                                                     CurriculumDatasetWrapper, PerSampleCurriculumDatasetWrapper
@@ -104,6 +108,37 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
         with open_dict(self.config):
             self.config.actor_rollout_ref.actor.optim.total_training_steps = total_training_steps
             self.config.critic.optim.total_training_steps = total_training_steps
+    
+
+    def _save_checkpoint(self):
+        super()._save_checkpoint()
+        # save the dataset state
+        local_global_step_folder = os.path.join(self.config.trainer.default_local_dir,
+                                                f'global_step_{self.global_steps}')
+        ratio_actor_local_path = os.path.join(local_global_step_folder, 'ratio_actor.pt')
+        ratio_actor_state_dict = ray.get(self.train_dataset.dataframe.ratio_actor.get_state.remote())
+        torch.save(ratio_actor_state_dict, ratio_actor_local_path)
+    
+
+    def _load_checkpoint(self):
+        super()._load_checkpoint()
+        # load the dataset state
+        checkpoint_folder = self.config.trainer.default_local_dir  # TODO: check path
+        if not os.path.isabs(checkpoint_folder):
+            working_dir = os.getcwd()
+            checkpoint_folder = os.path.join(working_dir, checkpoint_folder)
+        global_step_folder = find_latest_ckpt_path(checkpoint_folder)  # None if no latest
+        if global_step_folder is None:
+            return
+        ratio_actor_local_path = os.path.join(global_step_folder, 'ratio_actor.pt')
+        if os.path.exists(ratio_actor_local_path):
+            ratio_actor_state_dict = torch.load(ratio_actor_local_path, weights_only=False)
+            ray.get(self.train_dataset.dataframe.ratio_actor.set_state.remote(ratio_actor_state_dict))
+            self.train_dataset.dataframe.sync_with_all_datasets()
+        else:
+            print(f"Warning: Checkpoint {ratio_actor_local_path} does not exist. "
+                  f"Using the default ratio actor state dict.")
+
         
     def log(self, data, reward_extra_info):
         portions = reward_extra_info['portions']
@@ -127,6 +162,7 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
 from verl.utils.dataset.rl_dataset import RLHFDataset, collate_fn
 from verl.utils.model import compute_position_id_with_mask
 import verl.utils.torch_functional as verl_F
+import datasets
 
 class AdaptiveRLHFDataset(RLHFDataset):
     """
@@ -140,7 +176,30 @@ class AdaptiveRLHFDataset(RLHFDataset):
         super().__init__(*args, **kwargs)
 
     def _read_files_and_tokenize(self):
-        super()._read_files_and_tokenize()
+        dataframes = []
+        for parquet_file in self.parquet_files:
+            # read parquet files and cache
+            dataframe = datasets.load_dataset("parquet", data_files=parquet_file)["train"].select(range(300))
+            dataframes.append(dataframe)
+        self.dataframe: datasets.Dataset = datasets.concatenate_datasets(dataframes)
+
+        print(f'dataset len: {len(self.dataframe)}')
+
+        # filter out too long prompts
+        if self.filter_overlong_prompts:
+            tokenizer = self.tokenizer
+            prompt_key = self.prompt_key
+            answer_key = 'answer'
+            self.dataframe = self.dataframe.filter(
+                lambda doc: len(tokenizer.apply_chat_template(doc[prompt_key], add_generation_prompt=True) + tokenizer.encode(doc[answer_key], add_special_tokens=False)
+                               ) <= self.max_prompt_length,
+                num_proc=self.num_workers,
+                desc=f"Filtering prompts longer than {self.max_prompt_length} tokens")
+            
+            # to test: tokenizer.decode(tokenizer.apply_chat_template(self.dataframe[0][self.prompt_key], add_generation_prompt=True) + tokenizer.encode(self.dataframe[0]['answer']))
+
+            print(f'filter dataset len: {len(self.dataframe)}')
+
         # pass to curriculum dataset wrapper
         ratio_actor = RatioAttemptsVariablesActor.remote(
             dataset_length=len(self.dataframe),
