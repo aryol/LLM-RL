@@ -165,33 +165,33 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
         raise NotImplementedError("Portion setting is not supported for per-sample curriculum learning.")
 
     # for debugging if all processes are getting the same portions/values
-    def save_portions_to_file(self,):
-        """Write attempted sample ratios and bounds to file for debugging."""
-        pid = os.getpid()
-        os.makedirs("./debugging", exist_ok=True)
-        os.makedirs(f"./debugging/portion_pid{pid}", exist_ok=True)
-        path = f'./debugging/portion_pid{pid}/step{self.wrote_file_step}.txt'
+    # def save_portions_to_file(self,):
+    #     """Write attempted sample ratios and bounds to file for debugging."""
+    #     pid = os.getpid()
+    #     os.makedirs("./debugging", exist_ok=True)
+    #     os.makedirs(f"./debugging/portion_pid{pid}", exist_ok=True)
+    #     path = f'./debugging/portion_pid{pid}/step{self.wrote_file_step}.txt'
 
-        with open(path, 'w') as f:
-            f.write(f"=== Debug info for PID {pid} ===\n\n")
-            f.write(f"Global step: {self.global_step}\n")
-            f.write(f"Min mean ratio: {self.min_mean_ratio}\n")
-            f.write(f"Max mean ratio: {self.max_mean_ratio}\n\n")
+    #     with open(path, 'w') as f:
+    #         f.write(f"=== Debug info for PID {pid} ===\n\n")
+    #         f.write(f"Global step: {self.global_step}\n")
+    #         f.write(f"Min mean ratio: {self.min_mean_ratio}\n")
+    #         f.write(f"Max mean ratio: {self.max_mean_ratio}\n\n")
 
-            f.write("Sampled portions in this process:\n")
-            for idx, portion in self.this_process_tried_portions:
-                f.write(f"  - idx: {idx}, portion: {portion:.4f}\n")
+    #         f.write("Sampled portions in this process:\n")
+    #         for idx, portion in self.this_process_tried_portions:
+    #             f.write(f"  - idx: {idx}, portion: {portion:.4f}\n")
 
-            f.write("\nPer-sample max ratios and attempts:\n")
-            for i in range(len(self.dataset)):
-                f.write(f"\nidx {i}:\n")
-                f.write(f"  max_per_sample_ratio: {self.max_per_sample_ratio[i]:.4f}\n")
-                for entry in self.attempted_ratio_list[i]:
-                    f.write(f"    portion: {entry['portion']}, rewards: {entry['reward']}\n")
+    #         f.write("\nPer-sample max ratios and attempts:\n")
+    #         for i in range(len(self.dataset)):
+    #             f.write(f"\nidx {i}:\n")
+    #             f.write(f"  max_per_sample_ratio: {self.max_per_sample_ratio[i]:.4f}\n")
+    #             for entry in self.attempted_ratio_list[i]:
+    #                 f.write(f"    portion: {entry['portion']}, rewards: {entry['reward']}\n")
 
-        # Reset logging
-        self.wrote_file_step += 1
-        self.this_process_tried_portions = []
+    #     # Reset logging
+    #     self.wrote_file_step += 1
+    #     self.this_process_tried_portions = []
 
 
 
@@ -278,5 +278,25 @@ class RatioAttemptsVariablesActor:
             'num_samples_with_history': sum(1 for x in self.attempted_ratios_list if x),
             'num_recently_updated': len(self.newly_added_ids)
         }
+
+    def get_state(self):
+        return {
+            'attempted_ratios_list': self.attempted_ratios_list,
+            'newly_added_ids': self.newly_added_ids,
+            'mean_min_ratio': self.mean_min_ratio,
+            'mean_max_ratio': self.mean_max_ratio,
+            'max_per_sample_ratio': self.max_per_sample_ratio
+        }
+    
+    def set_state(self, states):
+        # to avoid read-only error, we need to copy each object
+        self.attempted_ratios_list = [list(x) for x in states['attempted_ratios_list']]
+        for i in range(len(self.attempted_ratios_list)):
+            self.attempted_ratios_list[i] = [{'portion': x['portion'], 'reward': list(x['reward'])} for x in self.attempted_ratios_list[i]]
+        self.newly_added_ids = set(states['newly_added_ids'])
+        self.max_per_sample_ratio = [x for x in states['max_per_sample_ratio']]
+        self.mean_max_ratio = states['mean_max_ratio']
+        self.mean_min_ratio = states['mean_min_ratio']
+        return 1
 
 

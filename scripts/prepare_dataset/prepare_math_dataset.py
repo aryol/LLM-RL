@@ -30,7 +30,7 @@ def extract_solution(solution_str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--local_dir", default="~/LLM-RL/data/verl-data/")
+    parser.add_argument("--local_dir", default="~/LLM-RL/data/verl-data/math")
     parser.add_argument("--hdfs_dir", default=None)
 
     args = parser.parse_args()
@@ -58,11 +58,10 @@ if __name__ == "__main__":
             data = {
                 "data_source": data_source,
                 "prompt": [{"role": "user", "content": question}],
+                "answer": answer,
                 "ability": "math",
                 "reward_model": {"style": "rule", "ground_truth": solution},
-                "extra_info": {"split": split, "index": idx,
-                                 "answer": answer,
-                               },
+                "extra_info": {"split": split, "index": idx,},
             }
             return data
 

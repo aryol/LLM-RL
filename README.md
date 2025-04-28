@@ -22,6 +22,20 @@ pip install "triton==3.1.0"
 python ./src/train.py experiment=qwen_gsm8k_uniform day_time="2023-10-12_16-00-00" log_dir=./logs/progressive_rl_ppo_on_gsm8k_Qwen2.5-0.5B-Instruct
 ```
 
+To continue training from last steps, you need to pass `day_time=2023-10-12_16-00-00` or anything for that matter, also, for your jobs if they get preempted, you can set the day_time in the script so it 
+keeps going back to the last step and loading that checkpoint
+
+
+## preparing the data.
+
+for math:
+```bash
+python scripts/prepare_dataset/prepare_math_dataset.py --local_dir LLM-RL/data/verl-data/math
+python scripts/prepare_dataset/prepare_gsm8k_dataset.py --local_dir LLM-RL/data/verl-data/gsm8k
+```
+
+
+
 ## Running commands
 
 first activate the conda environment
