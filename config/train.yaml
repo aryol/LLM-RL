@@ -36,13 +36,13 @@ trainer:
   balance_batch: True
   total_epochs: 30
   total_training_steps: null
-  project_name: progressive_rl_${algorithm_name}_on_${data.name}_${model_name}_
-  experiment_name: ${data.train_dataset_type}
+  project_name: progressive_rl_${algorithm_name}_on_${data.name}
+  experiment_name: ${model_name}_${data.train_dataset_type}
   logger: [ 'console', 'wandb' ]
   log_val_generations: 0
   nnodes: 1
   n_gpus_per_node: 8
-  save_freq: 60
+  save_freq: 1000
   # auto: find the last ckpt to resume. If can't find, start from scratch
   resume_mode: auto # or disable or resume_path if resume_from_path is set
   resume_from_path: null

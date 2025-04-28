@@ -4,7 +4,7 @@ import numpy as np
 import re
 
 class CurriculumDatasetWrapper:
-    def __init__(self, dataset, ratio_attempts_var_actor, initial_portion=0.0, prompt_key='prompt', target_key='answer', seperator=None, zero_prob=0):
+    def __init__(self, dataset, ratio_attempts_var_actor, initial_portion=0.0, prompt_key='prompt', target_key='answer', seperator=None, **kwargs):
         self.dataset = dataset  # Keep as HF Dataset
         self.ground_truth_portion_dist = initial_portion  # Start with a small proportion
         self.prompt_key = prompt_key
@@ -13,7 +13,6 @@ class CurriculumDatasetWrapper:
         self.global_step = 0
         self.seperator = seperator
         self.portions = []
-        self.zero_prob = 0
 
     def __getitem__(self, idx):
         """Retrieves a dataset sample with a dynamically adjusted reasoning portion."""

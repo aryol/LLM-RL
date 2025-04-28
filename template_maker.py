@@ -37,13 +37,13 @@ import yaml
 # Verl - 22 April 2025
 
 counter = 0
-base_counter = 320
-# 'Qwen/Qwen2.5-1.5B'
-for model in ['microsoft/rho-math-1b-v0.1']:
+base_counter = 400
+# 'Qwen/Qwen2.5-1.5B', 'microsoft/rho-math-1b-v0.1', 'Qwen/Qwen2.5-7B', 'aryolotfi/SFT_gsm8k_rho-math-1b-v0.1_epoch_1_global_step_29', 'aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58', 'aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58', 'masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29', 'aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58', 'masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29'
+for model in ['aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58', 'masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29']:
     for dataset in ['gsm8k']:
         more_info = "data.max_prompt_length=1024" if dataset == 'gsm8k' else "actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072"
-        for algo in ['ppo', 'grpo']:
-            for zero_prob in ['linear', 0.5, 'uniform-linear', 0]:
+        for algo in ['grpo']:
+            for zero_prob in [0.5, 0]:
                 template = f'''- id: {base_counter + counter}
   name: "{model}-adaptive-{zero_prob}-id-{base_counter + counter}"
   model: "{model}"

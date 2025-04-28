@@ -7,6 +7,7 @@ train_dataset_type: adaptive # base or adaptive
 curriculum_config:
   seperator: null # null, char, "\n", ' ', '=', etc
   zero_prob: 0
+  reward_threshold: 0.5
 # reward_fn_key: data_source
 max_prompt_length: ???
 max_response_length: ???

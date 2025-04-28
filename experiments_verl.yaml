@@ -1,0 +1,496 @@
+# - id: 1
+#   name: 'Qwen2.5-0.5B-GSM8k-uniform-1to1-0to0'
+#   model: 'Qwen/Qwen2-0.5B-Instruct'
+#   command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=base model_path="Qwen/Qwen2.5-1.5B" log_dir=$BOLT_ARTIFACT_DIR trainer.n_gpus_per_node=8 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072'
+
+- id: 300
+  name: "Qwen/Qwen2.5-1.5B-adaptive-linear-id-300"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=linear data.max_prompt_length=1024' 
+- id: 301
+  name: "Qwen/Qwen2.5-1.5B-adaptive-0.5-id-301"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=0.5 data.max_prompt_length=1024' 
+- id: 302
+  name: "Qwen/Qwen2.5-1.5B-adaptive-uniform-linear-id-302"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=uniform-linear data.max_prompt_length=1024' 
+- id: 303
+  name: "Qwen/Qwen2.5-1.5B-adaptive-0-id-303"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=0 data.max_prompt_length=1024' 
+- id: 304
+  name: "Qwen/Qwen2.5-1.5B-base-id-304"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=base model_path=Qwen/Qwen2.5-1.5B data.max_prompt_length=1024' 
+- id: 305
+  name: "Qwen/Qwen2.5-1.5B-adaptive-linear-id-305"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=linear data.max_prompt_length=1024' 
+- id: 306
+  name: "Qwen/Qwen2.5-1.5B-adaptive-0.5-id-306"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=0.5 data.max_prompt_length=1024' 
+- id: 307
+  name: "Qwen/Qwen2.5-1.5B-adaptive-uniform-linear-id-307"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=uniform-linear data.max_prompt_length=1024' 
+- id: 308
+  name: "Qwen/Qwen2.5-1.5B-adaptive-0-id-308"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=0 data.max_prompt_length=1024' 
+- id: 309
+  name: "Qwen/Qwen2.5-1.5B-base-id-309"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=base model_path=Qwen/Qwen2.5-1.5B data.max_prompt_length=1024' 
+- id: 310
+  name: "Qwen/Qwen2.5-1.5B-adaptive-linear-id-310"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 311
+  name: "Qwen/Qwen2.5-1.5B-adaptive-0.5-id-311"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=0.5 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 312
+  name: "Qwen/Qwen2.5-1.5B-adaptive-uniform-linear-id-312"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=uniform-linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 313
+  name: "Qwen/Qwen2.5-1.5B-adaptive-0-id-313"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=0 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 314
+  name: "Qwen/Qwen2.5-1.5B-base-id-314"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=base model_path=Qwen/Qwen2.5-1.5B actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 315
+  name: "Qwen/Qwen2.5-1.5B-adaptive-linear-id-315"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 316
+  name: "Qwen/Qwen2.5-1.5B-adaptive-0.5-id-316"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=0.5 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 317
+  name: "Qwen/Qwen2.5-1.5B-adaptive-uniform-linear-id-317"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=uniform-linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 318
+  name: "Qwen/Qwen2.5-1.5B-adaptive-0-id-318"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-1.5B data.curriculum_config.zero_prob=0 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 319
+  name: "Qwen/Qwen2.5-1.5B-base-id-319"
+  model: "Qwen/Qwen2.5-1.5B"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=base model_path=Qwen/Qwen2.5-1.5B actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+
+
+
+- id: 320
+  name: "microsoft/rho-math-1b-v0.1-adaptive-linear-id-320"
+  model: "microsoft/rho-math-1b-v0.1"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=microsoft/rho-math-1b-v0.1 data.curriculum_config.zero_prob=linear data.max_prompt_length=1024' 
+- id: 321
+  name: "microsoft/rho-math-1b-v0.1-adaptive-0.5-id-321"
+  model: "microsoft/rho-math-1b-v0.1"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=microsoft/rho-math-1b-v0.1 data.curriculum_config.zero_prob=0.5 data.max_prompt_length=1024' 
+- id: 322
+  name: "microsoft/rho-math-1b-v0.1-adaptive-uniform-linear-id-322"
+  model: "microsoft/rho-math-1b-v0.1"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=microsoft/rho-math-1b-v0.1 data.curriculum_config.zero_prob=uniform-linear data.max_prompt_length=1024' 
+- id: 323
+  name: "microsoft/rho-math-1b-v0.1-adaptive-0-id-323"
+  model: "microsoft/rho-math-1b-v0.1"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=microsoft/rho-math-1b-v0.1 data.curriculum_config.zero_prob=0 data.max_prompt_length=1024' 
+- id: 324
+  name: "microsoft/rho-math-1b-v0.1-base-id-324"
+  model: "microsoft/rho-math-1b-v0.1"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=base model_path=microsoft/rho-math-1b-v0.1 data.max_prompt_length=1024' 
+- id: 325
+  name: "microsoft/rho-math-1b-v0.1-adaptive-linear-id-325"
+  model: "microsoft/rho-math-1b-v0.1"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=microsoft/rho-math-1b-v0.1 data.curriculum_config.zero_prob=linear data.max_prompt_length=1024' 
+- id: 326
+  name: "microsoft/rho-math-1b-v0.1-adaptive-0.5-id-326"
+  model: "microsoft/rho-math-1b-v0.1"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=microsoft/rho-math-1b-v0.1 data.curriculum_config.zero_prob=0.5 data.max_prompt_length=1024' 
+- id: 327
+  name: "microsoft/rho-math-1b-v0.1-adaptive-uniform-linear-id-327"
+  model: "microsoft/rho-math-1b-v0.1"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=microsoft/rho-math-1b-v0.1 data.curriculum_config.zero_prob=uniform-linear data.max_prompt_length=1024' 
+- id: 328
+  name: "microsoft/rho-math-1b-v0.1-adaptive-0-id-328"
+  model: "microsoft/rho-math-1b-v0.1"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=microsoft/rho-math-1b-v0.1 data.curriculum_config.zero_prob=0 data.max_prompt_length=1024' 
+- id: 329
+  name: "microsoft/rho-math-1b-v0.1-base-id-329"
+  model: "microsoft/rho-math-1b-v0.1"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=base model_path=microsoft/rho-math-1b-v0.1 data.max_prompt_length=1024' 
+
+- id: 330
+  name: "Qwen/Qwen2.5-7B-adaptive-linear-id-330"
+  model: "Qwen/Qwen2.5-7B"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-7B data.curriculum_config.zero_prob=linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 331
+  name: "Qwen/Qwen2.5-7B-adaptive-0.5-id-331"
+  model: "Qwen/Qwen2.5-7B"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-7B data.curriculum_config.zero_prob=0.5 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 332
+  name: "Qwen/Qwen2.5-7B-adaptive-uniform-linear-id-332"
+  model: "Qwen/Qwen2.5-7B"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-7B data.curriculum_config.zero_prob=uniform-linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 333
+  name: "Qwen/Qwen2.5-7B-adaptive-0-id-333"
+  model: "Qwen/Qwen2.5-7B"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-7B data.curriculum_config.zero_prob=0 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 334
+  name: "Qwen/Qwen2.5-7B-base-id-334"
+  model: "Qwen/Qwen2.5-7B"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=base model_path=Qwen/Qwen2.5-7B actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 335
+  name: "Qwen/Qwen2.5-7B-adaptive-linear-id-335"
+  model: "Qwen/Qwen2.5-7B"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-7B data.curriculum_config.zero_prob=linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 336
+  name: "Qwen/Qwen2.5-7B-adaptive-0.5-id-336"
+  model: "Qwen/Qwen2.5-7B"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-7B data.curriculum_config.zero_prob=0.5 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 337
+  name: "Qwen/Qwen2.5-7B-adaptive-uniform-linear-id-337"
+  model: "Qwen/Qwen2.5-7B"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-7B data.curriculum_config.zero_prob=uniform-linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 338
+  name: "Qwen/Qwen2.5-7B-adaptive-0-id-338"
+  model: "Qwen/Qwen2.5-7B"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-7B data.curriculum_config.zero_prob=0 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 339
+  name: "Qwen/Qwen2.5-7B-base-id-339"
+  model: "Qwen/Qwen2.5-7B"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=base model_path=Qwen/Qwen2.5-7B actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+
+
+- id: 340
+  name: "mistralai/Mistral-7B-v0.1-adaptive-linear-id-340"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=mistralai/Mistral-7B-v0.1 data.curriculum_config.zero_prob=linear data.max_prompt_length=1024' 
+- id: 341
+  name: "mistralai/Mistral-7B-v0.1-adaptive-0.5-id-341"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=mistralai/Mistral-7B-v0.1 data.curriculum_config.zero_prob=0.5 data.max_prompt_length=1024' 
+- id: 342
+  name: "mistralai/Mistral-7B-v0.1-adaptive-uniform-linear-id-342"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=mistralai/Mistral-7B-v0.1 data.curriculum_config.zero_prob=uniform-linear data.max_prompt_length=1024' 
+- id: 343
+  name: "mistralai/Mistral-7B-v0.1-base-id-343"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=base model_path=mistralai/Mistral-7B-v0.1 data.max_prompt_length=1024' 
+- id: 344
+  name: "mistralai/Mistral-7B-v0.1-adaptive-linear-id-344"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=mistralai/Mistral-7B-v0.1 data.curriculum_config.zero_prob=linear data.max_prompt_length=1024' 
+- id: 345
+  name: "mistralai/Mistral-7B-v0.1-adaptive-0.5-id-345"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=mistralai/Mistral-7B-v0.1 data.curriculum_config.zero_prob=0.5 data.max_prompt_length=1024' 
+- id: 346
+  name: "mistralai/Mistral-7B-v0.1-adaptive-uniform-linear-id-346"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=mistralai/Mistral-7B-v0.1 data.curriculum_config.zero_prob=uniform-linear data.max_prompt_length=1024' 
+- id: 347
+  name: "mistralai/Mistral-7B-v0.1-base-id-347"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=base model_path=mistralai/Mistral-7B-v0.1 data.max_prompt_length=1024' 
+- id: 348
+  name: "mistralai/Mistral-7B-v0.1-adaptive-linear-id-348"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=mistralai/Mistral-7B-v0.1 data.curriculum_config.zero_prob=linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 349
+  name: "mistralai/Mistral-7B-v0.1-adaptive-0.5-id-349"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=mistralai/Mistral-7B-v0.1 data.curriculum_config.zero_prob=0.5 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 350
+  name: "mistralai/Mistral-7B-v0.1-adaptive-uniform-linear-id-350"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=mistralai/Mistral-7B-v0.1 data.curriculum_config.zero_prob=uniform-linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 351
+  name: "mistralai/Mistral-7B-v0.1-base-id-351"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=base model_path=mistralai/Mistral-7B-v0.1 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 352
+  name: "mistralai/Mistral-7B-v0.1-adaptive-linear-id-352"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=mistralai/Mistral-7B-v0.1 data.curriculum_config.zero_prob=linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 353
+  name: "mistralai/Mistral-7B-v0.1-adaptive-0.5-id-353"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=mistralai/Mistral-7B-v0.1 data.curriculum_config.zero_prob=0.5 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 354
+  name: "mistralai/Mistral-7B-v0.1-adaptive-uniform-linear-id-354"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=mistralai/Mistral-7B-v0.1 data.curriculum_config.zero_prob=uniform-linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 355
+  name: "mistralai/Mistral-7B-v0.1-base-id-355"
+  model: "mistralai/Mistral-7B-v0.1"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=base model_path=mistralai/Mistral-7B-v0.1 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072'
+
+
+- id: 356
+  name: "Qwen/Qwen2.5-0.5B-adaptive-linear-id-356"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-0.5B data.curriculum_config.zero_prob=linear data.max_prompt_length=1024' 
+- id: 357
+  name: "Qwen/Qwen2.5-0.5B-adaptive-0.5-id-357"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-0.5B data.curriculum_config.zero_prob=0.5 data.max_prompt_length=1024' 
+- id: 358
+  name: "Qwen/Qwen2.5-0.5B-adaptive-uniform-linear-id-358"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-0.5B data.curriculum_config.zero_prob=uniform-linear data.max_prompt_length=1024' 
+- id: 359
+  name: "Qwen/Qwen2.5-0.5B-base-id-359"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=base model_path=Qwen/Qwen2.5-0.5B data.max_prompt_length=1024' 
+- id: 360
+  name: "Qwen/Qwen2.5-0.5B-adaptive-linear-id-360"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-0.5B data.curriculum_config.zero_prob=linear data.max_prompt_length=1024' 
+- id: 361
+  name: "Qwen/Qwen2.5-0.5B-adaptive-0.5-id-361"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-0.5B data.curriculum_config.zero_prob=0.5 data.max_prompt_length=1024' 
+- id: 362
+  name: "Qwen/Qwen2.5-0.5B-adaptive-uniform-linear-id-362"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-0.5B data.curriculum_config.zero_prob=uniform-linear data.max_prompt_length=1024' 
+- id: 363
+  name: "Qwen/Qwen2.5-0.5B-base-id-363"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=base model_path=Qwen/Qwen2.5-0.5B data.max_prompt_length=1024' 
+- id: 364
+  name: "Qwen/Qwen2.5-0.5B-adaptive-linear-id-364"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-0.5B data.curriculum_config.zero_prob=linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 365
+  name: "Qwen/Qwen2.5-0.5B-adaptive-0.5-id-365"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-0.5B data.curriculum_config.zero_prob=0.5 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 366
+  name: "Qwen/Qwen2.5-0.5B-adaptive-uniform-linear-id-366"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-0.5B data.curriculum_config.zero_prob=uniform-linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 367
+  name: "Qwen/Qwen2.5-0.5B-base-id-367"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=base model_path=Qwen/Qwen2.5-0.5B actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 368
+  name: "Qwen/Qwen2.5-0.5B-adaptive-linear-id-368"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-0.5B data.curriculum_config.zero_prob=linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 369
+  name: "Qwen/Qwen2.5-0.5B-adaptive-0.5-id-369"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-0.5B data.curriculum_config.zero_prob=0.5 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 370
+  name: "Qwen/Qwen2.5-0.5B-adaptive-uniform-linear-id-370"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=Qwen/Qwen2.5-0.5B data.curriculum_config.zero_prob=uniform-linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+- id: 371
+  name: "Qwen/Qwen2.5-0.5B-base-id-371"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=base model_path=Qwen/Qwen2.5-0.5B actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072' 
+
+
+- id: 372
+  name: "aryolotfi/SFT_gsm8k_rho-math-1b-v0.1_epoch_1_global_step_29-adaptive-linear-id-372"
+  model: "aryolotfi/SFT_gsm8k_rho-math-1b-v0.1_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=aryolotfi/SFT_gsm8k_rho-math-1b-v0.1_epoch_1_global_step_29 data.curriculum_config.zero_prob=linear data.max_prompt_length=1024' 
+- id: 373
+  name: "aryolotfi/SFT_gsm8k_rho-math-1b-v0.1_epoch_1_global_step_29-adaptive-0.5-id-373"
+  model: "aryolotfi/SFT_gsm8k_rho-math-1b-v0.1_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=aryolotfi/SFT_gsm8k_rho-math-1b-v0.1_epoch_1_global_step_29 data.curriculum_config.zero_prob=0.5 data.max_prompt_length=1024' 
+- id: 374
+  name: "aryolotfi/SFT_gsm8k_rho-math-1b-v0.1_epoch_1_global_step_29-adaptive-uniform-linear-id-374"
+  model: "aryolotfi/SFT_gsm8k_rho-math-1b-v0.1_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=aryolotfi/SFT_gsm8k_rho-math-1b-v0.1_epoch_1_global_step_29 data.curriculum_config.zero_prob=uniform-linear data.max_prompt_length=1024' 
+- id: 375
+  name: "aryolotfi/SFT_gsm8k_rho-math-1b-v0.1_epoch_1_global_step_29-base-id-375"
+  model: "aryolotfi/SFT_gsm8k_rho-math-1b-v0.1_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=base model_path=aryolotfi/SFT_gsm8k_rho-math-1b-v0.1_epoch_1_global_step_29 data.max_prompt_length=1024'
+
+
+- id: 376
+  name: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58-adaptive-linear-id-376"
+  model: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58 data.curriculum_config.zero_prob=linear data.max_prompt_length=1024 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+- id: 377
+  name: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58-adaptive-0.5-id-377"
+  model: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58 data.curriculum_config.zero_prob=0.5 data.max_prompt_length=1024 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+- id: 378
+  name: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58-adaptive-uniform-linear-id-378"
+  model: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58 data.curriculum_config.zero_prob=uniform-linear data.max_prompt_length=1024 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+- id: 379
+  name: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58-base-id-379"
+  model: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=base model_path=aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58 data.max_prompt_length=1024 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+- id: 380
+  name: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-linear-id-380"
+  model: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29 data.curriculum_config.zero_prob=linear data.max_prompt_length=1024' 
+- id: 381
+  name: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-0.5-id-381"
+  model: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29 data.curriculum_config.zero_prob=0.5 data.max_prompt_length=1024' 
+- id: 382
+  name: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-uniform-linear-id-382"
+  model: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=adaptive model_path=masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29 data.curriculum_config.zero_prob=uniform-linear data.max_prompt_length=1024' 
+- id: 383
+  name: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29-base-id-383"
+  model: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=ppo data=gsm8k data.train_dataset_type=base model_path=masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29 data.max_prompt_length=1024' 
+
+
+- id: 384
+  name: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58-adaptive-linear-id-384"
+  model: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58 data.curriculum_config.zero_prob=linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+- id: 385
+  name: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58-adaptive-0.5-id-385"
+  model: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58 data.curriculum_config.zero_prob=0.5 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+- id: 386
+  name: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58-adaptive-uniform-linear-id-386"
+  model: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58 data.curriculum_config.zero_prob=uniform-linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+- id: 387
+  name: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58-base-id-387"
+  model: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=base model_path=aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+- id: 388
+  name: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-linear-id-388"
+  model: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29 data.curriculum_config.zero_prob=linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 data.max_response_length=1024' 
+- id: 389
+  name: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-0.5-id-389"
+  model: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29 data.curriculum_config.zero_prob=0.5 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 data.max_response_length=1024' 
+- id: 390
+  name: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-uniform-linear-id-390"
+  model: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=adaptive model_path=masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29 data.curriculum_config.zero_prob=uniform-linear actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 data.max_response_length=1024' 
+- id: 391
+  name: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29-base-id-391"
+  model: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=ppo data=math data.train_dataset_type=base model_path=masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 data.max_response_length=1024' 
+
+
+- id: 392
+  name: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58-adaptive-0.5-id-392"
+  model: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58 data.curriculum_config.zero_prob=0.5 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+
+- id: 392001
+  name: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58-adaptive-0.5-id-392001"
+  model: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58 data.curriculum_config.zero_prob=0.5 data.curriculum_config.reward_threshold=0.7 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+
+
+- id: 393
+  name: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58-adaptive-0-id-393"
+  model: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58 data.curriculum_config.zero_prob=0 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+
+- id: 394
+  name: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58-adaptive-0-id-394"
+  model: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58 data.curriculum_config.zero_prob=0 data.curriculum_config.reward_threshold=0.9 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+
+- id: 395
+  name: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58-base-id-395"
+  model: "aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=base model_path=aryolotfi/SFT_math_Mistral-7B-v0.1_epoch_2_global_step_58 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+
+
+- id: 396
+  name: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-0.5-id-396"
+  model: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29 data.curriculum_config.zero_prob=0.5 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 data.max_response_length=1024' 
+
+- id: 396001
+  name: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-0.5-id-396001"
+  model: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29 data.curriculum_config.zero_prob=0.5 data.curriculum_config.reward_threshold=0.7 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 data.max_response_length=1024' 
+
+- id: 397
+  name: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-0-id-397"
+  model: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29 data.curriculum_config.zero_prob=0 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 data.max_response_length=1024' 
+
+- id: 398
+  name: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-0-id-398"
+  model: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=adaptive model_path=masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29 data.curriculum_config.zero_prob=0 data.curriculum_config.reward_threshold=0.9 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 data.max_response_length=1024' 
+
+- id: 399
+  name: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29-base-id-399"
+  model: "masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=base model_path=masani/SFT_math_Llama-2-7b-hf_epoch_1_global_step_29 actor_rollout_ref.actor.ppo_mini_batch_size=64 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.max_prompt_length=3072 data.max_response_length=1024' 
+
+
+
+- id: 400
+  name: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58-adaptive-0.5-id-400"
+  model: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58 data.curriculum_config.zero_prob=0.5 data.max_prompt_length=1024 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+
+- id: 400001
+  name: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58-adaptive-0.5-id-400001"
+  model: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58 data.curriculum_config.zero_prob=0.5 data.curriculum_config.reward_threshold=0.7 data.max_prompt_length=1024 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+
+- id: 401
+  name: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58-adaptive-0-id-401"
+  model: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58 data.curriculum_config.zero_prob=0 data.max_prompt_length=1024 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+- id: 402
+  name: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58-adaptive-0-id-402"
+  model: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58 data.curriculum_config.zero_prob=0 data.curriculum_config.reward_threshold=0.9 data.max_prompt_length=1024 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+- id: 403
+  name: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58-base-id-403"
+  model: "aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=base model_path=aryolotfi/SFT_gsm8k_Mistral-7B-v0.1_epoch_2_global_step_58 data.max_prompt_length=1024 actor_rollout_ref.actor.optim.lr=3e-7 critic.optim.lr=3e-6' 
+- id: 404
+  name: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-0.5-id-404"
+  model: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29 data.curriculum_config.zero_prob=0.5 data.max_prompt_length=1024' 
+
+- id: 404001
+  name: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-0.5-id-404001"
+  model: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29 data.curriculum_config.zero_prob=0.5 data.curriculum_config.reward_threshold=0.7 data.max_prompt_length=1024' 
+
+- id: 405
+  name: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-0-id-405"
+  model: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29 data.curriculum_config.zero_prob=0 data.max_prompt_length=1024' 
+
+- id: 406
+  name: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-0-id-406"
+  model: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=adaptive model_path=masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29 data.curriculum_config.zero_prob=0 data.curriculum_config.reward_threshold=0.9 data.max_prompt_length=1024' 
+
+- id: 407
+  name: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29-base-id-407"
+  model: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=grpo data=gsm8k data.train_dataset_type=base model_path=masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29 data.max_prompt_length=1024' 
+
+
+
+# high Golden T
+# why moving average doesn't work\
+# EVAL MATH
+# Greedy for VAL?
