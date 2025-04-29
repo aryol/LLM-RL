@@ -41,7 +41,7 @@ class CurriculumDatasetWrapper:
     def _apply_portion_to_sample_(self, sample, portion):
         # Modify reasoning exposure based on `portion`
         if portion > 0.0:
-            reasoning_steps = sample['extra_info'].get(self.target_key, '')
+            reasoning_steps = sample.get(self.target_key, '')
             if self.seperator == 'char':
                 word_list = list(reasoning_steps)
                 cut_answer = ''.join(word_list[:int(len(word_list) * portion)])  # Partial CoT answer
@@ -290,6 +290,7 @@ class RatioAttemptsVariablesActor:
     
     def set_state(self, states):
         # to avoid read-only error, we need to copy each object
+        # breakpoint()
         self.attempted_ratios_list = [list(x) for x in states['attempted_ratios_list']]
         for i in range(len(self.attempted_ratios_list)):
             self.attempted_ratios_list[i] = [{'portion': x['portion'], 'reward': list(x['reward'])} for x in self.attempted_ratios_list[i]]

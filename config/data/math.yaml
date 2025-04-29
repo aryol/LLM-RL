@@ -7,6 +7,6 @@ name: math
 train_files: data/verl-data/math/train.parquet
 val_files: data/verl-data/math/test.parquet
 
-max_prompt_length: 3072
-max_response_length: 3072
+max_prompt_length: 2048
+max_response_length: 1536
 train_batch_size: 1024

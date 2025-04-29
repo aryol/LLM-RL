@@ -3,11 +3,17 @@ tokenizer: null
 train_files: ???
 val_files: ???
 prompt_key: prompt
+
 train_dataset_type: adaptive # base or adaptive
+
 curriculum_config:
   seperator: null # null, char, "\n", ' ', '=', etc
   zero_prob: 0
   reward_threshold: 0.5
+
+sampler:
+  _target_: src.utils.curriculum_sampler.CurriculumSampler
+
 # reward_fn_key: data_source
 max_prompt_length: ???
 max_response_length: ???

@@ -9,6 +9,7 @@ import numpy as np
 import os
 import ray
 from verl.utils.checkpoint.checkpoint_manager import find_latest_ckpt_path
+import hydra
 
 
 from src.utils.curriculum_dataset_wrapper import RatioAttemptsVariablesActor, \
@@ -49,7 +50,11 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
             'truncation', 'error'
         ), f'dataset truncation {self.train_dataset.truncation} must be the same as config {self.config.data.get("truncation", "error")}'
         # use sampler for better ckpt resume
-        if self.config.data.shuffle:
+        if self.config.data.get('sampler', None) is not None:
+            sampler = hydra.utils.instantiate(self.config.data.sampler, dataset_size=len(self.train_dataset),
+                                              attempted_ratio_list=self.train_dataset.dataframe.attempted_ratio_list,
+                                              epsilon=0.01, easy_floor=0.02)
+        elif self.config.data.shuffle:
             train_dataloader_generator = torch.Generator()
             train_dataloader_generator.manual_seed(self.config.data.get('seed', 1))
             sampler = RandomSampler(data_source=self.train_dataset, generator=train_dataloader_generator)
@@ -135,6 +140,7 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
             ratio_actor_state_dict = torch.load(ratio_actor_local_path, weights_only=False)
             ray.get(self.train_dataset.dataframe.ratio_actor.set_state.remote(ratio_actor_state_dict))
             self.train_dataset.dataframe.sync_with_all_datasets()
+            self.train_dataloader.sampler.attempted_ratio_list = self.train_dataset.dataframe.attempted_ratio_list
         else:
             print(f"Warning: Checkpoint {ratio_actor_local_path} does not exist. "
                   f"Using the default ratio actor state dict.")
@@ -149,6 +155,7 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
         wandb.log({f'portions/{stage}_portions_mean': mean_portion}, step=self.global_steps)
         wandb.log({f'portions/{stage}_portions_std': std_portion}, step=self.global_steps)
 
+
     def update_datasets_with_ratios(self, data, scores, reward_extra_info):
         ids = reward_extra_info['index']
         portions = reward_extra_info['portions']
@@ -157,6 +164,7 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
             self.train_dataset.dataframe.ratio_actor.update_attempted_ratios.remote([(ids, portions, scores)])
             self.train_dataset.dataframe.ratio_actor.set_global_step.remote(self.global_steps)
             self.train_dataset.dataframe.sync_with_all_datasets()
+            self.train_dataloader.sampler.attempted_ratio_list = self.train_dataset.dataframe.attempted_ratio_list
 
 
 from verl.utils.dataset.rl_dataset import RLHFDataset, collate_fn
@@ -179,7 +187,7 @@ class AdaptiveRLHFDataset(RLHFDataset):
         dataframes = []
         for parquet_file in self.parquet_files:
             # read parquet files and cache
-            dataframe = datasets.load_dataset("parquet", data_files=parquet_file)["train"].select(range(300))
+            dataframe = datasets.load_dataset("parquet", data_files=parquet_file)["train"]
             dataframes.append(dataframe)
         self.dataframe: datasets.Dataset = datasets.concatenate_datasets(dataframes)
 
