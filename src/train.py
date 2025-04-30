@@ -84,16 +84,20 @@ class TaskRunner:
             mapping[Role.RefPolicy] = global_pool_id
 
         # use naive reward manager
+        if config.data.get('compute_score_fn', None) is not None:
+            compute_score_fn = hydra.utils.get_method(config.data.compute_score_fn)
+        else:
+            compute_score_fn = None
         reward_manager_cls = NaiveRewardManagerWithPortionLogging
         reward_fn = reward_manager_cls(tokenizer=tokenizer,
                                        num_examine=1,
-                                       compute_score=None,
+                                       compute_score=compute_score_fn,
                                        reward_fn_key='data_source',)
 
         # Note that we always use function-based RM for validation
         val_reward_fn = reward_manager_cls(tokenizer=tokenizer,
                                            num_examine=1,
-                                           compute_score=None,
+                                           compute_score=compute_score_fn,
                                            reward_fn_key='data_source')
         resource_pool_manager = ResourcePoolManager(resource_pool_spec=resource_pool_spec, mapping=mapping)
 

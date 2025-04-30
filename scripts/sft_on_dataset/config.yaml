@@ -22,9 +22,9 @@ data:
   val_files: ./data/verl-data/${data.name}/test.parquet
   # Single-turn settings
   prompt_key: prompt
-  response_key: extra_info
+  response_key: answer
   prompt_dict_keys: []
-  response_dict_keys: ['answer']
+  response_dict_keys: []
   # Multi-turn settings
   multiturn:
     enable: false  # Set to true to use multi-turn dataset

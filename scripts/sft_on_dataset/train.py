@@ -530,6 +530,7 @@ class FSDPSFTTrainer:
         self.save_checkpoint(step=0, epoch=0)
         for epoch in range(self.config.trainer.total_epochs):
             self.train_sampler.set_epoch(epoch=epoch)
+            log_a_sample = True
             for data in tqdm(
                 self.train_dataloader,
                 total=self.steps_per_epoch,
@@ -540,6 +541,18 @@ class FSDPSFTTrainer:
                 metric = self.training_step(data)
                 if rank == 0:
                     tracking.log(data=metric, step=global_step)
+                    if log_a_sample:
+                        # log a sample input and output
+                        input_ids = data["input_ids"][0].cpu().numpy()
+                        attention_mask = data["attention_mask"][0].cpu().numpy()
+                        position_ids = data["position_ids"][0].cpu().numpy()
+                        loss_mask = data["loss_mask"][0].cpu().numpy()
+                        input_str = self.tokenizer.decode(input_ids, skip_special_tokens=True)
+                        print(f"Sample input: {input_str}")
+                        print(f"Sample attention mask: {attention_mask}")
+                        print(f"Sample position ids: {position_ids}")
+                        print(f"Sample loss mask: {loss_mask}")
+                        log_a_sample = False
 
                 # for early exit validation
                 if global_step >= self.total_training_steps:
@@ -651,6 +664,10 @@ class FixedSFTDataset(SFTDataset):
                 print(f'self.responses={self.responses}')
                 raise
         self.responses = self.responses.squeeze().tolist()
+        # print a sample input response
+        if len(self.prompts) > 0 and len(self.responses) > 0:
+            print(f"Sample input: {self.prompts[0]}")
+            print(f"Sample response: {self.responses[0]}")
     
     def __getitem__(self, item):
         tokenizer = self.tokenizer
