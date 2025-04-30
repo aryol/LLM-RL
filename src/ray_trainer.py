@@ -164,7 +164,8 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
             self.train_dataset.dataframe.ratio_actor.update_attempted_ratios.remote([(ids, portions, scores)])
             self.train_dataset.dataframe.ratio_actor.set_global_step.remote(self.global_steps)
             self.train_dataset.dataframe.sync_with_all_datasets()
-            self.train_dataloader.sampler.attempted_ratio_list = self.train_dataset.dataframe.attempted_ratio_list
+            if self.config.data.get('sampler', None) is not None:
+                self.train_dataloader.sampler.attempted_ratio_list = self.train_dataset.dataframe.attempted_ratio_list
 
 
 from verl.utils.dataset.rl_dataset import RLHFDataset, collate_fn
