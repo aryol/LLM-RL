@@ -49,7 +49,13 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
         assert self.train_dataset.truncation == self.config.data.get(
             'truncation', 'error'
         ), f'dataset truncation {self.train_dataset.truncation} must be the same as config {self.config.data.get("truncation", "error")}'
-        # use sampler for better ckpt resume
+
+        self.ratio_actor = RatioAttemptsVariablesActor.remote(dataset_length=len(self.train_dataset.dataframe),
+                                                                min_ratio=self.config.data.curriculum_config.get('min_ratio', 0.0),
+                                                                max_ratio=self.config.data.curriculum_config.get('max_ratio', 0.9),
+                                                                moving_avg_alpha=0.8,
+                                                                reward_threshold=0.5)
+
         if self.config.data.get('sampler', None) is not None:
             sampler = hydra.utils.instantiate(self.config.data.sampler, dataset_size=len(self.train_dataset),
                                               attempted_ratio_list=self.train_dataset.dataframe.attempted_ratio_list,
@@ -121,7 +127,7 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
         local_global_step_folder = os.path.join(self.config.trainer.default_local_dir,
                                                 f'global_step_{self.global_steps}')
         ratio_actor_local_path = os.path.join(local_global_step_folder, 'ratio_actor.pt')
-        ratio_actor_state_dict = ray.get(self.train_dataset.dataframe.ratio_actor.get_state.remote())
+        ratio_actor_state_dict = ray.get(self.ratio_actor.get_state.remote())
         torch.save(ratio_actor_state_dict, ratio_actor_local_path)
     
 
@@ -138,9 +144,13 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
         ratio_actor_local_path = os.path.join(global_step_folder, 'ratio_actor.pt')
         if os.path.exists(ratio_actor_local_path):
             ratio_actor_state_dict = torch.load(ratio_actor_local_path, weights_only=False)
-            ray.get(self.train_dataset.dataframe.ratio_actor.set_state.remote(ratio_actor_state_dict))
-            self.train_dataset.dataframe.sync_with_all_datasets()
-            self.train_dataloader.sampler.attempted_ratio_list = self.train_dataset.dataframe.attempted_ratio_list
+            ray.get(self.ratio_actor.set_state.remote(ratio_actor_state_dict))
+            state_dict = ray.get(self.ratio_actor.get_state.remote())
+            self.train_dataset.dataframe.sync_with_all_datasets({**state_dict, 'global_step': self.global_steps})
+            if self.config.data.get('sampler', None) is not None:
+                # update the sampler with the new attempted ratio list
+                self.train_dataloader.sampler.attempted_ratio_list = state_dict['attempted_ratio_list']
+
         else:
             print(f"Warning: Checkpoint {ratio_actor_local_path} does not exist. "
                   f"Using the default ratio actor state dict.")
@@ -161,10 +171,12 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
         portions = reward_extra_info['portions']
         if data.non_tensor_batch['extra_info'][0]['split'] == 'train':
             # Update the training dataset
-            self.train_dataset.dataframe.ratio_actor.update_attempted_ratios.remote([(ids, portions, scores)])
-            self.train_dataset.dataframe.ratio_actor.set_global_step.remote(self.global_steps)
-            self.train_dataset.dataframe.sync_with_all_datasets()
-            self.train_dataloader.sampler.attempted_ratio_list = self.train_dataset.dataframe.attempted_ratio_list
+            self.ratio_actor.update_attempted_ratios.remote([(ids, portions, scores)])
+            self.ratio_actor.set_global_step.remote(self.global_steps)
+            state_dict = ray.get(self.ratio_actor.get_state.remote())
+            self.train_dataset.dataframe.sync_with_all_datasets({**state_dict, 'global_step': self.global_steps})
+            if self.config.data.get('sampler', None) is not None:
+                self.train_dataloader.sampler.attempted_ratio_list = state_dict['attempted_ratio_list']
 
 
 from verl.utils.dataset.rl_dataset import RLHFDataset, collate_fn
@@ -207,19 +219,10 @@ class AdaptiveRLHFDataset(RLHFDataset):
             # to test: tokenizer.decode(tokenizer.apply_chat_template(self.dataframe[0][self.prompt_key], add_generation_prompt=True) + tokenizer.encode(self.dataframe[0]['answer']))
 
             print(f'filter dataset len: {len(self.dataframe)}')
-
-        # pass to curriculum dataset wrapper
-        ratio_actor = RatioAttemptsVariablesActor.remote(
-            dataset_length=len(self.dataframe),
-            min_ratio=0.0,
-            max_ratio=0.9,
-            moving_avg_alpha=0.8,
-            reward_threshold=0.5
-        )
         if self.type == 'base':
-            self.dataframe = CurriculumDatasetWrapper(self.dataframe, ratio_attempts_var_actor=ratio_actor, **self.curriculum_config)
+            self.dataframe = CurriculumDatasetWrapper(self.dataframe, **self.curriculum_config)
         elif self.type == 'adaptive':
-            self.dataframe = PerSampleCurriculumDatasetWrapper(self.dataframe, ratio_attempts_var_actor=ratio_actor, **self.curriculum_config)
+            self.dataframe = PerSampleCurriculumDatasetWrapper(self.dataframe, **self.curriculum_config)
         else:
             raise NotImplementedError(f"Unknown dataset type: {self.type}")
 

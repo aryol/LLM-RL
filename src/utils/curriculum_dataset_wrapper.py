@@ -4,12 +4,11 @@ import numpy as np
 import re
 
 class CurriculumDatasetWrapper:
-    def __init__(self, dataset, ratio_attempts_var_actor, initial_portion=0.0, prompt_key='prompt', target_key='answer', seperator=None, **kwargs):
+    def __init__(self, dataset, initial_portion=0.0, prompt_key='prompt', target_key='answer', seperator=None, **kwargs):
         self.dataset = dataset  # Keep as HF Dataset
         self.ground_truth_portion_dist = initial_portion  # Start with a small proportion
         self.prompt_key = prompt_key
         self.target_key = target_key
-        self.ratio_actor = ratio_attempts_var_actor
         self.global_step = 0
         self.seperator = seperator
         self.portions = []
@@ -18,16 +17,11 @@ class CurriculumDatasetWrapper:
         """Retrieves a dataset sample with a dynamically adjusted reasoning portion."""
         sample = self.dataset[idx]  # Directly access HF dataset  
         portion = self._compute_portion_for_sample(idx)
-        # self.global_step = ray.get(self.ratio_actor.get_global_step.remote())
         return self._apply_portion_to_sample_(sample, portion)
 
     def _compute_portion_for_sample(self, idx):
         portion = self.sample_portion(seed=self.return_seed(idx), size=1)[0] # Get current difficulty proportion
         return portion
-    
-    def set_portion(self, portion):
-        """Updates the portion of ground-truth CoT reasoning used in training."""
-        self.ground_truth_portion_dist = portion
 
     def sample_portion(self, seed=42, size=1):
         """Returns the current proportion of ground-truth CoT to use."""
@@ -66,6 +60,9 @@ class CurriculumDatasetWrapper:
         
         return sample
 
+    def sync_with_all_datasets(self, state=None):
+        self.global_step = state.get('global_step', self.global_step)
+
     def return_seed(self, idx):
         return self.global_step + 1024 * idx
 
@@ -77,28 +74,24 @@ class CurriculumDatasetWrapper:
         for i in range(len(self.dataset)):
             yield self[i]
 
-    def sync_with_all_datasets(self):
-        self.global_step = ray.get(self.ratio_actor.get_global_step.remote())
     
-
-
 
 import os
 import numpy as np
 class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
-    def __init__(self, dataset, ratio_attempts_var_actor, initial_portion=0.0, prompt_key='prompt', target_key='answer',
-                 reward_threshold=0.5, seperator=None, zero_prob=0):
-        super().__init__(dataset, ratio_attempts_var_actor, initial_portion, prompt_key, target_key, seperator=seperator)
+    def __init__(self, dataset, initial_portion=0.0, prompt_key='prompt', target_key='answer',
+                 reward_threshold=0.5, seperator=None, zero_prob=0, max_ratio=0.9, min_ratio=0.0):
+        super().__init__(dataset, initial_portion, prompt_key, target_key, seperator=seperator)
         self.reward_threshold = reward_threshold
-        self.min_mean_ratio = 0.0
-        self.max_mean_ratio = 0.9
+        self.min_mean_ratio = min_ratio
+        self.max_mean_ratio = max_ratio
         self.max_per_sample_ratio = np.ones(len(self.dataset)) * self.max_mean_ratio
         self.attempted_ratio_list = [[] for _ in range(len(self.dataset))]  # Store attempted ratios for each sample
         self.global_step = 0
         self.zero_prob = zero_prob
         
-        self.wrote_file_step = 0
-        self.this_process_tried_portions = []  # for debugging
+        # self.wrote_file_step = 0
+        # self.this_process_tried_portions = []  # for debugging
 
     def _compute_portion_for_sample(self, idx):
         upper_bound = self.max_per_sample_ratio[idx]
@@ -118,18 +111,17 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
             upper_bound = self.max_mean_ratio
         
         portion = self._sample_ratio_with_seed(seed=self.return_seed(idx), size=1, lower_bound=lower_bound, upper_bound=upper_bound)[0]
-        self.this_process_tried_portions.append((idx, portion))
+        # self.this_process_tried_portions.append((idx, portion))
         return portion
     
-    def sync_with_all_datasets(self):
+    def sync_with_all_datasets(self, state=None):
         # Sync the ratio actor with all datasets
         # self.save_portions_to_file()
-        ray.get(self.ratio_actor.update_min_max_avg_ratios.remote())
-        # computing the lowerbound and upperbounds for portion sampling
-        self.max_per_sample_ratio = ray.get(self.ratio_actor.get_max_per_sample_ratio.remote())
-        self.min_mean_ratio = ray.get(self.ratio_actor.get_min_mean_ratio.remote()) # because we never go back/ Ma be aghab bar nemigardim
-        self.attempted_ratio_list = ray.get(self.ratio_actor.get_sample_attempted_ratio_list.remote())
-        self.global_step = ray.get(self.ratio_actor.get_global_step.remote())
+        self.max_per_sample_ratio = state['max_per_sample_ratio']
+        self.min_mean_ratio = state['mean_min_ratio']
+        self.max_mean_ratio = state['mean_max_ratio'] # because we never go back/ Ma be aghab bar nemigardim
+        self.attempted_ratio_list = state['attempted_ratios_list']
+        self.global_step = state['global_step']
 
     # Sample new portion from updated uniform distribution
     def _sample_ratio_with_seed(self, seed=42, size=1, lower_bound=0.0, upper_bound=1.0):
@@ -158,8 +150,6 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
                 return [0]
             else:
                 return rng.uniform(low=lower_bound, high=upper_bound, size=size)
-
-
 
     def set_portion(self, portion):
         raise NotImplementedError("Portion setting is not supported for per-sample curriculum learning.")
@@ -252,32 +242,6 @@ class RatioAttemptsVariablesActor:
     def set_global_step(self, step):
         self.global_step = step
         return 1
-
-    def get_newly_added_ids(self):
-        return list(self.newly_added_ids)
-
-    def get_max_per_sample_ratio(self):
-        return self.max_per_sample_ratio
-    
-    def get_sample_attempted_ratio_list(self):
-        return self.attempted_ratios_list
-    
-    def get_min_mean_ratio(self):
-        return self.mean_min_ratio
-
-    def get_max_mean_ratio(self):
-        return self.mean_max_ratio
-    
-    def get_global_step(self):
-        return self.global_step
-
-    def get_state_summary(self):
-        return {
-            'mean_min_ratio': self.mean_min_ratio,
-            'mean_max_ratio': self.mean_max_ratio,
-            'num_samples_with_history': sum(1 for x in self.attempted_ratios_list if x),
-            'num_recently_updated': len(self.newly_added_ids)
-        }
 
     def get_state(self):
         return {
