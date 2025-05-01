@@ -44,7 +44,7 @@ class CurriculumSampler(Sampler):
         return torch.tensor(weights)
 
     def __iter__(self):
-        print(f"process id: {os.getpid()} Curriculum Sampler: Sampling with weight, computing weights and building the iterator")
+        # print(f"process id: {os.getpid()} Curriculum Sampler: Sampling with weight, computing weights and building the iterator")
         weights = self.compute_weights()
         sampler = torch.utils.data.WeightedRandomSampler(weights, num_samples=self.dataset_size, replacement=True)
         return iter(sampler)

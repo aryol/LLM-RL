@@ -176,7 +176,7 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
             state_dict = ray.get(self.ratio_actor.get_state.remote())
             self.train_dataset.dataframe.sync_with_all_datasets({**state_dict, 'global_step': self.global_steps})
             if self.config.data.get('sampler', None) is not None:
-                self.train_dataloader.sampler.attempted_ratio_list = state_dict['attempted_ratio_list']
+                self.train_dataloader.sampler.attempted_ratio_list = state_dict['attempted_ratios_list']
 
 
 from verl.utils.dataset.rl_dataset import RLHFDataset, collate_fn
@@ -199,7 +199,7 @@ class AdaptiveRLHFDataset(RLHFDataset):
         dataframes = []
         for parquet_file in self.parquet_files:
             # read parquet files and cache
-            dataframe = datasets.load_dataset("parquet", data_files=parquet_file)["train"]
+            dataframe = datasets.load_dataset("parquet", data_files=parquet_file)["train"] # .select(range(10)) # for debugging
             dataframes.append(dataframe)
         self.dataframe: datasets.Dataset = datasets.concatenate_datasets(dataframes)
 

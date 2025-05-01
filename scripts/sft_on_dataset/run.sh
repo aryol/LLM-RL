@@ -28,7 +28,7 @@
 #     data.max_length=2048 \
 #     model.partial_pretrain=microsoft/rho-math-1b-v0.1 \
 #     data.micro_batch_size_per_gpu=32 \
-#     data.train_batch_size=256 \
+#     data.train_batch_size=256 \.
 #     trainer.total_epochs=5
     
 
@@ -38,9 +38,8 @@ torchrun --nproc_per_node=1 scripts/sft_on_dataset/train.py \
     model.partial_pretrain=Qwen/Qwen2-0.5B \
     data.micro_batch_size_per_gpu=4 \
     data.train_batch_size=256 \
-    trainer.total_epochs=5
+    trainer.total_epochs=20
 
-  
 
 # # to just upload models from the above training to hub:
 # torchrun --nproc_per_node=1 scripts/sft_on_dataset/train.py \

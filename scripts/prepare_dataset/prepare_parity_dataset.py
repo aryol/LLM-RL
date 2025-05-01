@@ -18,7 +18,7 @@ def generate_xor_sequence_dataset(num_samples=10, seq_length=500, bit_width=1, s
         
         # Format
         x_str = " ".join(str(x) for x in x_seq)
-        yz_str = " ".join(f"{y}{z}" for y, z in zip(y_seq, z_seq))
+        yz_str = " ".join(f"{y} {z}" for y, z in zip(y_seq, z_seq))
         # sample = {
         #     "input": f"{x_str} {separator} {yz_str}",
         #     "output": yz_str
@@ -35,10 +35,10 @@ def generate_xor_sequence_dataset(num_samples=10, seq_length=500, bit_width=1, s
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--local_dir', default='~/LLM-RL/data/verl-data/parity')
-    parser.add_argument('--train_size', type=int, default=1000)
+    parser.add_argument('--train_size', type=int, default=1024)
     parser.add_argument('--length', type=int, default=256)
     parser.add_argument('--bit_width', type=int, default=1)
-    parser.add_argument('--test_size', type=int, default=200)
+    parser.add_argument('--test_size', type=int, default=512)
 
     args = parser.parse_args()
     

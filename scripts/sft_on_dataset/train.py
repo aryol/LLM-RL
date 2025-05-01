@@ -668,6 +668,11 @@ class FixedSFTDataset(SFTDataset):
         if len(self.prompts) > 0 and len(self.responses) > 0:
             print(f"Sample input: {self.prompts[0]}")
             print(f"Sample response: {self.responses[0]}")
+            prompt_chat_str = self.tokenizer.apply_chat_template(self.prompts[0], add_generation_prompt=True, tokenize=False)
+            response_chat_str = self.responses[0] + self.tokenizer.eos_token
+            print(f"Sample string that we sft on: {prompt_chat_str + response_chat_str}")
+            print(f"total length in char: {len(prompt_chat_str + response_chat_str)}")
+            print(f"total length in token: {len(self.tokenizer(prompt_chat_str + response_chat_str)['input_ids'])}")
     
     def __getitem__(self, item):
         tokenizer = self.tokenizer
@@ -743,7 +748,7 @@ def upload_models_to_hub(saved_models_path: str):
         print(f'world size: {torch.distributed.get_world_size()}, rank: {torch.distributed.get_rank()}')
         return
     username = HfApi().whoami()["name"]
-    model_epochs = os.listdir(saved_models_path)
+    model_epochs = os.listdir(saved_models_path)[-1:]
     for epoch in model_epochs:
         model_name = 'SFT_' + saved_models_path.split('/')[-4] + '_' + epoch
         print(f"Uploading model {model_name} to huggingface hub...")

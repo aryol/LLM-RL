@@ -8,12 +8,12 @@ def ParityReward(data_source, solution_str, ground_truth, extra_info=None):
     except:
         return 0
     
-    for i in range(length):
-        yi = int(ground_truth_list[i][0])
-        zi = int(ground_truth_list[i][1])
+    for i in range(0, length, 2):
+        yi = int(ground_truth_list[i])
+        zi = int(ground_truth_list[i+1])
         try:
-            hat_yi = int(solution_list[i][0])
-            hat_zi = int(solution_list[i][1])
+            hat_yi = int(solution_list[i])
+            hat_zi = int(solution_list[i+1])
         except:
             # If the solution is not in the expected format, return 0
             return 0
