@@ -527,7 +527,7 @@ class FSDPSFTTrainer:
         print(f"Total training steps: {self.total_training_steps}")
 
         # TODO (zhangchi.usc1992) add back checkpoint manager. Currently, it blocks when uploading to hdfs. So very slow.
-        self.save_checkpoint(step=0, epoch=0)
+        # self.save_checkpoint(step=0, epoch=0)
         for epoch in range(self.config.trainer.total_epochs):
             self.train_sampler.set_epoch(epoch=epoch)
             log_a_sample = True
@@ -585,7 +585,7 @@ class FSDPSFTTrainer:
             torch.distributed.barrier()
 
             # save checkpoint
-            self.save_checkpoint(step=global_step, epoch=epoch+1)
+            # self.save_checkpoint(step=global_step, epoch=epoch+1)
 
 
 
@@ -748,7 +748,7 @@ def upload_models_to_hub(saved_models_path: str):
         print(f'world size: {torch.distributed.get_world_size()}, rank: {torch.distributed.get_rank()}')
         return
     username = HfApi().whoami()["name"]
-    model_epochs = os.listdir(saved_models_path)[-1:]
+    model_epochs = os.listdir(saved_models_path)
     for epoch in model_epochs:
         model_name = 'SFT_' + saved_models_path.split('/')[-4] + '_' + epoch
         print(f"Uploading model {model_name} to huggingface hub...")

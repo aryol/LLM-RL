@@ -34,7 +34,10 @@ python scripts/prepare_dataset/prepare_math_dataset.py --local_dir LLM-RL/data/v
 python scripts/prepare_dataset/prepare_gsm8k_dataset.py --local_dir LLM-RL/data/verl-data/gsm8k
 ```
 
-
+for parity;
+```bash
+python scripts/prepare_dataset/prepare_parity_dataset.py --length 64 --train_size 999999 --test_size 512 --local_dir data/verl-data
+```
 
 ## Running commands
 
