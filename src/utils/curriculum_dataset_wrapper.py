@@ -11,13 +11,17 @@ class CurriculumDatasetWrapper:
         self.target_key = target_key
         self.global_step = 0
         self.seperator = seperator
-        self.portions = []
+        # self.portions = []
 
     def __getitem__(self, idx):
         """Retrieves a dataset sample with a dynamically adjusted reasoning portion."""
         sample = self.dataset[idx]  # Directly access HF dataset  
-        portion = self._compute_portion_for_sample(idx)
-        return self._apply_portion_to_sample_(sample, portion)
+        sample['extra_info']['index'] = idx
+        if sample['extra_info'].get('partial_answer', None) is None:
+            portion = self._compute_portion_for_sample(idx)
+            return self._apply_portion_to_sample_(sample, portion)
+        else:
+            return sample
 
     def _compute_portion_for_sample(self, idx):
         portion = self.sample_portion(seed=self.return_seed(idx), size=1)[0] # Get current difficulty proportion
@@ -57,7 +61,8 @@ class CurriculumDatasetWrapper:
                 sample['extra_info']['partial_answer'] = cut_answer
                 sample['extra_info']['completion'] = completion
                 sample['extra_info']['portion'] = portion
-        
+        else:
+            sample['extra_info']['portion'] = 0.0
         return sample
 
     def sync_with_all_datasets(self, state=None):
@@ -83,6 +88,7 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
                  reward_threshold=0.5, seperator=None, zero_prob=0, max_ratio=0.9, min_ratio=0.0):
         super().__init__(dataset, initial_portion, prompt_key, target_key, seperator=seperator)
         self.reward_threshold = reward_threshold
+        self.max_ratio_allowed = max_ratio
         self.min_mean_ratio = min_ratio
         self.max_mean_ratio = max_ratio
         self.max_per_sample_ratio = np.ones(len(self.dataset)) * self.max_mean_ratio
@@ -94,7 +100,6 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
         # self.this_process_tried_portions = []  # for debugging
 
     def _compute_portion_for_sample(self, idx):
-        upper_bound = self.max_per_sample_ratio[idx]
         lower_bound = 0.0 # because we never go back/ Ma be aghab bar nemigardim
         attempted_ratio_list = self.attempted_ratio_list[idx]
 
@@ -104,7 +109,7 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
             if last_gen_avg_reward < self.reward_threshold:
                 lower_bound = last_gen_portion
             else:
-                upper_bound = last_gen_portion
+                lower_bound = max(last_gen_portion-0.1, 0.0)
         else:
             # moving average of the min and max ratio
             lower_bound = self.min_mean_ratio

@@ -170,7 +170,6 @@ class FSDPSFTTrainer:
 
         # build dataloader
         # Use data parallel rank and size instead of global rank and world size
-
         # If doing SP, we need to use the local rank and size
         if self.config.ulysses_sequence_parallel_size > 1:
             rank = self.ulysses_device_mesh.get_local_rank("dp")
@@ -327,7 +326,7 @@ class FSDPSFTTrainer:
 
         if not hasattr(self.config.optim, "lr_scheduler") or self.config.optim.lr_scheduler == "cosine":
             self.lr_scheduler = get_cosine_schedule_with_warmup(
-                optimizer=self.optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=self.total_steps
+                optimizer=self.optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=self.total_steps, num_cycles=self.config.optim.num_cycles,
             )
         elif self.config.optim.lr_scheduler == "wsd":
             raise NotImplementedError("WSD is not implemented yet")
@@ -644,7 +643,9 @@ class FixedSFTDataset(SFTDataset):
             # read parquet files and cache
             dataframe = pd.read_parquet(parquet_file)
             dataframes.append(dataframe)
+    
         self.dataframe = pd.concat(dataframes)
+
         self.prompts = self.dataframe[self.prompt_key]
         for key in self.prompt_dict_keys:
             # type(x): pandas.core.series.Series
@@ -673,6 +674,28 @@ class FixedSFTDataset(SFTDataset):
             print(f"Sample string that we sft on: {prompt_chat_str + response_chat_str}")
             print(f"total length in char: {len(prompt_chat_str + response_chat_str)}")
             print(f"total length in token: {len(self.tokenizer(prompt_chat_str + response_chat_str)['input_ids'])}")
+        
+        # filter longer than max length datapoints.
+        # to test: tokenizer.decode(tokenizer.apply_chat_template(self.dataframe[0][self.prompt_key], add_generation_prompt=True) + tokenizer.encode(self.dataframe[0]['answer']))
+        old_len = len(self.prompts)
+        def filter_function(doc):
+            prompt = self.tokenizer.apply_chat_template(doc[0], add_generation_prompt=True)
+            response = self.tokenizer.encode(doc[1], add_special_tokens=False)
+            return len(prompt + response) <= self.max_length
+
+        # Apply filtering
+        filtered = list(filter(filter_function, zip(self.prompts, self.responses)))
+
+        # Unpack if not empty
+        if filtered:
+            self.prompts, self.responses = zip(*filtered)
+        else:
+            self.prompts, self.responses = [], []
+
+        print(f'filter dataset len: {len(self.prompts)}')
+        print(f'number of filtered samples: {len(self.prompts) - old_len}')
+
+
     
     def __getitem__(self, item):
         tokenizer = self.tokenizer

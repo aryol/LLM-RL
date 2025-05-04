@@ -157,9 +157,9 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
 
         
     def log(self, data, reward_extra_info):
-        portions = reward_extra_info['portions']
-        mean_portion = np.mean(portions)
-        std_portion = np.std(portions)
+        portion = reward_extra_info['portion']
+        mean_portion = np.mean(portion)
+        std_portion = np.std(portion)
         is_train_set =  data.non_tensor_batch['extra_info'][0]['split']
         stage = 'train' if is_train_set=='train' else 'val' 
         wandb.log({f'portions/{stage}_portions_mean': mean_portion}, step=self.global_steps)
@@ -168,10 +168,10 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
 
     def update_datasets_with_ratios(self, data, scores, reward_extra_info):
         ids = reward_extra_info['index']
-        portions = reward_extra_info['portions']
+        portion = reward_extra_info['portion']
         if data.non_tensor_batch['extra_info'][0]['split'] == 'train':
             # Update the training dataset
-            self.ratio_actor.update_attempted_ratios.remote([(ids, portions, scores)])
+            self.ratio_actor.update_attempted_ratios.remote([(ids, portion, scores)])
             self.ratio_actor.set_global_step.remote(self.global_steps)
             state_dict = ray.get(self.ratio_actor.get_state.remote())
             self.train_dataset.dataframe.sync_with_all_datasets({**state_dict, 'global_step': self.global_steps})
@@ -199,7 +199,7 @@ class AdaptiveRLHFDataset(RLHFDataset):
         dataframes = []
         for parquet_file in self.parquet_files:
             # read parquet files and cache
-            dataframe = datasets.load_dataset("parquet", data_files=parquet_file)["train"] # .select(range(10)) # for debugging
+            dataframe = datasets.load_dataset("parquet", data_files=parquet_file)["train"] # .select(range(100)) # for debugging
             dataframes.append(dataframe)
         self.dataframe: datasets.Dataset = datasets.concatenate_datasets(dataframes)
 

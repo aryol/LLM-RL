@@ -33,7 +33,7 @@ def extract_solution(solution_str):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--local_dir', default='~/LLM-RL/data/verl-data/gsm8k')
+    parser.add_argument('--local_dir', default='~/LLM-RL/data/verl-data/gsm8k_r3')
     parser.add_argument('--hdfs_dir', default=None)
 
     args = parser.parse_args()
@@ -47,9 +47,67 @@ if __name__ == '__main__':
 
     instruction_following = "Let's think step by step and output the final answer after \"####\"."
 
-    # add a row to each data item that represents a unique id
-    def make_map_fn(split):
+    r3_train_dataset = []
+    idxx = 0
+    for example in train_dataset:
+        question_raw = example.pop('question')
+        question = question_raw + ' ' + instruction_following
 
+        answer_raw = example.pop('answer')
+        solution = extract_solution(answer_raw)
+        answer_steps = answer_raw.split('\n')
+
+        r3_train_dataset.append({
+                "data_source": data_source,
+                "prompt": [{
+                    "role": "user",
+                    "content": question,
+                }],
+                "answer": answer_raw,
+                "ability": "math",
+                "reward_model": {
+                    "style": "rule",
+                    "ground_truth": solution
+                },
+                "extra_info": {
+                    'split': 'train',
+                    'index': idxx,
+                    'question': question_raw,
+                }
+            })
+        idxx += 1
+
+        for j in range(0, len(answer_steps)):  
+            cut_answer = '\n'.join(answer_steps[:j])
+            completion = '\n'.join(answer_steps[j:])
+            portion = j / len(answer_steps)
+            r3_train_dataset.append({
+                "data_source": data_source,
+                "prompt": [{
+                    "role": "user",
+                    "content": question,
+                }],
+                "answer": answer_raw,
+                "ability": "math",
+                "reward_model": {
+                    "style": "rule",
+                    "ground_truth": solution
+                },
+                "extra_info": {
+                    'split': 'train',
+                    'index': idxx,
+                    'question': question_raw,
+                    'partial_answer': cut_answer,
+                    'completion': completion,
+                    'portion': portion,
+                }
+            })
+            idxx += 1
+
+
+    r3_train_dataset = datasets.Dataset.from_list(r3_train_dataset)
+
+    def make_map_fn(split):
         def process_fn(example, idx):
             question_raw = example.pop('question')
 
@@ -71,6 +129,7 @@ if __name__ == '__main__':
                 },
                 "extra_info": {
                     'split': split,
+                    'index': idx,
                     "question": question_raw,
                 }
             }
@@ -78,13 +137,12 @@ if __name__ == '__main__':
 
         return process_fn
 
-    train_dataset = train_dataset.map(function=make_map_fn('train'), with_indices=True)
     test_dataset = test_dataset.map(function=make_map_fn('test'), with_indices=True)
 
     local_dir = args.local_dir
     hdfs_dir = args.hdfs_dir
 
-    train_dataset.to_parquet(os.path.join(local_dir, 'train.parquet'))
+    r3_train_dataset.to_parquet(os.path.join(local_dir, 'train.parquet'))
     test_dataset.to_parquet(os.path.join(local_dir, 'test.parquet'))
 
     if hdfs_dir is not None:
