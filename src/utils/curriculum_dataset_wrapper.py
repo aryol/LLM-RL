@@ -2,6 +2,7 @@
 import ray
 import numpy as np
 import re
+import pprint
 
 class CurriculumDatasetWrapper:
     def __init__(self, dataset, initial_portion=0.0, prompt_key='prompt', target_key='answer', seperator=None, **kwargs):
@@ -207,6 +208,8 @@ class RatioAttemptsVariablesActor:
         self.max_per_sample_ratio = np.ones(dataset_length) * self.max_ratio
 
     def update_attempted_ratios(self, gathered_data):
+        # pid = os.getpid()
+        # pprint.pp(f'Updating attempted ratios in PID {pid} with these samples: {gathered_data} \n \n')
         for ids, portions, rewards in gathered_data:
             for id_, portion, reward in zip(ids, portions, rewards):
                 entry_list = self.attempted_ratios_list[id_]
