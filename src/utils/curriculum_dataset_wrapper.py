@@ -100,6 +100,7 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
         # self.this_process_tried_portions = []  # for debugging
 
     def _compute_portion_for_sample(self, idx):
+        upper_bound = self.max_per_sample_ratio[idx]
         lower_bound = 0.0 # because we never go back/ Ma be aghab bar nemigardim
         attempted_ratio_list = self.attempted_ratio_list[idx]
 
@@ -109,7 +110,8 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
             if last_gen_avg_reward < self.reward_threshold:
                 lower_bound = last_gen_portion
             else:
-                lower_bound = max(last_gen_portion-0.1, 0.0)
+                upper_bound = last_gen_portion
+                # lower_bound = max(last_gen_portion-0.1, 0.0)
         else:
             # moving average of the min and max ratio
             lower_bound = self.min_mean_ratio
