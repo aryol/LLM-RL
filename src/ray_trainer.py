@@ -172,9 +172,11 @@ class RayPPOTrainerNonParquetteDataset(RayPPOTrainer):
         portion = reward_extra_info['portion']
         if data.non_tensor_batch['extra_info'][0]['split'] == 'train': # we are in train mode not validation
             # Update the training dataset
-            ray.get(self.ratio_actor.update_attempted_ratios.remote([(ids, portion, scores)]))
+            # ray.get(self.ratio_actor.update_attempted_ratios.remote([(ids, portion, scores)]))
+            self.ratio_actor.update_attempted_ratios.remote([(ids, portion, scores)])
             self.ratio_actor.set_global_step.remote(self.global_steps)
             ray.get(self.ratio_actor.update_min_max_avg_ratios.remote())
+            # self.ratio_actor.update_min_max_avg_ratios.remote()
             state_dict = ray.get(self.ratio_actor.get_state.remote())
             # print(f'max_per_sample_ratio: {state_dict["max_per_sample_ratio"]}')
             # pprint.pp(f'attempted_ratio list \n {state_dict["attempted_ratios_list"]}')
@@ -204,7 +206,7 @@ class AdaptiveRLHFDataset(RLHFDataset):
         dataframes = []
         for parquet_file in self.parquet_files:
             # read parquet files and cache
-            dataframe = datasets.load_dataset("parquet", data_files=parquet_file)["train"] # .select(range(256)) # for debugging
+            dataframe = datasets.load_dataset("parquet", data_files=parquet_file)["train"] # .select(range(512)) # for debugging
             dataframes.append(dataframe)
         self.dataframe: datasets.Dataset = datasets.concatenate_datasets(dataframes)
 
