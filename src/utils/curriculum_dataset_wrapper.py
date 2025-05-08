@@ -39,6 +39,7 @@ class CurriculumDatasetWrapper:
 
     def _apply_portion_to_sample_(self, sample, portion):
         # Modify reasoning exposure based on `portion`
+        sample['extra_info']['portion'] = portion
         if portion > 0.0:
             reasoning_steps = sample.get(self.target_key, '')
             if self.seperator == 'char':
@@ -61,9 +62,6 @@ class CurriculumDatasetWrapper:
             if cut_answer != '':
                 sample['extra_info']['partial_answer'] = cut_answer
                 sample['extra_info']['completion'] = completion
-            sample['extra_info']['portion'] = portion
-        else:
-            sample['extra_info']['portion'] = 0.0
         return sample
 
     def sync_with_all_datasets(self, state=None):
@@ -103,9 +101,9 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
         self.counter = 0
 
     def _compute_portion_for_sample(self, idx):
-        self.counter += 1
-        if self.counter % 256 ==0:
-            self.save_portions_to_file()
+        # self.counter += 1
+        # if self.counter % 256 ==0:
+        #     self.save_portions_to_file()
         upper_bound = self.max_per_sample_ratio[idx]
         lower_bound = 0.0 # because we never go back/ Ma be aghab bar nemigardim
         attempted_ratio_list = self.attempted_ratio_list[idx]
@@ -123,18 +121,19 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
             lower_bound = self.min_mean_ratio
             upper_bound = self.max_mean_ratio
 
-        if upper_bound <= 0:
-            print("Havij", f"\n{self.max_per_sample_ratio[idx]}, {len(self.max_per_sample_ratio)}, {(self.min_mean_ratio, self.max_mean_ratio)}\n" , f'idx={idx},\n lower_bound={lower_bound},\n upper_bound={upper_bound},\n last_gen_portion={last_gen_portion},\n last_gen_reward={last_gen_avg_reward}, attempted_ratio_list={attempted_ratio_list},\n', self.max_per_sample_ratio, flush=True)
-        if lower_bound > upper_bound:
-            print("CHECK THIS", f"\n{self.max_per_sample_ratio[idx]}, {len(self.max_per_sample_ratio)}, {(self.min_mean_ratio, self.max_mean_ratio)}\n", f'idx={idx},\n lower_bound={lower_bound},\n upper_bound={upper_bound},\n last_gen_portion={last_gen_portion},\n last_gen_reward={last_gen_avg_reward}, attempted_ratio_list={attempted_ratio_list},\n', self.max_per_sample_ratio, flush=True)
-            raise Exception(f'idx={idx},\n lower_bound={lower_bound},\n upper_bound={upper_bound},\n last_gen_portion={last_gen_portion},\n last_gen_reward={last_gen_avg_reward}, attempted_ratio_list={attempted_ratio_list},\n{self.max_per_sample_ratio}')
+        # if upper_bound <= 0:
+        #     print("Havij", f"\n{self.max_per_sample_ratio[idx]}, {len(self.max_per_sample_ratio)}, {(self.min_mean_ratio, self.max_mean_ratio)}\n" , f'idx={idx},\n lower_bound={lower_bound},\n upper_bound={upper_bound},\n last_gen_portion={last_gen_portion},\n last_gen_reward={last_gen_avg_reward}, attempted_ratio_list={attempted_ratio_list},\n', self.max_per_sample_ratio, flush=True)
+        # if lower_bound > upper_bound:
+        #     print("CHECK THIS", f"\n{self.max_per_sample_ratio[idx]}, {len(self.max_per_sample_ratio)}, {(self.min_mean_ratio, self.max_mean_ratio)}\n", f'idx={idx},\n lower_bound={lower_bound},\n upper_bound={upper_bound},\n last_gen_portion={last_gen_portion},\n last_gen_reward={last_gen_avg_reward}, attempted_ratio_list={attempted_ratio_list},\n', self.max_per_sample_ratio, flush=True)
+        #     raise Exception(f'idx={idx},\n lower_bound={lower_bound},\n upper_bound={upper_bound},\n last_gen_portion={last_gen_portion},\n last_gen_reward={last_gen_avg_reward}, attempted_ratio_list={attempted_ratio_list},\n{self.max_per_sample_ratio}')
+        
         portion = self._sample_ratio_with_seed(seed=self.return_seed(idx), size=1, lower_bound=lower_bound, upper_bound=upper_bound)[0]
         # self.this_process_tried_portions.append((idx, portion))
         return portion
     
     def sync_with_all_datasets(self, state=None):
         # Sync the ratio actor with all datasets
-        self.save_portions_to_file()
+        # self.save_portions_to_file()
         self.max_per_sample_ratio = state['max_per_sample_ratio']
         self.min_mean_ratio = state['mean_min_ratio']
         self.max_mean_ratio = state['mean_max_ratio'] # because we never go back/ Ma be aghab bar nemigardim
@@ -173,33 +172,33 @@ class PerSampleCurriculumDatasetWrapper(CurriculumDatasetWrapper):
         raise NotImplementedError("Portion setting is not supported for per-sample curriculum learning.")
 
     # for debugging if all processes are getting the same portions/values
-    def save_portions_to_file(self,):
-        """Write attempted sample ratios and bounds to file for debugging."""
-        pid = os.getpid()
-        os.makedirs("/mnt/task_wrapper/user_output/artifacts/debugging", exist_ok=True)
-        os.makedirs(f"/mnt/task_wrapper/user_output/artifacts/debugging/portion_pid{pid}", exist_ok=True)
-        path = f'/mnt/task_wrapper/user_output/artifacts/debugging/portion_pid{pid}/step{self.wrote_file_step}.txt'
+    # def save_portions_to_file(self,):
+    #     """Write attempted sample ratios and bounds to file for debugging."""
+    #     pid = os.getpid()
+    #     os.makedirs("/mnt/task_wrapper/user_output/artifacts/debugging", exist_ok=True)
+    #     os.makedirs(f"/mnt/task_wrapper/user_output/artifacts/debugging/portion_pid{pid}", exist_ok=True)
+    #     path = f'/mnt/task_wrapper/user_output/artifacts/debugging/portion_pid{pid}/step{self.wrote_file_step}.txt'
 
-        with open(path, 'w') as f:
-            f.write(f"=== Debug info for PID {pid} ===\n\n")
-            f.write(f"Global step: {self.global_step}\n")
-            f.write(f"Min mean ratio: {self.min_mean_ratio}\n")
-            f.write(f"Max mean ratio: {self.max_mean_ratio}\n\n")
+    #     with open(path, 'w') as f:
+    #         f.write(f"=== Debug info for PID {pid} ===\n\n")
+    #         f.write(f"Global step: {self.global_step}\n")
+    #         f.write(f"Min mean ratio: {self.min_mean_ratio}\n")
+    #         f.write(f"Max mean ratio: {self.max_mean_ratio}\n\n")
 
-            f.write("Sampled portions in this process:\n")
-            for idx, portion in self.this_process_tried_portions:
-                f.write(f"  - idx: {idx}, portion: {portion:.4f}\n")
+    #         f.write("Sampled portions in this process:\n")
+    #         for idx, portion in self.this_process_tried_portions:
+    #             f.write(f"  - idx: {idx}, portion: {portion:.4f}\n")
 
-            f.write("\nPer-sample max ratios and attempts:\n")
-            for i in range(len(self.dataset)):
-                f.write(f"\nidx {i}:\n")
-                f.write(f"  max_per_sample_ratio: {self.max_per_sample_ratio[i]:.4f}\n")
-                for entry in self.attempted_ratio_list[i]:
-                    f.write(f"    portion: {entry['portion']}, rewards: {entry['reward']}\n")
+    #         f.write("\nPer-sample max ratios and attempts:\n")
+    #         for i in range(len(self.dataset)):
+    #             f.write(f"\nidx {i}:\n")
+    #             f.write(f"  max_per_sample_ratio: {self.max_per_sample_ratio[i]:.4f}\n")
+    #             for entry in self.attempted_ratio_list[i]:
+    #                 f.write(f"    portion: {entry['portion']}, rewards: {entry['reward']}\n")
 
-        # Reset logging
-        self.wrote_file_step += 1
-        self.this_process_tried_portions = []
+    #     # Reset logging
+    #     self.wrote_file_step += 1
+    #     self.this_process_tried_portions = []
 
 
 
