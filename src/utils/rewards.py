@@ -67,3 +67,22 @@ def CumulativeParityReward(data_source, solution_str, ground_truth, extra_info=N
     reward = 0.1 * (length==len(solution_str.split())) + 0.9 * (n_equal == 0)
 
     return reward
+
+
+def TensorGSMReward(data_source, solution_str, ground_truth, extra_info=None):
+    ground_truth_list = ground_truth.split(' and ')
+    length = len(ground_truth_list)
+
+    try:
+        solution_list = solution_str.split('####')[1:]
+    except:
+        return 0
+    if len(solution_list) != len(ground_truth_list):
+        return 0
+    for i in range(len(solution_list)):
+        try:
+            if int(solution_list[i].strip()) != int(ground_truth[i].strip()):
+                return 0.1
+        except:
+            return 0.1
+    return 1

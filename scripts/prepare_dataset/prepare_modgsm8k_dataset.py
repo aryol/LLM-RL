@@ -83,7 +83,7 @@ if __name__ == '__main__':
     train_dataset = dataset['train']
     test_dataset = dataset['test']
 
-    instruction_following = "Let's think step by step and output the final answer after \"####\" in base-7."
+    instruction_following = "Let's think step by step and output the final answer after \"####\" "
 
     def make_map_fn(split):
         def process_fn(example, idx):
@@ -91,8 +91,8 @@ if __name__ == '__main__':
             answer_raw = example.pop('answer')
 
             # Apply mod7 to question and full answer rationale
-            # question_mod7 = base7_transform_text(question_raw)
-            question_mod7 = question_raw
+            question_mod7 = base7_transform_text(question_raw)
+            # question_mod7 = question_raw
             answer_mod7 = base7_transform_final_answer(answer_raw)
 
             solution = extract_solution(answer_mod7)
