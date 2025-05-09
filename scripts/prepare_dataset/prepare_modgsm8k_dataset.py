@@ -68,6 +68,10 @@ def base7_transform_final_answer(text):
         return text[:end_index-length] + base7_answer + text[end_index:]
     return text
 
+def is_integer_only(example):
+    # Match decimal numbers like 0.2, 12.5, etc.
+    pattern = r'\d+\.\d+'
+    return not (re.search(pattern, example['question']) or re.search(pattern, example['answer']))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -80,8 +84,19 @@ if __name__ == '__main__':
 
     dataset = datasets.load_dataset(data_source, 'main')
 
-    train_dataset = dataset['train']
-    test_dataset = dataset['test']
+    # Filter train and test splits
+    filtered_train = dataset["train"].filter(is_integer_only)
+    filtered_test = dataset["test"].filter(is_integer_only)
+
+    print(f"Original train size: {len(dataset['train'])}")
+    print(f"Filtered train size: {len(filtered_train)}")
+
+    print(f"Original test size: {len(dataset['test'])}")
+    print(f"Filtered test size: {len(filtered_test)}")
+
+
+    train_dataset = filtered_train
+    test_dataset = filtered_test
 
     instruction_following = "Let's think step by step and output the final answer after \"####\" "
 
@@ -92,8 +107,7 @@ if __name__ == '__main__':
 
             # Apply mod7 to question and full answer rationale
             question_mod7 = base7_transform_text(question_raw)
-            # question_mod7 = question_raw
-            answer_mod7 = base7_transform_final_answer(answer_raw)
+            answer_mod7 = base7_transform_text(answer_raw)
 
             solution = extract_solution(answer_mod7)
 
@@ -132,3 +146,5 @@ if __name__ == '__main__':
     if args.hdfs_dir is not None:
         makedirs(args.hdfs_dir)
         copy(src=local_dir, dst=args.hdfs_dir)
+
+
