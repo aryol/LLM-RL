@@ -808,6 +808,15 @@
   model: "masani/SFT_math_Llama-3.1-8B_epoch_3_global_step_87"
   command: 'python src/train.py experiment=grpo data=math data.train_dataset_type=base model_path=masani/SFT_math_Llama-3.1-8B_epoch_3_global_step_87 actor_rollout_ref.actor.ppo_mini_batch_size=256 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=4 data.sampler=null' 
 
+- id: 613
+  name: "meta-llama/Llama-3.2-3B-Instruct-adaptive-0.15-id-613"
+  model: "meta-llama/Llama-3.2-3B-Instruct"
+  command: 'python src/train.py experiment=grpo data=gsm8k-t2 data.train_dataset_type=adaptive model_path=meta-llama/Llama-3.2-3B-Instruct data.curriculum_config.zero_prob=0.15 actor_rollout_ref.actor.ppo_mini_batch_size=256 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=16 data.sampler=null' 
+- id: 614
+  name: "meta-llama/Llama-3.2-3B-Instruct-base-id-614"
+  model: "meta-llama/Llama-3.2-3B-Instruct"
+  command: 'python src/train.py experiment=grpo data=gsm8k-t2 data.train_dataset_type=base model_path=meta-llama/Llama-3.2-3B-Instruct actor_rollout_ref.actor.ppo_mini_batch_size=256 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=16 data.sampler=null' 
+
 
 
 # high Golden T
