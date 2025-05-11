@@ -50,6 +50,13 @@ def main(args):
     )
     # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(args.model)
+    if tokenizer.chat_template is None:
+            print("No chat template found. Setting a custom one. it should take care of add_generation_prompt")
+            tokenizer.chat_template = """{% for message in messages -%}
+                                            {{ message['role'] }}: {{ message['content'] }}
+                                            {% endfor -%}{% if add_generation_prompt -%}
+                                            assistant: {% endif %}"""
+
 
     prompts = [tokenizer.apply_chat_template(example["prompt"], tokenize=False) for example in dataset]
     outputs = llm.generate(prompts, sampling_params)  # returns list of RequestOutput
