@@ -41,7 +41,7 @@ def main(args):
         compute_reward = hydra.utils.get_method(args.reward_fn)
 
     # Load model
-    llm = LLM(model=args.model, dtype="auto", gpu_memory_utilization=0.9)
+    llm = LLM(model=args.model, dtype="auto", gpu_memory_utilization=0.9, tensor_parallel_size=8)
     sampling_params = SamplingParams(
         temperature=args.temperature,
         top_p=args.top_p,

@@ -41,6 +41,11 @@ except ImportError:
 # to use:
 # python -m torch.distributed.run --nproc_per_node=8 --master_port=1234 scripts/model_merger.py --hf_model_path <huggingface_model_path> --local_dir <local_dir> --target_dir <target_dir> --hf_upload_path <huggingface_repo_path>
 # python scripts/model_merger.py --hf_model_path <huggingface_model_path> --local_dir <local_dir> --target_dir <target_dir> --hf_upload_path <huggingface_repo_path>
+
+# python scripts/model_merger.py \
+#   --hf_model_path meta-llama/Llama-3.2-1B \
+#   --local_dir llama-1B-base/actor/ \
+
 # python scripts/model_merger.py \
 #   --hf_model_path masani/SFT_cumulative_parity_length_16_bitwidth_1_1024_512_Qwen2-1.5B_epoch_25_global_step_100 \
 #   --local_dir /dlabscratch1/amani/LLM-RL/logs/progressive_rl_grpo_on_cumulative_parity_length_16_bitwidth_1_1024_512_SFT_cumulative_parity_length_16_bitwidth_1_1024_512_Qwen2-1.5B_epoch_25_global_step_100/2025-05-02_14-53-16/checkpoints/global_step_6000/actor \
