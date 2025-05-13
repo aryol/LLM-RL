@@ -16,8 +16,8 @@ def extract_trajectory_stats(attempted_ratios_list):
         for t, entry in enumerate(sample_history):
             portion_matrix[i, t] = entry['portion']
             reward_matrix[i, t] = np.mean(entry['reward'])
-            if np.isnan(reward_matrix[i, t]):
-                reward_matrix[i, t] = reward_matrix[i, t-1]
+        reward_matrix[i, t:] = reward_matrix[i, t]
+        portion_matrix[i, t:] = portion_matrix[i, t]
     return portion_matrix, reward_matrix
 
 def plot_portion_and_reward_trajectories(portion_matrix, reward_matrix, sample_ids=None, path=None):
@@ -62,6 +62,98 @@ def plot_portion_and_reward_trajectories(portion_matrix, reward_matrix, sample_i
         plt.savefig(path, dpi=300)
     plt.show()
 
+
+def plot_mean_trajectories_only(portion_matrix, reward_matrix, path=None):
+    """Plot only the mean ± std for portion and reward in a single figure with two subplots."""
+    iterations = np.arange(portion_matrix.shape[1])
+
+    portion_mean = np.nanmean(portion_matrix, axis=0)
+    portion_std = np.nanstd(portion_matrix, axis=0)
+
+    reward_mean = np.nanmean(reward_matrix, axis=0)
+    reward_std = np.nanstd(reward_matrix, axis=0)
+
+    fig, axes = plt.subplots(2, 1, figsize=(12, 6), sharex=True)
+
+    lower_portion_bound = np.clip(portion_mean - portion_std, 0, 1)
+    upper_portion_bound = np.clip(portion_mean + portion_std, 0, 1)
+
+    lower_reward_bound = np.clip(reward_mean - reward_std, 0, 1)
+    upper_reward_bound = np.clip(reward_mean + reward_std, 0, 1)
+
+    # Portion subplot
+    axes[0].plot(iterations, portion_mean, label='Mean Portion', linestyle='--')
+    axes[0].fill_between(iterations, lower_portion_bound, upper_portion_bound, alpha=0.2)
+    axes[0].set_ylabel("Supervision Ratio (Portion)")
+    axes[0].set_title("Mean Supervision Ratio Over Iterations")
+    axes[0].legend()
+    axes[0].grid(True)
+
+    # Reward subplot
+    axes[1].plot(iterations, reward_mean, label='Mean Reward', linestyle='--', color='tab:green')
+    axes[1].fill_between(iterations, lower_reward_bound, upper_reward_bound, alpha=0.2, color='tab:green')
+    axes[1].set_ylabel("Reward")
+    axes[1].set_xlabel("Iteration")
+    axes[1].set_title("Mean Reward Over Iterations")
+    axes[1].legend()
+    axes[1].grid(True)
+
+    plt.tight_layout()
+    if path:
+        plt.savefig(path, dpi=300)
+    plt.show()
+
+def plot_combined_mean_trajectory_paper_style(portion_matrix, reward_matrix, path_pdf=None):
+    """Plot both mean portion and reward over iterations in one subplot with shaded std, for paper use."""
+    import matplotlib as mpl
+    mpl.rcParams.update({
+        "font.size": 8,
+        "axes.labelsize": 8,
+        "axes.titlesize": 9,
+        "legend.fontsize": 7,
+        "xtick.labelsize": 7,
+        "ytick.labelsize": 7,
+        "figure.dpi": 300,
+        "savefig.dpi": 300,
+        "lines.linewidth": 1,
+        "lines.markersize": 4,
+    })
+
+    iterations = np.arange(portion_matrix.shape[1])
+
+    portion_mean = np.nanmean(portion_matrix, axis=0)
+    portion_std = np.nanstd(portion_matrix, axis=0)
+
+    reward_mean = np.nanmean(reward_matrix, axis=0)
+    reward_std = np.nanstd(reward_matrix, axis=0)
+
+    lower_portion_bound = np.clip(portion_mean - portion_std, 0, 1)
+    upper_portion_bound = np.clip(portion_mean + portion_std, 0, 1)
+
+    lower_reward_bound = np.clip(reward_mean - reward_std, 0, 1)
+    upper_reward_bound = np.clip(reward_mean + reward_std, 0, 1)
+
+    fig, ax = plt.subplots(figsize=(5.0, 2.5))
+
+    # Portion (blue)
+    ax.plot(iterations, portion_mean, label='Mean Portion', linestyle='--', color='tab:blue')
+    ax.fill_between(iterations, lower_portion_bound, upper_portion_bound, alpha=0.2, color='tab:blue')
+
+    # Reward (green)
+    ax.plot(iterations, reward_mean, label='Mean Reward', linestyle='--', color='tab:green')
+    ax.fill_between(iterations, lower_reward_bound, upper_reward_bound, alpha=0.2, color='tab:green')
+
+    ax.set_xlabel("Iteration")
+    ax.set_ylabel("Value")
+    ax.set_title("Mean Portion and Reward Over Iterations", pad=4)
+    ax.legend(loc='upper right', bbox_to_anchor=(1, 0.45), frameon=False)
+    ax.grid(True, linestyle=':', linewidth=0.5)
+
+    plt.tight_layout(pad=1.0)
+    if path_pdf:
+        plt.savefig(path_pdf, format='pdf', bbox_inches='tight')
+    plt.show()
+
 if __name__ == "__main__":
     # Load state dict
     ratio_actor_path = './LLM-RL/scripts/scratch/ratio_actor-2.pt'
@@ -72,4 +164,17 @@ if __name__ == "__main__":
 
     # Save plot in same directory as script
     save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "trajectories_summary.png")
-    plot_portion_and_reward_trajectories(portion_matrix, reward_matrix, path=save_path)
+    plot_portion_and_reward_trajectories(portion_matrix, reward_matrix, path=save_path, sample_ids=[0, 1, 2])
+
+
+    # Also create a plot with only the aggregate trends
+    avg_plot_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mean_trajectories_only.png")
+    plot_mean_trajectories_only(portion_matrix, reward_matrix, path=avg_plot_path)
+
+    # Also create a plot with only the aggregate trends
+    avg_plot_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mean_trajectories_only_paper_style.pdf")
+    plot_combined_mean_trajectory_paper_style(portion_matrix, reward_matrix, path_pdf=avg_plot_path)
+
+
+
+
