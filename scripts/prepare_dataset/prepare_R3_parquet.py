@@ -6,19 +6,10 @@ import math
 import datasets
 
 from verl.utils.hdfs_io import copy, makedirs
-from verl.utils.reward_score.math import last_boxed_only_string, remove_boxed
-
-
-def extract_solution(solution_str: str) -> str:
-    """Extract the final boxed answer from a LaTeX solution."""
-    return remove_boxed(last_boxed_only_string(solution_str))
-
 
 def build_r3_split(
     hf_split,
     split_name: str,
-    data_source: str,
-    instruction_following: str,
     k: int,
 ):
     """
@@ -30,49 +21,57 @@ def build_r3_split(
     """
     r3_examples = []
     idx = 0
+    # {
+    #             "data_source": data_source,
+    #             "prompt": [
+    #                 {
+    #                     "role": "user",
+    #                     "content": question,
+    #                 }
+    #             ],
+    #             # Full CoT solution
+    #             "answer": full_answer,
+    #             "ability": "math",
+    #             "reward_model": {
+    #                 "style": "rule",
+    #                 # Only the final boxed answer as ground truth
+    #                 "ground_truth": ground_truth,
+    #             },
+    #             "extra_info": {
+    #                 "split": split_name,
+    #                 "index": idx,
+    #                 "orig_index": original_idx,
+    #                 "question": question_raw,
+    #             },
+    #         }
 
     for original_idx, example in enumerate(hf_split):
-        # Original fields
-        question_raw = example["problem"]
-        full_answer = example["solution"]
-
-        # Chat-style question with instruction
-        question = question_raw + " " + instruction_following
-
-        # Final boxed answer only
-        ground_truth = extract_solution(full_answer)
-
         # Tokenize the full CoT answer at the word level
+        full_answer = example["answer"].strip()
         words = full_answer.split()
         n_words = len(words)
 
         # --- 1) Base example (no partial info) ---
         r3_examples.append(
             {
-                "data_source": data_source,
-                "prompt": [
-                    {
-                        "role": "user",
-                        "content": question,
-                    }
-                ],
+                "data_source": example["data_source"],
+                "prompt": example["prompt"],
                 # Full CoT solution
                 "answer": full_answer,
                 "ability": "math",
                 "reward_model": {
                     "style": "rule",
                     # Only the final boxed answer as ground truth
-                    "ground_truth": ground_truth,
+                    "ground_truth": example['reward_model']["ground_truth"],
                 },
                 "extra_info": {
-                    "split": split_name,
+                    "split": example['extra_info']['split'],
                     "index": idx,
-                    "orig_index": original_idx,
-                    "question": question_raw,
+                    "orig_index": example['extra_info']['index'],
+                    "question": example['extra_info']["question"],
                 },
             }
         )
-        idx += 1
 
         # --- 2) k partial-rationale curriculum variants ---
         # j = 1..k: reveal j/k of the words of the solution
@@ -85,49 +84,57 @@ def build_r3_split(
                 partial_answer = " ".join(partial_words)
                 completion = " ".join(completion_words)
                 portion = cutoff / n_words
-
+                idx += 1
                 r3_examples.append(
                     {
-                        "data_source": data_source,
-                        "prompt": [
-                            {
-                                "role": "user",
-                                "content": question,
-                            }
-                        ],
+                        "data_source": example["data_source"],
+                        "prompt": example["prompt"],
                         # Still keep the *full* solution as the model target
                         "answer": full_answer,
                         "ability": "math",
                         "reward_model": {
                             "style": "rule",
-                            "ground_truth": ground_truth,
+                            "ground_truth": example['reward_model']["ground_truth"],
                         },
                         "extra_info": {
                             "split": split_name,
                             "index": idx,
                             "orig_index": original_idx,
-                            "question": question_raw,
+                            "question": example['extra_info']['question'],
                             "partial_answer": partial_answer,
                             "completion": completion,
                             "portion": portion,  # fraction of words revealed
                         },
                     }
                 )
-                idx += 1
+                
 
     return datasets.Dataset.from_list(r3_examples)
 
 
 if __name__ == "__main__":
-    # import debugpy
-    # debugpy.listen(("0.0.0.0", 5678))  # Or another port
-    # print("Waiting for debugger to attach...")
-    # debugpy.wait_for_client()
+    import debugpy
+    debugpy.listen(("0.0.0.0", 5678))  # Or another port
+    print("Waiting for debugger to attach...")
+    debugpy.wait_for_client()
 
     parser = argparse.ArgumentParser()
+    
+    parser.add_argument(
+        "--data_train_path",
+        default="./data/verl-data/DeepScaleR/train.parquet",
+        help="Local directory to save parquet files.",
+    )
+
+    parser.add_argument(
+        "--data_test_path",
+        default="./data/verl-data/DeepScaleR/test.parquet",
+        help="Local directory to save parquet files.",
+    )
+
     parser.add_argument(
         "--local_dir",
-        default="./data/verl-data/math-r3",
+        default="./data/verl-data/deepscaler-r3",
         help="Local directory to save parquet files.",
     )
     parser.add_argument(
@@ -142,30 +149,24 @@ if __name__ == "__main__":
         help="Number of equal word-level chunks for partial solutions.",
     )
     args = parser.parse_args()
-
+    data_train_path = os.path.expanduser(args.data_train_path)
+    data_test_path = os.path.expanduser(args.data_test_path)
     local_dir = os.path.expanduser(args.local_dir)
     hdfs_dir = args.hdfs_dir
     k = args.k
 
-    # Data source (mirror for lighteval/MATH)
-    data_source = "DigitalLearningGmbH/MATH-lighteval"
 
-    print(f"Loading the {data_source} dataset from huggingface...", flush=True)
-    dataset = datasets.load_dataset(data_source, trust_remote_code=True)
+    print(f"Loading the {data_train_path} ...", flush=True)
+    dataset = datasets.load_dataset('parquet', data_files=data_train_path, trust_remote_code=True)
     train_dataset = dataset["train"]
-    test_dataset = dataset["test"]
-
-    # Same instruction as before (or tweak as you like)
-    instruction_following = (
-        "Let's think step by step and output the final answer within \\boxed{}."
-    )
+    print(f"Loading the {data_test_path} ...", flush=True)
+    dataset = datasets.load_dataset('parquet', data_files=data_test_path, trust_remote_code=True)   
+    test_dataset = dataset["train"]
 
     print(f"Building R3-style train split with k={k}...", flush=True)
     r3_train_dataset = build_r3_split(
         hf_split=train_dataset,
         split_name="train",
-        data_source=data_source,
-        instruction_following=instruction_following,
         k=k,
     )
 
@@ -173,8 +174,6 @@ if __name__ == "__main__":
     r3_test_dataset = build_r3_split(
         hf_split=test_dataset,
         split_name="test",
-        data_source=data_source,
-        instruction_following=instruction_following,
         k=0,
     )
 
@@ -193,3 +192,7 @@ if __name__ == "__main__":
         makedirs(hdfs_dir)
         copy(src=local_dir, dst=hdfs_dir)
         print("Copy to HDFS completed.")
+
+
+# for openr1-math-220k`;
+# # python scripts/prepare_dataset/prepare_R3_parquet.py --data_train_path data/verl-data/openr1-math-220k/train.parquet --data_test_path data/verl-data/openr1-math-220k/test.parquet --local_dir ./data/verl-data/openr1-math-r3 --k 4`

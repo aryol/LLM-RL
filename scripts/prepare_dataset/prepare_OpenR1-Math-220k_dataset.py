@@ -113,6 +113,7 @@ def make_map_fn(
                 "index": idx,
                 "problem": problem,
                 "problem_type": example.get("problem_type"),
+                'question': problem,
                 "question_type": example.get("question_type"),
                 "source": example.get("source"),
             },
@@ -188,6 +189,7 @@ if __name__ == "__main__":
         "Please reason step by step, and put your final answer within \\boxed{}."
     )
 
+    all_cols = raw_train.column_names
     print("Mapping to VERL-style schema...", flush=True)
     processed = filtered.map(
         function=make_map_fn(
@@ -196,6 +198,7 @@ if __name__ == "__main__":
             instruction_following=instruction_following,
         ),
         with_indices=True,
+        remove_columns=all_cols,  # drop original columns after mapping
     )
 
     split_dict = processed.train_test_split(

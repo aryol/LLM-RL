@@ -15,9 +15,28 @@ def extract_solution(solution_str):
     return remove_boxed(last_boxed_only_string(solution_str))
 
 
+def make_filter_fn(min_words, max_words):
+    """
+    Keep only examples whose chosen solution has word count in [min_words, max_words].
+    """
+    
+    def _filter_fn(example):
+        if not example['solution']:
+            return False
+        sol = len(example['solution'].split())
+        return (sol >= min_words) and (sol <= max_words)
+
+    return _filter_fn
+
+
 if __name__ == "__main__":
+    import debugpy
+    debugpy.listen(("0.0.0.0", 5678))  # Or another port
+    print("Waiting for debugger to attach...")
+    debugpy.wait_for_client()
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("--local_dir", default="~/LLM-RL/data/verl-data/DeepScaleR")
+    parser.add_argument("--local_dir", default="./data/verl-data/DeepScaleR")
     parser.add_argument("--hdfs_dir", default=None)
 
     args = parser.parse_args()
@@ -26,7 +45,11 @@ if __name__ == "__main__":
     print(f"Loading the {data_source} dataset from huggingface...", flush=True)
     dataset = datasets.load_dataset(data_source, trust_remote_code=True)
 
-    train_dataset, test_dataset = dataset['train'].train_test_split(test_size=0.07).values()
+    filtered = dataset['train'].filter(
+        make_filter_fn(min_words=10, max_words=10000)
+    )
+
+    train_dataset, test_dataset = filtered.train_test_split(test_size=0.07).values()
 
     instruction_following = "Let's think step by step and output the final answer within \\boxed{}."
     # add a row to each data item that represents a unique id
@@ -34,7 +57,7 @@ if __name__ == "__main__":
         def process_fn(example, idx):
             question = example.pop("problem")
 
-            question = question + " " + instruction_following
+            question_intr = question + " " + instruction_following
 
             solution = example.pop("solution")
             answer = example.pop("answer")
@@ -42,12 +65,12 @@ if __name__ == "__main__":
             solution = solution + " " + boxed_solution
 
             data = {
-                "data_source": data_source,
-                "prompt": [{"role": "user", "content": question}],
+                "data_source": 'DigitalLearningGmbH/MATH-lighteval',
+                "prompt": [{"role": "user", "content": question_intr}],
                 "answer": solution,
                 "ability": "math",
                 "reward_model": {"style": "rule", "ground_truth": answer},
-                "extra_info": {"split": split, "index": idx,},
+                "extra_info": {"split": split, "index": idx, 'question': question,},
             }
             return data
 

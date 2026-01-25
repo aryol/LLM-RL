@@ -51,7 +51,7 @@ def main(argv: Optional[list[str]] = None) -> None:
     display_head(args.parquet_path, args.num_rows)
 
 
-# usage: python /dlabscratch1/amani/prod/LLM-RL/scripts/ispect_data.py /path/to/file.parquet -n 10
+# usage: python /dlabscratch1/amani/LLM-RL/scripts/inspect_data.py /path/to/file.parquet -n 10
 
 if __name__ == "__main__":
     main()

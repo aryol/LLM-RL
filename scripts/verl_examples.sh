@@ -74,3 +74,22 @@ python3 src/train.py experiment=grpo data=gsm8k \
 # actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=24 actor_rollout_ref.actor.optim.lr=1e-6 critic.optim.lr=1e-5 \
 # trainer.total_epochs=10000 actor_rollout_ref.actor.ppo_epochs=1 data.train_batch_size=256 trainer.test_freq=40
 
+
+
+# New Llama 7B Experiments PPO
+- id: 657
+  name: "masani/Qwen/Qwen2.5-0.5B-adaptive-0.1-id-657"
+  model: "Qwen/Qwen2.5-0.5B"
+  command: 'python src/train.py experiment=grpo data=math_r3 data.train_size=512 data.test_size=128 data.test_size=256 model_path="Qwen/Qwen2.5-0.5B" data.train_dataset_type=base data.sampler=null data.curriculum_config.zero_prob=0.1 trainer.n_gpus_per_node=1 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=3 actor_rollout_ref.actor.ppo_mini_batch_size=256 actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=24 actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=24 actor_rollout_ref.actor.optim.lr=1e-6 critic.optim.lr=1e-5 trainer.total_epochs=1000 actor_rollout_ref.actor.ppo_epochs=1 data.train_batch_size=256 trainer.test_freq=40 trainer.save_freq=2000' 
+
+- id: 657
+  name: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-0.1-id-657"
+  model: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=grpo data=openr1-math-220k data.train_size=1024 model_path="Qwen/Qwen2.5-0.5B" data.train_dataset_type=adaptive data.sampler=null data.curriculum_config.zero_prob=0.1 trainer.n_gpus_per_node=1 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=16 actor_rollout_ref.actor.ppo_mini_batch_size=256 actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=24 actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=24 actor_rollout_ref.actor.optim.lr=1e-6 critic.optim.lr=1e-5 trainer.total_epochs=1000 actor_rollout_ref.actor.ppo_epochs=1 data.train_batch_size=256 trainer.test_freq=40 trainer.save_freq=2000 +debug=true' 
+
+# New Llama 7B Experiments PPO
+- id: 657
+  name: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29-adaptive-0.1-id-657"
+  model: "masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29"
+  command: 'python src/train.py experiment=grpo data=gsm8k model_path="masani/SFT_gsm8k_Llama-2-7b-hf_epoch_1_global_step_29" data.train_dataset_type=adaptive data.sampler=null data.curriculum_config.zero_prob=0.1 trainer.n_gpus_per_node=8 actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=16 actor_rollout_ref.actor.ppo_mini_batch_size=256 actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=24 actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=24 actor_rollout_ref.actor.optim.lr=1e-6 critic.optim.lr=1e-5 trainer.total_epochs=1000 actor_rollout_ref.actor.ppo_epochs=1 data.train_batch_size=256 trainer.test_freq=40 trainer.save_freq=2000' 
+

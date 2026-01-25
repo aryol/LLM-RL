@@ -17,6 +17,7 @@ scripts/scratch/
 
 # VS Code
 *code-workspace
+.vscode/
 
 # Runner tmp folder
 tmp/

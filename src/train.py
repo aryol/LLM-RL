@@ -30,6 +30,9 @@ from src.utils.naive_verl_reward_wrapper import NaiveRewardManagerWithPortionLog
 class TaskRunner:
 
     def run(self, config):
+        if config.get("debug", False):
+            breakpoint()
+            print("Waiting for debugger to attach...")
         # import debugpy
         # debugpy.listen(("0.0.0.0", 5678))  # Or another port
         # print("Waiting for debugger to attach...")
